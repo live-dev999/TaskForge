@@ -1,0 +1,19 @@
+﻿<SolutionConfiguration>
+  <Settings>
+    <AllowParallelTestExecution>True</AllowParallelTestExecution>
+    <EnableRDI>False</EnableRDI>
+    <GridServerReferencesForSolution>
+      <Value>10.10.20.50:41141&gt;kWsYQgsdCULxYA+ugfuFOkvCc7UPi6Zm9mqoyOzuTec=</Value>
+    </GridServerReferencesForSolution>
+    <RdiConfigured>True</RdiConfigured>
+    <SolutionConfigured>True</SolutionConfigured>
+  </Settings>
+  <EngineModes>
+    <EngineMode>
+      <Name>Run all tests automatically</Name>
+      <Settings>
+        <EngineModeColor>a255, r0, g128, b25</EngineModeColor>
+      </Settings>
+    </EngineMode>
+  </EngineModes>
+</SolutionConfiguration>

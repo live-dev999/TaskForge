@@ -1,0 +1,6 @@
+@TaskForge.EventProcessor_HostAddress = http://localhost:5223
+
+GET {{TaskForge.EventProcessor_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

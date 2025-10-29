@@ -54,3 +54,96 @@ Develop an API service for user task management with support for both synchronou
 - Code cleanliness and readability
 - Completeness of implemented requirements
 - Quality of tests and documentation
+
+
+# Task 2: SQL Function for Payment Analysis
+
+## Task Objective
+It is necessary to write a SQL table-valued function that will return daily payment amounts for a given ClientId and date range (Date type). If there were no payments on a specified day, the function should return 0. Date ranges can span multiple years.
+
+## Data Structure
+Client payments table `ClientPayments`:
+
+```sql
+ClientPayments
+(
+    Id bigint,          -- table primary key
+    ClientId bigint,    -- Client ID
+    Dt datetime2(0),    -- payment date
+    Amount money        -- payment amount
+)
+```
+
+## Sample Input Data
+
+| Id | ClientId | Dt                  | Amount |
+|----|----------|---------------------|--------|
+| 1  | 1        | 2022-01-03 17:24:00 | 100    |
+| 2  | 1        | 2022-01-05 17:24:14 | 200    |
+| 3  | 1        | 2022-01-05 18:23:34 | 250    |
+| 4  | 1        | 2022-01-07 10:12:38 | 50     |
+| 5  | 2        | 2022-01-05 17:24:14 | 278    |
+| 6  | 2        | 2022-01-10 12:39:29 | 300    |
+
+## Function Requirements
+- The function should accept three parameters:
+  - `@ClientId` - client identifier
+  - `@StartDate` - period start date (Date type)
+  - `@EndDate` - period end date (Date type)
+- The function should return a table with columns:
+  - `Dt` - date (Date type)
+  - `Amount` - daily payment amount (money type)
+- For days with no payments, the amount should be 0
+- All days in the specified range should be included (including start and end dates)
+
+## Function Usage Examples
+
+### Example 1
+
+**Input parameters:**
+- `ClientId` = 1
+- `StartDate` = 2022-01-02
+- `EndDate` = 2022-01-07
+
+**Function result:**
+
+| Dt         | Amount |
+|------------|--------|
+| 2022-01-02 | 0      |
+| 2022-01-03 | 100    |
+| 2022-01-04 | 0      |
+| 2022-01-05 | 450    |
+| 2022-01-06 | 0      |
+| 2022-01-07 | 50     |
+
+### Example 2
+
+**Input parameters:**
+- `ClientId` = 2
+- `StartDate` = 2022-01-04
+- `EndDate` = 2022-01-11
+
+**Function result:**
+
+| Dt         | Amount |
+|------------|--------|
+| 2022-01-04 | 0      |
+| 2022-01-05 | 278    |
+| 2022-01-06 | 0      |
+| 2022-01-07 | 0      |
+| 2022-01-08 | 0      |
+| 2022-01-09 | 0      |
+| 2022-01-10 | 300    |
+| 2022-01-11 | 0      |
+
+## Notes
+- The function should work correctly for periods spanning multiple years
+- Optimal performance should be ensured when working with large data volumes
+- It is recommended to use recursive CTEs or number tables for date sequence generation
+
+## Implementation Tips
+1. Generate all dates in the specified range
+2. Left join with payment data for the specific client
+3. Group by date and calculate daily sums
+4. Use COALESCE or ISNULL to replace NULL values with 0
+5. Consider creating appropriate indexes on ClientId and Dt columns for better performance

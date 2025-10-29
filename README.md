@@ -1,3 +1,18 @@
+# Build info
+Azure Build Status (master)/(dev)
+| dev   |      master      |
+|----------|:-------------:|
+|  |  |
+
+
+
+GitHub Build Status (master)/(dev)
+
+| dev   |      master      |
+|----------|:-------------:|
+|  |  |
+
+
 ## **Preinstalled software**
 ### Windows:
 - [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) or [Microsoft VS Code](https://visualstudio.microsoft.com/downloads/)

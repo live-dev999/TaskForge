@@ -1,7 +1,9 @@
-# About project
 # TaskForge 
 Task Management Service with Events
+<!-- ![logo](/design/logo.jpg?raw=true) { height=200px } -->
+<img width="250" src="design/logo.jpeg?raw=true">
 
+# About project
 The project is a test task. The full description of the title can be read here [EN](/docs/TASK-EN.MD) of [RU](/docs/TASK-RU.MD)
 
 

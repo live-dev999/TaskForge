@@ -1,4 +1,7 @@
 # About project
+# TaskForge 
+Task Management Service with Events
+
 The project is a test task. The full description of the title can be read here [EN](/docs/TASK-EN.MD) of [RU](/docs/TASK-RU.MD)
 
 

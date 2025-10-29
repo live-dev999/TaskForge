@@ -1,0 +1,132 @@
+@@ -0,0 +1,95 @@
+#!/usr/bin/env bash
+green="\033[1;32m"
+reset="\033[m"
+projectName="TaskForge"
+echo "About to create the directory"
+mkdir src
+echo -e "${green}Creating solution and projects${reset}"
+dotnet new sln -n $projectName
+cd src
+dotnet new webapi -n $projectName.API
+dotnet new classlib -n $projectName.Application
+dotnet new classlib -n $projectName.Domain
+dotnet new classlib -n $projectName.Persistence
+dotnet new classlib -n $projectName.StartupTasks
+dotnet new webapi -n $projectName.EventProcessor
+dotnet new worker -n $projectName.MessageConsumer
+
+cd ..
+echo -e "${green}Adding projects to the solution${reset}"
+dotnet sln add ./src/$projectName.API/$projectName.API.csproj
+dotnet sln add ./src/$projectName.Application/$projectName.Application.csproj
+dotnet sln add ./src/$projectName.Domain/$projectName.Domain.csproj
+dotnet sln add ./src/$projectName.Persistence/$projectName.Persistence.csproj
+dotnet sln add ./src/$projectName.StartupTasks/$projectName.StartupTasks.csproj
+dotnet sln add ./src/$projectName.EventProcessor/$projectName.EventProcessor.csproj
+dotnet sln add ./src/$projectName.MessageConsumer/$projectName.MessageConsumer.csproj
+
+cd ./src
+
+echo -e "${green}Setting up project dependancies${reset}"
+cd $projectName.API
+dotnet add reference ../$projectName.Application/$projectName.Application.csproj
+dotnet add reference ../$projectName.EventProcessor/$projectName.EventProcessor.csproj
+dotnet add reference ../$projectName.MessageConsumer/$projectName.MessageConsumer.csproj
+cd ../$projectName.Application
+dotnet add reference ../$projectName.Domain/$projectName.Domain.csproj
+dotnet add reference ../$projectName.Persistence/$projectName.Persistence.csproj
+dotnet add reference ../$projectName.StartupTasks/$projectName.StartupTasks.csproj
+cd ../$projectName.Persistence
+dotnet add reference ../$projectName.Domain/$projectName.Domain.csproj
+
+
+cd ..
+cd ..
+echo "Create folder tests"
+mkdir tests
+echo -e "${green}Create tests project to the solution${reset}"
+cd ./tests
+dotnet new xunit -o Tests.$projectName.API
+dotnet new xunit -o Tests.$projectName.Application
+dotnet new xunit -o Tests.$projectName.Domain
+dotnet new xunit -o Tests.$projectName.Persistence
+dotnet new xunit -o Tests.$projectName.StartupTasks
+dotnet new xunit -o Tests.$projectName.EventProcessor
+dotnet new xunit -o Tests.$projectName.MessageConsumer
+cd ..
+# cd ../src
+
+echo -e "${green}Adding tests project to the solution${reset}"
+dotnet sln add ./tests/Tests.$projectName.API/Tests.$projectName.API.csproj
+dotnet sln add ./tests/Tests.$projectName.Application/Tests.$projectName.Application.csproj
+dotnet sln add ./tests/Tests.$projectName.Domain/Tests.$projectName.Domain.csproj
+dotnet sln add ./tests/Tests.$projectName.Persistence/Tests.$projectName.Persistence.csproj
+dotnet sln add ./tests/Tests.$projectName.StartupTasks/Tests.$projectName.StartupTasks.csproj
+dotnet sln add ./tests/Tests.$projectName.EventProcessor/Tests.$projectName.EventProcessor.csproj
+dotnet sln add ./tests/Tests.$projectName.MessageConsumer/Tests.$projectName.MessageConsumer.csproj
+
+cd ./tests
+echo -e "${green}Setting up project dependancies${reset}"
+cd Tests.$projectName.API
+dotnet add reference ../../src/$projectName.API/$projectName.API.csproj
+cd ../Tests.$projectName.Application
+dotnet add reference ../../src/$projectName.Application/$projectName.Application.csproj
+cd ../Tests.$projectName.Domain
+dotnet add reference ../../src/$projectName.Domain/$projectName.Domain.csproj
+cd ../Tests.$projectName.Persistence
+dotnet add reference ../../src/$projectName.Persistence/$projectName.Persistence.csproj
+cd ../Tests.$projectName.StartupTasks
+dotnet add reference ../../src/$projectName.StartupTasks/$projectName.StartupTasks.csproj
+cd ../Tests.$projectName.EventProcessor
+dotnet add reference ../../src/$projectName.EventProcessor/$projectName.EventProcessor.csproj
+cd ../Tests.$projectName.MessageConsumer
+dotnet add reference ../../src/$projectName.MessageConsumer/$projectName.MessageConsumer.csproj
+cd ..
+
+
+echo -e "${green}Create IntegratonTests project to the solution${reset}"
+cd ./tests
+dotnet new xunit -o IntegratonTests.$projectName.API
+dotnet new xunit -o IntegratonTests.$projectName.Application
+dotnet new xunit -o IntegratonTests.$projectName.Domain
+dotnet new xunit -o IntegratonTests.$projectName.Persistence
+dotnet new xunit -o IntegratonTests.$projectName.StartupTasks
+dotnet new xunit -o IntegratonTests.$projectName.EventProcessor
+dotnet new xunit -o IntegratonTests.$projectName.MessageConsumer
+
+# cd ../src
+cd ..
+echo -e "${green}Adding tests project to the solution${reset}"
+dotnet sln add ./tests/IntegratonTests.$projectName.API/IntegratonTests.$projectName.API.csproj
+dotnet sln add ./tests/IntegratonTests.$projectName.Application/IntegratonTests.$projectName.Application.csproj
+dotnet sln add ./tests/IntegratonTests.$projectName.Domain/IntegratonTests.$projectName.Domain.csproj
+dotnet sln add ./tests/IntegratonTests.$projectName.Persistence/IntegratonTests.$projectName.Persistence.csproj
+dotnet sln add ./tests/IntegratonTests.$projectName.StartupTasks/IntegratonTests.$projectName.StartupTasks.csproj
+dotnet sln add ./tests/IntegratonTests.$projectName.EventProcessor/IntegratonTests.$projectName.EventProcessor.csproj
+dotnet sln add ./tests/IntegratonTests.$projectName.MessageConsumer/IntegratonTests.$projectName.MessageConsumer.csproj
+
+
+cd ./tests
+echo -e "${green}Setting up project dependancies${reset}"
+cd IntegratonTests.$projectName.API
+dotnet add reference ../../src/$projectName.API/$projectName.API.csproj
+cd ../IntegratonTests.$projectName.Application
+dotnet add reference ../../src/$projectName.Application/$projectName.Application.csproj
+cd ../IntegratonTests.$projectName.Domain
+dotnet add reference ../../src/$projectName.Domain/$projectName.Domain.csproj
+cd ../IntegratonTests.$projectName.Persistence
+dotnet add reference ../../src/$projectName.Persistence/$projectName.Persistence.csproj
+cd ../IntegratonTests.$projectName.StartupTasks
+dotnet add reference ../../src/$projectName.StartupTasks/$projectName.StartupTasks.csproj
+cd ../IntegratonTests.$projectName.EventProcessor
+dotnet add reference ../../src/$projectName.EventProcessor/$projectName.EventProcessor.csproj
+cd ../IntegratonTests.$projectName.MessageConsumer
+dotnet add reference ../../src/$projectName.MessageConsumer/$projectName.MessageConsumer.csproj
+cd ..
+cd ..
+
+echo -e "${green}Executing dotnet restore${reset}"
+dotnet restore
+
+echo -e "${green}Finished!${reset}"

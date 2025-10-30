@@ -1,0 +1,59 @@
+{
+	"info": {
+		"_postman_id": "55dcad98-a7f5-4629-a413-04f0ae150889",
+		"name": "TaskForge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7330571",
+		"_collection_link": "https://warped-space-7101.postman.co/workspace/Team-Workspace~95566864-724b-40a9-834d-4026b8c49fc0/collection/7330571-55dcad98-a7f5-4629-a413-04f0ae150889?action=share&source=collection_link&creator=7330571"
+	},
+	"item": [
+		{
+			"name": "get_all",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/api/TaskItem",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"TaskItem"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"00e0641a-2130-4b7a-a347-3b4acff102a3\",\r\n    \"title\": \"Завершить проект API 2\",\r\n    \"description\": \"Завершить разработку REST API для системы управления задачами\",\r\n    \"status\": 1,\r\n    \"createdAt\": \"2025-10-25T17:28:45.078623\",\r\n    \"updatedAt\": \"2025-10-30T15:28:45.0788155\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/api/TaskItem/00e0641a-2130-4b7a-a347-3b4acff102a3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"TaskItem",
+						"00e0641a-2130-4b7a-a347-3b4acff102a3"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

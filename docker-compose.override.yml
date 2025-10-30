@@ -1,27 +1,47 @@
+networks:
+  frontend:
+  backend:
+
 services:
+  sql.data:
+    container_name: sql.data
+    environment:
+      - SA_PASSWORD=your@Password
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+    ports:
+      - "5433:1433"
+    networks:
+      - backend
+
   taskforge.api:
+    container_name: taskforge.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=80
-      # - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
+      #- ASPNETCORE_URLS=https://+:443;http://+:80
     ports:
       - "5001:80"
-      # - "8081"
-    # volumes:
-    #   - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-    #   - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-    #   - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-    #   - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      # - "10001:443"
+    #volumes:
+    #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      - sql.data
+    networks:
+      - backend
+
   taskforge.eventprocessor:
+    container_name: taskforge.eventprocessor
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=80
-      # - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
+      #- ASPNETCORE_URLS=https://+:443;http://+:80
     ports:
-      - "5002:80"
-      # - "8081"
-    # volumes:
-    #   - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-    #   - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-    #   - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-    #   - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - "5001:80"
+      # - "10001:443"
+    #volumes:
+    #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      - sql.data
+    networks:
+      - backend

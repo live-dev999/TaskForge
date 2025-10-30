@@ -1,4 +1,8 @@
 services:
+  sql.data:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqldatacontainer
+
   taskforge.api:
     image: ${DOCKER_REGISTRY-}taskforgeapi
     build:

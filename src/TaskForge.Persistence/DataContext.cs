@@ -21,9 +21,16 @@
  *   SOFTWARE.
  */
 
-namespace TaskForge.Domain;
+using Microsoft.EntityFrameworkCore;
+using TaskForge.Domain;
 
-public class Class1
+namespace TaskForge.Persistence;
+
+public class DataContext : DbContext
 {
+    public DataContext(DbContextOptions options) : base(options)
+    {
+    }
 
+    public DbSet<TaskItem> TaskItems { get; set; }
 }

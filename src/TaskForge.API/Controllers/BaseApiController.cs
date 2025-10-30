@@ -21,9 +21,16 @@
  *   SOFTWARE.
  */
 
-namespace TaskForge.Persistence;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
-public class Class1
+namespace TaskForge.API.Controllers
 {
-
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BaseApiController : ControllerBase
+    {
+        private IMediator _mediator;
+        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+    }
 }

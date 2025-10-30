@@ -8,9 +8,9 @@ namespace TaskForge.API.Controllers
     public class TaskItemController : BaseApiController
     {
         [HttpGet] //api/taskitems
-        public async Task<ActionResult<List<TaskItem>>> GetTaskItems()
+        public async Task<ActionResult<List<TaskItem>>> GetTaskItems(CancellationToken ct)
         {
-            return await Mediator.Send(new List.Query());
+            return await Mediator.Send(new List.Query(), ct);
         }
 
         [HttpGet("{id}")] //api/taskitems/{id}

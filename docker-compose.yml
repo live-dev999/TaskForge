@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  sql.data:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqldatacontainer
+
+  taskforge.api:
+    image: ${DOCKER_REGISTRY-}taskforge-api
+    build:
+        context: .
+        dockerfile: src/TaskForge.API/Dockerfile
+
+  taskforge.eventprocessor:
+    image: ${DOCKER_REGISTRY-}taskforge-eventprocessor
+    build:
+        context: .
+        dockerfile: src/TaskForge.EventProcessor/Dockerfile
+  
+  

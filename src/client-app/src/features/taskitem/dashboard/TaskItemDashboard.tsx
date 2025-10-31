@@ -1,18 +1,16 @@
 import { observer } from "mobx-react-lite";
 import { Grid } from "semantic-ui-react";
 import { useStore } from "../../../app/stores/store";
-import TaskItemDetails from "../details/TaskItemDetails";
-import TaskItemForm from "../form/TaskItemForm";
 import TaskItemList from "./TaskItemList";
 import { useEffect } from "react";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 
 export default observer(function TaskItemDashboard() {
     const { taskItemStore } = useStore();
-
+    const { loadTaskItems, taskItemRegistry } = taskItemStore;
     useEffect(() => {
-        taskItemStore.loadTaskItems();
-    }, [taskItemStore])
+        if (taskItemRegistry.size <= 1) loadTaskItems();
+    }, [loadTaskItems,taskItemRegistry])
 
     if (taskItemStore.loadingInitial)
         return (<LoadingComponent content='Loading app...' />)
@@ -20,7 +18,7 @@ export default observer(function TaskItemDashboard() {
     return (
         <Grid>
             <Grid.Column width='10'>
-                <TaskItemList/>
+                <TaskItemList />
             </Grid.Column>
             <Grid.Column width='6'>
                 <h2>

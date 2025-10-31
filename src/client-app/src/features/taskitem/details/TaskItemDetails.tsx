@@ -1,5 +1,7 @@
 import { Button, ButtonGroup, Card } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
+import { useStore } from "../../../app/stores/store";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 
 interface Props {
     taskItem: TaskItem;
@@ -7,7 +9,11 @@ interface Props {
     openForm: (id: string) => void;
 }
 
-export default function TaskItemDetails({ taskItem, cancelSelectedTaskItem, openForm}: Props) {
+export default function TaskItemDetails() {
+    const { taskItemStore } = useStore();
+    const { selectedTaskItem: taskItem, openForm, cancelselectedTaskItem } = taskItemStore;
+
+    if (!taskItem) return <LoadingComponent/>;
     return (
         <Card fluid>
             <Card.Content>
@@ -24,9 +30,9 @@ export default function TaskItemDetails({ taskItem, cancelSelectedTaskItem, open
             </Card.Content>
              <Card.Content extra>
                 <ButtonGroup widths='2'>
-                    <Button onClick={()=> openForm(taskItem.id)} basic color='blue' content='Edit'/>
-                    <Button onClick={cancelSelectedTaskItem} basic color='green' content='Cancel'/>
-            </ButtonGroup>
+                    <Button onClick={() => openForm(taskItem.id)} basic color='blue' content='Edit' />
+                    <Button onClick={cancelselectedTaskItem} basic color='green' content='Cancel' />
+                </ButtonGroup>
         </Card.Content>
         </Card >
     )

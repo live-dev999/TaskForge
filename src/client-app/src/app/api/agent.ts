@@ -31,7 +31,7 @@ const TaskItems = {
     list: () => requests.get<TaskItem[]>('/taskItems'),
     details: (id: string) => requests.get<TaskItem>(`/taskItems/${id}`),
     create: (taskItem: TaskItem) => requests.post<void>('/taskItems', taskItem),
-    update: (taskItem: TaskItem) => requests.put<void>('/taskItems', taskItem),
+    update: (taskItem: TaskItem) => requests.put<void>(`/taskItems/${taskItem.id}`, taskItem),
     delete: (id: string) => requests.del(`/taskItems/${id}`),
 }
 

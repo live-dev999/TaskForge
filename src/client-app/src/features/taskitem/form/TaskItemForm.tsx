@@ -1,6 +1,7 @@
 import { ChangeEvent, useState } from "react";
 import { Button, Form, Segment } from "semantic-ui-react";
 import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
+import { useStore } from "../../../app/stores/store";
 
 
 interface Props {
@@ -10,8 +11,9 @@ interface Props {
     submitting: boolean;
 }
 
-export default function TaskItemForm({ taskItem: selectedTaskItem, closeForm, createOrEdit, submitting }: Props) {
-    
+export default function TaskItemForm() {
+    const { taskItemStore } = useStore();
+    const { selectedTaskItem, closeForm, createTaskItem, updateTaskItem, loading } = taskItemStore;
     const initialState = selectedTaskItem ?? {
         id: '',
         title: '',
@@ -21,12 +23,12 @@ export default function TaskItemForm({ taskItem: selectedTaskItem, closeForm, cr
         status: TaskStatus.New
     }
 
-    const [taskItem, setTaskItem] = useState(initialState);
-
     function handleSubmit() {
-        console.log(taskItem)
-        createOrEdit(taskItem)
+        console.log(taskItem);
+        taskItem.id ? updateTaskItem(taskItem) : createTaskItem(taskItem)
     }
+
+    const [taskItem, setTaskItem] = useState(initialState);
 
     function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         const { name, value } = event.target;
@@ -41,7 +43,7 @@ export default function TaskItemForm({ taskItem: selectedTaskItem, closeForm, cr
                 <Form.Input type="date" placeholder='Create Date' value={taskItem.createdAt} name='createdAt' onChange={handleInputChange} />
                 <Form.Input type="date" placeholder='Update Date' value={taskItem.updatedAt} name='updatedAt' onChange={handleInputChange} />
                 <Form.Input placeholder='Status' value={taskItem.status} name='status' onChange={handleInputChange} />
-               <Button loading={submitting} floated='right' positive type='submit' content='Submit' />
+                <Button loading={loading} floated='right' positive type='submit' content='Submit' />
                 <Button onClick={closeForm} floated='right' positive type='button' content='Cancel' />
             </Form>
         </Segment>

@@ -17,6 +17,18 @@ export default class TaskItemStore {
         return Array.from(this.taskItemRegistry.values()).sort((a, b) =>
             Date.parse(a.createdAt) - Date.parse(b.createdAt));
     }
+
+    get groupedTaskItems() {
+        return Object.entries(
+            this.taskItemsByDate.reduce((taskItems, taskItem) => {
+                const date = taskItem.createdAt;
+                taskItems[date] = taskItems[date] ? [...taskItems[date], taskItem] : [taskItem];
+                return taskItems;
+            }, {} as { [key: string]: TaskItem[] })
+        )
+    }
+
+
     loadTaskItems = async () => {
         this.setLoadingInitial(true);
         try {

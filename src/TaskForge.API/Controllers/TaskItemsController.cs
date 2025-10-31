@@ -39,7 +39,7 @@ namespace TaskForge.API.Controllers
         [HttpGet("{id}")] //api/taskitems/{id}
         public async Task<ActionResult<TaskItem>> GetTaskItem(Guid id)
         {
-            return await Mediator.Send(new Details.Query() { Id = id });
+            return HandleResult(await Mediator.Send(new Details.Query() { Id = id }));
         }
 
         [HttpPost]

@@ -23,6 +23,8 @@
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Application.Core;
+using TaskForge.Application.Core;
 
 namespace TaskForge.API.Controllers
 {
@@ -31,6 +33,18 @@ namespace TaskForge.API.Controllers
     public class BaseApiController : ControllerBase
     {
         private IMediator _mediator;
-        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+        protected IMediator Mediator =>
+            _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+
+        protected IActionResult HandleResult<T>(Result<T> result)
+        {
+            if (result.IsSeccess && result.Value != null)
+                return Ok(result.Value);
+
+            if (result.IsSeccess && result.Value == null)
+                return NotFound();
+
+            return BadRequest(result.Error);
+        }
     }
 }

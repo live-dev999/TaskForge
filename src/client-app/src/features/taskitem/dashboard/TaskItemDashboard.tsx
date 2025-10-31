@@ -22,23 +22,19 @@
  */
 
 import React from "react";
-import { Button, Container, Menu } from "semantic-ui-react";
+import { Grid, List } from "semantic-ui-react";
+import TaskItemList from "./TaskItemList";
+import { TaskItem } from "../../../app/models/taskItem";
 
-
-export default function NavBar() {
+interface Props{
+    taskItems: TaskItem[]
+}
+export default function TaskItemDashboard({taskItems}: Props) {
     return (
-        <Menu inverted fixed="top">
-            <Container>
-                <Menu.Item header>
-                    <img src="./assets/logo.jpeg" alt="logo" style={{marginRight: '10px'}}/>
-                    Task Forge
-                </Menu.Item>
-                <Menu.Item name="TaskItems">
-                </Menu.Item>
-                <Menu.Item name="TaskItems">
-                    <Button positive content='Create TaskItem'/>
-                </Menu.Item>
-            </Container>
-        </Menu>
-    )
+        <Grid>
+            <Grid.Column width='10'>
+                <TaskItemList taskItems={taskItems}/>
+            </Grid.Column>
+        </Grid>
+        )
 }

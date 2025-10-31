@@ -1,7 +1,7 @@
 /*
  *   Copyright (c) 2025 Dzianis Prokharchyk
  *   All rights reserved.
-../models/taskItem
+
  *   Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to deal
  *   in the Software without restriction, including without limitation the rights
@@ -21,33 +21,31 @@
  *   SOFTWARE.
  */
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, Header, List } from 'semantic-ui-react';
+import { Button, Container, Header, List } from 'semantic-ui-react';
 import { TaskItem } from '../models/taskItem';
 import NavBar from './NavBar';
+import TaskItemDashboard from '../../features/taskitem/dashboard/TaskItemDashboard';
 
 function App() {
-  const [taskItems, setTaskItem] = useState<TaskItem[]>([]);
+  const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
 
   useEffect(() => {
     axios.get<TaskItem[]>("http://localhost:5000/api/taskItems").then(
       response => {
-        setTaskItem(response.data)
+        setTaskItems(response.data)
       }
     );
   }, [])
 
   return (
-    <div>
+    <>
       <NavBar/>
-      <List>
-        {taskItems.map((taskItem) => (
-          <List.Item key={taskItem.id}>{taskItem.title}</List.Item>
-        ))}
-      </List>
-      <Button content='test'></Button>
-    </div>
+     <Container style={{marginTop: '7em'}}>
+       <TaskItemDashboard taskItems={taskItems}/>
+     </Container>
+    </>
   );
 }
 

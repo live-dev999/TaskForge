@@ -25,10 +25,10 @@ namespace TaskForge.Application.TaskItem
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
-                var activity = await _context.TaskItems.FindAsync(request.TaskItem.Id);
+                var taskItem = await _context.TaskItems.FindAsync(request.TaskItem.Id);
 
-                _mapper.Map(request.TaskItem, activity);
-                _context.Update(activity);
+                _mapper.Map(request.TaskItem, taskItem);
+                _context.Update(taskItem);
 
                 await _context.SaveChangesAsync();
 

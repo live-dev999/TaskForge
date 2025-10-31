@@ -1,7 +1,7 @@
 import React, { SyntheticEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { Item, ItemMeta, Button, Label, SegmentGroup, Segment, Icon } from "semantic-ui-react";
-import { TaskItem } from "../../../app/models/taskItem";
+import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
 import { useStore } from "../../../app/stores/store";
 
 interface Props {
@@ -42,7 +42,7 @@ export default function TaskItemListItem({ taskItem }: Props) {
                
             </Segment>
              <Segment secondary>
-                {taskItem.status}
+                Task Status: {TaskStatus[taskItem.status]}
             </Segment>   
             <Segment clearing>
           

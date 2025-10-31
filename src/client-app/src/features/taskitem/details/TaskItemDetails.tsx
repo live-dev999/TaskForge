@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Card } from "semantic-ui-react";
-import { TaskItem } from "../../../app/models/taskItem";
+import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
 import { useStore } from "../../../app/stores/store";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { Link, useParams } from "react-router-dom";
@@ -36,6 +36,9 @@ export default observer(function TaskItemDetails() {
                 </Card.Meta>
                 <Card.Description>
                     {taskItem.description}
+                </Card.Description>
+                <Card.Description>
+                   Task Status: {TaskStatus[taskItem.status]}
                 </Card.Description>
             </Card.Content>
               <Card.Content extra>

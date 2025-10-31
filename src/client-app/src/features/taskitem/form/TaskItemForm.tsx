@@ -43,10 +43,19 @@ const navigate = useNavigate();
         }
     }
 
-    function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        const { name, value } = event.target;
+    function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) {
+        const { name, value } = event.target || event.currentTarget || event;
         setTaskItem({ ...taskItem, [name]: value });
     }
+
+    const statusOptions = Object.entries(TaskStatus)
+    .filter(([key, value]) => isNaN(Number(key)))
+    .map(([key, value]) => ({
+        key: key,
+        text: key,
+        value: value
+    }));
+
     if (loadingInitial) return <LoadingComponent content="Loading taskItem ..." />
     return (
         <Segment clearing>
@@ -55,7 +64,21 @@ const navigate = useNavigate();
                 <Form.TextArea placeholder='Description' value={taskItem.description} name='description' onChange={handleInputChange} />
                 <Form.Input type="date" placeholder='Create Date' value={taskItem.createdAt} name='createdAt' onChange={handleInputChange} />
                 <Form.Input type="date" placeholder='Update Date' value={taskItem.updatedAt} name='updatedAt' onChange={handleInputChange} />
-                <Form.Input placeholder='Status' value={taskItem.status} name='status' onChange={handleInputChange} />
+                <Form>
+      <Form.Select
+    label="Task Status"
+    placeholder="Select Status"
+    options={statusOptions}
+    value={taskItem.status}
+    onChange={(e, data) => handleInputChange({
+        target: {
+            name: data.name,
+            value: data.value
+        }
+    })}
+    name="status"
+/>
+    </Form>
                  <Button loading={loading} floated='right' positive type='submit' content='Submit' />
                 <Button floated='right' as={Link} to={'/taskItems'}  positive type='button' content='Cancel' />
             </Form>

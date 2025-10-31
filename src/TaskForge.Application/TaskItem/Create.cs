@@ -34,6 +34,13 @@ namespace Application.TaskItems
                 CancellationToken cancellationToken
             )
             {
+                // Auto-set ID, CreatedAt and UpdatedAt
+                if (request.TaskItem.Id == Guid.Empty)
+                    request.TaskItem.Id = Guid.NewGuid();
+                    
+                request.TaskItem.CreatedAt = DateTime.UtcNow;
+                request.TaskItem.UpdatedAt = DateTime.UtcNow;
+                
                 _context.Add(request.TaskItem);
 
                 var result = await _context.SaveChangesAsync() > 0;

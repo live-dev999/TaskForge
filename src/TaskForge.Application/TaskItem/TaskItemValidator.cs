@@ -5,11 +5,10 @@ namespace TaskForge.Application.TaskItem
     {
         public TaskItemValidator()
         {
-            RuleFor(x => x.Title).NotEmpty();
-            RuleFor(x => x.Description).NotEmpty();
-            RuleFor(x => x.CreatedAt).NotEmpty();
-            RuleFor(x => x.UpdatedAt).NotEmpty();
-            RuleFor(x => x.Status).NotEmpty();
+            RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required");
+            RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required");
+            RuleFor(x => x.Status).IsInEnum().WithMessage("Invalid task status");
+            // Note: CreatedAt and UpdatedAt are set automatically, no validation needed
         }
     }
 }

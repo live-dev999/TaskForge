@@ -24,6 +24,10 @@ namespace Application.TaskItems
             public async Task<Result<TaskItem>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var taskItem = await _context.TaskItems.FindAsync(request.Id);
+                
+                if (taskItem == null)
+                    return Result<TaskItem>.Failure("Task item not found");
+                    
                 return Result<TaskItem>.Success(taskItem);
             }
         }

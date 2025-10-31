@@ -34,10 +34,15 @@ namespace Application.TaskItems
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var taskItem =await _context.TaskItems.FindAsync(request.TaskItem.Id);
+                var taskItem = await _context.TaskItems.FindAsync(request.TaskItem.Id);
 
                 if (taskItem == null)
-                    return null;
+                    return Result<Unit>.Failure("Task item not found");
+                
+                // Preserve CreatedAt and update UpdatedAt automatically
+                request.TaskItem.CreatedAt = taskItem.CreatedAt;
+                request.TaskItem.UpdatedAt = DateTime.UtcNow;
+                
                 _mapper.Map(request.TaskItem, taskItem);
                 _context.Update(taskItem);
 

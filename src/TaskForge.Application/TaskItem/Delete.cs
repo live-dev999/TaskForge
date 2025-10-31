@@ -31,7 +31,7 @@ namespace TaskForge.Application.TaskItem
                 var taskItem = await _context.TaskItems.FindAsync(request.Id);
 
                 if (taskItem == null)
-                    return null;
+                    return Result<Unit>.Failure("Task item not found");
 
                 _context.Remove(taskItem);
 

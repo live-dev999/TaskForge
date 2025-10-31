@@ -33,10 +33,13 @@ namespace TaskForge.API.Controllers
     {
         private IMediator _mediator;
         protected IMediator Mediator =>
-            _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+            _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
 
         protected IActionResult HandleResult<T>(Result<T> result)
         {
+            if (result == null)
+                return StatusCode(500, "Internal server error: result is null");
+
             if (result.IsSuccess && result.Value != null)
                 return Ok(result.Value);
 

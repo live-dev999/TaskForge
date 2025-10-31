@@ -37,10 +37,10 @@ namespace TaskForge.API.Controllers
 
         protected IActionResult HandleResult<T>(Result<T> result)
         {
-            if (result.IsSeccess && result.Value != null)
+            if (result.IsSuccess && result.Value != null)
                 return Ok(result.Value);
 
-            if (result.IsSeccess && result.Value == null)
+            if (result.IsSuccess && result.Value == null)
                 return NotFound();
 
             return BadRequest(result.Error);

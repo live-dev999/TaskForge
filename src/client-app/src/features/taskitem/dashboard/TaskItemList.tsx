@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import { SyntheticEvent, useState } from "react";
 import { Button, Item, ItemMeta, Label, Segment } from "semantic-ui-react";
 import { useStore } from "../../../app/stores/store";
+import { Link } from "react-router-dom";
 
 export default observer(function TaskItemList() {
     const [target, setTarget] = useState('');
@@ -30,12 +31,12 @@ export default observer(function TaskItemList() {
                                 <div>{taskItem.description}</div>
                             </Item.Description>
                             <Item.Extra>
-                                <Button onClick={() => taskItemStore.selectTaskItem(taskItem.id)} floated='right' content='View' color='blue' />
-                                <Button
-                                    name={taskItem.id}
-                                    loading={loading && target === taskItem.id}
-                                    onClick={(e) => handleTaskItemDelete(e, taskItem.id)}
-                                    floated='right' content='Delete' color='red' />
+                                <Button as={Link} to={`/taskItems/${taskItem.id}`} floated='right' content='View' color='blue' />
+                                <Button 
+                                name={taskItem.id}
+                                loading={loading && target === taskItem.id} 
+                                onClick={(e) => handleTaskItemDelete(e, taskItem.id)} 
+                                floated='right' content='Delete' color='red' />
                                 <Label basic content={taskItem.status} />
                             </Item.Extra>
                         </Item.Content>

@@ -22,9 +22,7 @@ export default class TaskItemStore {
             const taskItems = await agent.TaskItems.list();
 
             taskItems.forEach(taskItem => {
-                taskItem.createdAt = taskItem.createdAt.split('T')[0];
-                taskItem.updatedAt = taskItem.updatedAt.split('T')[0];
-                this.taskItemRegistry.set(taskItem.id, taskItem);
+                this.setTaskItem(taskItem);
             });
             this.setLoadingInitial(false);
         } catch (error) {
@@ -33,24 +31,30 @@ export default class TaskItemStore {
         }
     }
 
+    loadTaskItem = async (id: string) => {
+        let taskItem = this.getTaskItem(id)
+        if (taskItem) this.selectedTaskItem = taskItem;
+        else {
+            this.setLoadingInitial(true);
+            try {
+                taskItem = await agent.TaskItems.details(id);
+                this.setTaskItem(taskItem);
+            } catch (error) {
+                console.log(error);
+                this.setLoadingInitial(false);
+            }
+        }
+    }
+    private setTaskItem = (taskItem: TaskItem) => {
+        taskItem.createdAt = taskItem.createdAt.split('T')[0];
+        taskItem.updatedAt = taskItem.updatedAt.split('T')[0];
+        this.taskItemRegistry.set(taskItem.id, taskItem);
+    }
+    private getTaskItem = (id: string) => {
+        return this.taskItemRegistry.get(id);
+    }
     setLoadingInitial = (state: boolean) => {
         this.loadingInitial = state;
-    }
-
-    selectTaskItem = (id: string) => {
-        this.selectedTaskItem = this.taskItemRegistry.get(id);//this.taskItems.find(a => a.id === id);
-
-    }
-    cancelselectedTaskItem = () => {
-        this.selectedTaskItem = undefined;
-    }
-
-    openForm = (id?: string) => {
-        id ? this.selectTaskItem(id) : this.cancelselectedTaskItem();
-        this.editMode = true;
-    }
-    closeForm = () => {
-        this.editMode = false;
     }
 
     createTaskItem = async (taskItem: TaskItem) => {

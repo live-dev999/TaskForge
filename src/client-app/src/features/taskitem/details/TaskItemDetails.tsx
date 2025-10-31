@@ -9,11 +9,13 @@ interface Props {
     openForm: (id: string) => void;
 }
 
+
 export default function TaskItemDetails() {
     const { taskItemStore } = useStore();
-    const { selectedTaskItem: taskItem, openForm, cancelselectedTaskItem } = taskItemStore;
+    const { selectedTaskItem: taskItem} = taskItemStore;
 
     if (!taskItem) return <LoadingComponent/>;
+
     return (
         <Card fluid>
             <Card.Content>
@@ -30,8 +32,8 @@ export default function TaskItemDetails() {
             </Card.Content>
              <Card.Content extra>
                 <ButtonGroup widths='2'>
-                    <Button onClick={() => openForm(taskItem.id)} basic color='blue' content='Edit' />
-                    <Button onClick={cancelselectedTaskItem} basic color='green' content='Cancel' />
+                    <Button basic color='blue' content='Edit' />
+                    <Button basic color='green' content='Cancel' />
                 </ButtonGroup>
         </Card.Content>
         </Card >

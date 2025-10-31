@@ -3,6 +3,7 @@ import App from "../layout/App";
 import HomePage from "../../features/home/Home";
 import TaskItemDashboard from "../../features/taskitem/dashboard/TaskItemDashboard";
 import TaskItemForm from "../../features/taskitem/form/TaskItemForm";
+import TaskItemDetails from "../../features/taskitem/details/TaskItemDetails";
 
 
 export const routes: RouteObject[] = 
@@ -17,7 +18,12 @@ export const routes: RouteObject[] =
         {
             path: 'taskItems',
             element: <TaskItemDashboard />
-        }, {
+        },
+        {
+            path: '/taskItems/:id',
+            element: <TaskItemDetails />
+        }, 
+        {
             path: 'createTaskItem',
             element: <TaskItemForm />
         }

@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import { Button, Form, Segment } from "semantic-ui-react";
 import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
 import { useStore } from "../../../app/stores/store";
+import { observer } from "mobx-react-lite";
 
 
 interface Props {
@@ -11,9 +12,9 @@ interface Props {
     submitting: boolean;
 }
 
-export default function TaskItemForm() {
+export default observer(function TaskItemForm() {
     const { taskItemStore } = useStore();
-    const { selectedTaskItem, closeForm, createTaskItem, updateTaskItem, loading } = taskItemStore;
+    const { selectedTaskItem, createTaskItem, updateTaskItem, loading } = taskItemStore;
     const initialState = selectedTaskItem ?? {
         id: '',
         title: '',
@@ -23,7 +24,7 @@ export default function TaskItemForm() {
         status: TaskStatus.New
     }
 
-    function handleSubmit() {
+   function handleSubmit() {
         console.log(taskItem);
         taskItem.id ? updateTaskItem(taskItem) : createTaskItem(taskItem)
     }
@@ -43,9 +44,9 @@ export default function TaskItemForm() {
                 <Form.Input type="date" placeholder='Create Date' value={taskItem.createdAt} name='createdAt' onChange={handleInputChange} />
                 <Form.Input type="date" placeholder='Update Date' value={taskItem.updatedAt} name='updatedAt' onChange={handleInputChange} />
                 <Form.Input placeholder='Status' value={taskItem.status} name='status' onChange={handleInputChange} />
-                <Button loading={loading} floated='right' positive type='submit' content='Submit' />
-                <Button onClick={closeForm} floated='right' positive type='button' content='Cancel' />
+                 <Button loading={loading} floated='right' positive type='submit' content='Submit' />
+                <Button floated='right' positive type='button' content='Cancel' />
             </Form>
         </Segment>
     )
-}
+})

@@ -1,4 +1,6 @@
+using FluentValidation;
 using MediatR;
+using TaskForge.Application.TaskItem;
 using TaskForge.Domain;
 using TaskForge.Persistence;
 
@@ -10,7 +12,13 @@ namespace Application.TaskItems
         {
             public TaskItem TaskItem { get; set; }
         }
-
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.TaskItem).SetValidator(new TaskItemValidator());
+            }
+        }
         public class Handler : IRequestHandler<Command>
         {
             private readonly DataContext _context;

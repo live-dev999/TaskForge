@@ -176,16 +176,19 @@ public class BaseApiControllerTests
     #region HandleResult Tests - Edge Cases
 
     [Fact]
-    public void HandleResult_WhenResultIsNull_ThrowsNullReferenceException()
+    public void HandleResult_WhenResultIsNull_ReturnsInternalServerError()
     {
         // Arrange
         var controller = CreateController();
         Result<string> result = null;
 
-        // Act & Assert
-        // Current implementation doesn't check for null, so NullReferenceException will be thrown
-        // This is an edge case that should be handled in the code
-        Assert.Throws<NullReferenceException>(() => controller.TestHandleResult(result));
+        // Act
+        var actionResult = controller.TestHandleResult(result);
+
+        // Assert
+        var statusCodeResult = Assert.IsType<ObjectResult>(actionResult);
+        Assert.Equal(500, statusCodeResult.StatusCode);
+        Assert.Equal("Internal server error: result is null", statusCodeResult.Value);
     }
 
     [Fact]
@@ -305,7 +308,7 @@ public class BaseApiControllerTests
     }
 
     [Fact]
-    public void Mediator_WhenServiceNotRegistered_ReturnsNull()
+    public void Mediator_WhenServiceNotRegistered_ThrowsInvalidOperationException()
     {
         // Arrange
         var serviceProvider = new ServiceCollection()
@@ -324,11 +327,9 @@ public class BaseApiControllerTests
             }
         };
 
-        // Act
-        var mediator = controller.TestMediator;
-
-        // Assert
-        Assert.Null(mediator);
+        // Act & Assert
+        // GetRequiredService throws if service is not registered
+        Assert.Throws<InvalidOperationException>(() => controller.TestMediator);
     }
 
     [Fact]

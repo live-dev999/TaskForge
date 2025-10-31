@@ -140,7 +140,7 @@ public class DeleteHandlerTests
     #region Failure Tests
 
     [Fact]
-    public async Task Handle_WhenTaskItemNotFound_ReturnsNull()
+    public async Task Handle_WhenTaskItemNotFound_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -156,7 +156,8 @@ public class DeleteHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Null(result);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
     }
 
     [Fact]
@@ -177,9 +178,10 @@ public class DeleteHandlerTests
         };
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
+        Assert.False(result.IsSuccess);
         var count = await context.TaskItems.CountAsync();
         Assert.Equal(1, count);
         var remainingItem = await context.TaskItems.FindAsync(existingTaskItem.Id);
@@ -216,7 +218,7 @@ public class DeleteHandlerTests
     #region Edge Cases
 
     [Fact]
-    public async Task Handle_WhenIdIsEmpty_ReturnsNull()
+    public async Task Handle_WhenIdIsEmpty_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -232,11 +234,12 @@ public class DeleteHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Null(result);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
     }
 
     [Fact]
-    public async Task Handle_WhenDeletingAlreadyDeletedItem_ReturnsNull()
+    public async Task Handle_WhenDeletingAlreadyDeletedItem_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -259,11 +262,12 @@ public class DeleteHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Null(result);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
     }
 
     [Fact]
-    public async Task Handle_WhenDatabaseIsEmpty_ReturnsNull()
+    public async Task Handle_WhenDatabaseIsEmpty_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -279,7 +283,8 @@ public class DeleteHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Null(result);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
     }
 
     #endregion

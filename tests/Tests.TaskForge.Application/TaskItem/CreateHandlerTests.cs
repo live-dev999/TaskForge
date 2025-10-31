@@ -89,6 +89,35 @@ public class CreateHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenValidTaskItem_AutoSetsIdCreatedAtAndUpdatedAt()
+    {
+        // Arrange
+        using var context = CreateInMemoryContext();
+        var handler = new Create.Handler(context);
+        var taskItem = CreateValidTaskItem();
+        taskItem.Id = Guid.Empty; // Should be auto-set
+        taskItem.CreatedAt = default(DateTime); // Should be auto-set
+        taskItem.UpdatedAt = default(DateTime); // Should be auto-set
+        
+        var command = new Create.Command
+        {
+            TaskItem = taskItem
+        };
+
+        // Act
+        await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        var savedItem = await context.TaskItems.FindAsync(taskItem.Id);
+        Assert.NotNull(savedItem);
+        Assert.NotEqual(Guid.Empty, savedItem.Id);
+        Assert.NotEqual(default(DateTime), savedItem.CreatedAt);
+        Assert.NotEqual(default(DateTime), savedItem.UpdatedAt);
+        Assert.True(savedItem.CreatedAt <= DateTime.UtcNow.AddSeconds(1));
+        Assert.True(savedItem.UpdatedAt <= DateTime.UtcNow.AddSeconds(1));
+    }
+
+    [Fact]
     public async Task Handle_WhenMultipleValidTaskItems_CreatesAllInDatabase()
     {
         // Arrange

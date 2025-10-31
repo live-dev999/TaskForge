@@ -124,7 +124,7 @@ public class EditHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenTaskItemExists_UpdatesOnlySpecifiedProperties()
+    public async Task Handle_WhenTaskItemExists_PreservesCreatedAtAndUpdatesUpdatedAt()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -133,13 +133,14 @@ public class EditHandlerTests
         
         var existingTaskItem = CreateValidTaskItem();
         var originalCreatedAt = existingTaskItem.CreatedAt;
+        existingTaskItem.CreatedAt = DateTime.UtcNow.AddDays(-10);
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
         var updatedTaskItem = CreateValidTaskItem();
         updatedTaskItem.Id = existingTaskItem.Id;
         updatedTaskItem.Title = "Updated Title";
-        updatedTaskItem.CreatedAt = DateTime.UtcNow.AddDays(10);
+        updatedTaskItem.CreatedAt = DateTime.UtcNow.AddDays(10); // This should be ignored
 
         var command = new Edit.Command
         {
@@ -153,7 +154,8 @@ public class EditHandlerTests
         var savedItem = await context.TaskItems.FindAsync(existingTaskItem.Id);
         Assert.NotNull(savedItem);
         Assert.Equal("Updated Title", savedItem.Title);
-        // CreatedAt might be updated by mapper, depending on mapping configuration
+        Assert.Equal(existingTaskItem.CreatedAt, savedItem.CreatedAt); // CreatedAt should be preserved
+        Assert.True(savedItem.UpdatedAt > existingTaskItem.UpdatedAt); // UpdatedAt should be updated
     }
 
     #endregion
@@ -161,7 +163,7 @@ public class EditHandlerTests
     #region Failure Tests
 
     [Fact]
-    public async Task Handle_WhenTaskItemNotFound_ReturnsNull()
+    public async Task Handle_WhenTaskItemNotFound_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -180,7 +182,8 @@ public class EditHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Null(result);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
     }
 
     [Fact]
@@ -200,9 +203,10 @@ public class EditHandlerTests
         };
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
+        Assert.False(result.IsSuccess);
         var count = await context.TaskItems.CountAsync();
         Assert.Equal(0, count);
     }
@@ -240,7 +244,7 @@ public class EditHandlerTests
     #region Edge Cases
 
     [Fact]
-    public async Task Handle_WhenTaskItemIdIsEmpty_ReturnsNull()
+    public async Task Handle_WhenTaskItemIdIsEmpty_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -259,7 +263,8 @@ public class EditHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Null(result);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
     }
 
     [Fact]

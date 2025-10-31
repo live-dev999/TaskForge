@@ -174,11 +174,11 @@ public class TaskItemsControllerTests
     }
 
     [Fact]
-    public async Task GetTaskItem_WhenTaskItemNotFound_ReturnsNotFound()
+    public async Task GetTaskItem_WhenTaskItemNotFound_ReturnsBadRequest()
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var result = Result<TaskItem>.Success(null);
+        var result = Result<TaskItem>.Failure("Task item not found");
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Details.Query>(), It.IsAny<CancellationToken>()))
@@ -190,7 +190,8 @@ public class TaskItemsControllerTests
         var actionResult = await controller.GetTaskItem(Guid.NewGuid());
 
         // Assert
-        Assert.IsType<NotFoundResult>(actionResult);
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult);
+        Assert.Equal("Task item not found", badRequestResult.Value);
     }
 
     [Fact]

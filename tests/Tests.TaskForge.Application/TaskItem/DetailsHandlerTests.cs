@@ -136,7 +136,7 @@ public class DetailsHandlerTests
     #region Failure Tests
 
     [Fact]
-    public async Task Handle_WhenTaskItemNotFound_ReturnsSuccessWithNull()
+    public async Task Handle_WhenTaskItemNotFound_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -151,8 +151,8 @@ public class DetailsHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        // Note: Current implementation returns Success(null), which is a design issue
-        Assert.True(result.IsSuccess);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
         Assert.Null(result.Value);
     }
 
@@ -185,7 +185,7 @@ public class DetailsHandlerTests
     #region Edge Cases
 
     [Fact]
-    public async Task Handle_WhenIdIsEmpty_ReturnsSuccessWithNull()
+    public async Task Handle_WhenIdIsEmpty_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -200,12 +200,13 @@ public class DetailsHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
         Assert.Null(result.Value);
     }
 
     [Fact]
-    public async Task Handle_WhenDatabaseIsEmpty_ReturnsSuccessWithNull()
+    public async Task Handle_WhenDatabaseIsEmpty_ReturnsFailure()
     {
         // Arrange
         using var context = CreateInMemoryContext();
@@ -220,7 +221,8 @@ public class DetailsHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Task item not found", result.Error);
         Assert.Null(result.Value);
     }
 

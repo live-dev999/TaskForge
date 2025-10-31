@@ -160,7 +160,7 @@ public class TaskItemValidatorTests
     #region CreatedAt Validation Tests
 
     [Fact]
-    public void Validate_WhenCreatedAtIsDefault_ShouldHaveValidationError()
+    public void Validate_WhenCreatedAtIsDefault_ShouldNotHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
@@ -170,7 +170,8 @@ public class TaskItemValidatorTests
         var result = _validator.TestValidate(taskItem);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.CreatedAt);
+        // CreatedAt is set automatically, no validation needed
+        result.ShouldNotHaveValidationErrorFor(x => x.CreatedAt);
     }
 
     [Fact]
@@ -187,41 +188,12 @@ public class TaskItemValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.CreatedAt);
     }
 
-    [Fact]
-    public void Validate_WhenCreatedAtIsInPast_ShouldNotHaveValidationError()
-    {
-        // Arrange
-        var taskItem = CreateValidTaskItem();
-        taskItem.CreatedAt = DateTime.UtcNow.AddDays(-10);
-
-        // Act
-        var result = _validator.TestValidate(taskItem);
-
-        // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.CreatedAt);
-    }
-
-    [Fact]
-    public void Validate_WhenCreatedAtIsInFuture_ShouldNotHaveValidationError()
-    {
-        // Arrange
-        var taskItem = CreateValidTaskItem();
-        taskItem.CreatedAt = DateTime.UtcNow.AddDays(10);
-
-        // Act
-        var result = _validator.TestValidate(taskItem);
-
-        // Assert
-        // Note: Validator only checks for NotEmpty, not if date is in future
-        result.ShouldNotHaveValidationErrorFor(x => x.CreatedAt);
-    }
-
     #endregion
 
     #region UpdatedAt Validation Tests
 
     [Fact]
-    public void Validate_WhenUpdatedAtIsDefault_ShouldHaveValidationError()
+    public void Validate_WhenUpdatedAtIsDefault_ShouldNotHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
@@ -231,7 +203,8 @@ public class TaskItemValidatorTests
         var result = _validator.TestValidate(taskItem);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.UpdatedAt);
+        // UpdatedAt is set automatically, no validation needed
+        result.ShouldNotHaveValidationErrorFor(x => x.UpdatedAt);
     }
 
     [Fact]
@@ -253,11 +226,26 @@ public class TaskItemValidatorTests
     #region Status Validation Tests
 
     [Fact]
-    public void Validate_WhenStatusIsDefault_ShouldHaveValidationError()
+    public void Validate_WhenStatusIsDefault_ShouldNotHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = default(TaskStatus);
+        taskItem.Status = default(TaskStatus); // default = 0 = New
+
+        // Act
+        var result = _validator.TestValidate(taskItem);
+
+        // Assert
+        // Status uses IsInEnum, so default(0) = New is actually valid
+        result.ShouldNotHaveValidationErrorFor(x => x.Status);
+    }
+
+    [Fact]
+    public void Validate_WhenStatusIsInvalidEnumValue_ShouldHaveValidationError()
+    {
+        // Arrange
+        var taskItem = CreateValidTaskItem();
+        taskItem.Status = (TaskStatus)999; // Invalid enum value
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -348,7 +336,7 @@ public class TaskItemValidatorTests
         {
             Title = null,
             Description = null,
-            Status = default(TaskStatus),
+            Status = (TaskStatus)999, // Invalid enum value
             CreatedAt = default(DateTime),
             UpdatedAt = default(DateTime)
         };
@@ -358,7 +346,8 @@ public class TaskItemValidatorTests
 
         // Assert
         Assert.False(result.IsValid);
-        Assert.True(result.Errors.Count >= 5);
+        // Title, Description, Status should have errors (CreatedAt and UpdatedAt are not validated)
+        Assert.True(result.Errors.Count >= 3);
     }
 
     #endregion

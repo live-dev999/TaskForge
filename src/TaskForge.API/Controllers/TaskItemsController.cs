@@ -28,7 +28,7 @@ using TaskForge.Domain;
 
 namespace TaskForge.API.Controllers
 {
-    public class TaskItemController : BaseApiController
+    public class TaskItemsController : BaseApiController
     {
         [HttpGet] //api/taskitems
         public async Task<ActionResult<List<TaskItem>>> GetTaskItems(CancellationToken ct)

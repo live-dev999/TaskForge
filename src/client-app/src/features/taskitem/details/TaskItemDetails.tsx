@@ -3,10 +3,11 @@ import { Button, ButtonGroup, Card, Icon, Image } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
 
 interface Props {
-    taskItem: TaskItem
+    taskItem: TaskItem;
+    cancelSelectedTaskItem: () => void;
 }
 
-export default function TaskItemDetails({ taskItem }: Props) {
+export default function TaskItemDetails({ taskItem, cancelSelectedTaskItem}: Props) {
     return (
         <Card fluid>
             <Card.Content>
@@ -21,10 +22,10 @@ export default function TaskItemDetails({ taskItem }: Props) {
                     {taskItem.description}
                 </Card.Description>
             </Card.Content>
-            <Card.Content extra>
+             <Card.Content extra>
                 <ButtonGroup widths='2'>
                     <Button basic color='blue' content='Edit'></Button>
-                    <Button basic color='green' content='Cancel'></Button>
+                    <Button onClick={() => cancelSelectedTaskItem()} basic color='green' content='Cancel'></Button>
             </ButtonGroup>
         </Card.Content>
         </Card >

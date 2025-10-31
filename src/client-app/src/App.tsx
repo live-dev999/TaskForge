@@ -25,30 +25,41 @@ import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
-import { Button, Header, List } from 'semantic-ui-react';
+import { Button, Container, Header, List } from 'semantic-ui-react';
+import NavBar from './app/layout/NavBar';
+import TaskItemDashboard from './features/taskitem/dashboard/TaskItemDashboard';
+import { TaskItem } from './app/models/taskItem';
 
 function App() {
-  const[taskItems, setTaskItems] = useState([]);
+  const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
+  const [selectedTaskItems, setSelectedTaskItems] = useState<TaskItem | undefined>(undefined);
 
-  useEffect(()=>{
-    axios.get("http://localhost:5000/api/taskItems").then(
-      response =>{
-        //console.log(response.data)
-      setTaskItems(response.data)
+  useEffect(() => {
+    axios.get<TaskItem[]>("http://localhost:5000/api/taskItems").then(
+      response => {
+        setTaskItems(response.data)
       }
     );
-  },[])
+  }, [])
 
+  function handleSelectedTaskItem(id: string){
+    setSelectedTaskItems(taskItems.find(x=>x.id == id ))
+  }
+  function handlecancelSelectedTaskItem() {
+    setSelectedTaskItems(undefined)
+  }
   return (
-    <div>
-      <Header as='h1' icon='users' content='TaskForge'/>
-        <List>
-          {taskItems.map((taskItem:any)=>(
-            <List.Item key={taskItem.id}>{taskItem.title}</List.Item>
-          ))} 
-        </List>
-        <Button content='test'></Button>
-    </div>
+    <>
+      <NavBar />
+      <Container style={{ marginTop: '7em' }}>
+        <TaskItemDashboard 
+        taskItem={taskItems}
+          selectedTaskItem={selectedTaskItems}
+          selectTaskItem={handleSelectedTaskItem}
+          cancelSelectedTaskItem={handlecancelSelectedTaskItem}
+        />
+      </Container>
+    </>
   );
 }
 

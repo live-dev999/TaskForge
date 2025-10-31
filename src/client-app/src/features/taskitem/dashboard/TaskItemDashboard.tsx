@@ -28,21 +28,26 @@ import { TaskItem } from "../../../app/models/taskItem";
 import TaskItemDetails from "../details/TaskItemDetails";
 import TaskItemForm from "../form/TaskItemForm";
 
-interface Props{
-    taskItems: TaskItem[]
+interface Props {
+    taskItem: TaskItem[];
+    selectedTaskItem: TaskItem | undefined;
+    selectTaskItem: (id: string) => void;
+    cancelSelectedTaskItem: () => void;
 }
-export default function TaskItemDashboard({taskItems}: Props) {
+
+export default function TaskItemDashboard({ taskItem, selectedTaskItem, 
+    selectTaskItem, cancelSelectedTaskItem }: Props) {
     return (
         <Grid>
             <Grid.Column width='10'>
-                <TaskItemList taskItems={taskItems}/>
+                <TaskItemList taskItems={taskItem} selectTaskItem={selectTaskItem} />
             </Grid.Column>
             <Grid.Column width='6'>
-                {taskItems[0] &&
-                <TaskItemDetails taskItem={taskItems[0]}/>}
-                <TaskItemForm/>
+                {selectedTaskItem &&
+                    <TaskItemDetails taskItem={selectedTaskItem} cancelSelectedTaskItem={cancelSelectedTaskItem}/>}
+                <TaskItemForm />
             </Grid.Column>
-            
+
         </Grid>
-        )
+    )
 }

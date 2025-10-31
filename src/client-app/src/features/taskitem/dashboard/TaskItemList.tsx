@@ -27,11 +27,12 @@ import { TaskItem } from "../../../app/models/taskItem";
 
 
 interface Props {
-    taskItems: TaskItem[]
+    taskItems: TaskItem[];
+    selectTaskItem: (id: string) => void;
 }
 
-export default function TaskItemList({ taskItems }: Props){
-    return(
+export default function TaskItemList({ taskItems, selectTaskItem }: Props) {
+    return (
         <Segment>
             <Item.Group divided>
                 {taskItems.map((taskItem) => (
@@ -48,12 +49,12 @@ export default function TaskItemList({ taskItems }: Props){
                                 <div>{taskItem.description}</div>
                             </Item.Description>
                             <Item.Extra>
-                                <Button floated='right' content='View' color='blue'/>
+                                <Button onClick={() => selectTaskItem(taskItem.id)} floated='right' content='View' color='blue' />
                                 <Label basic content={taskItem.status}/>
                             </Item.Extra>
                         </Item.Content>
                     </Item>
-                ))}
+               ))}
             </Item.Group>
         </Segment>
     )

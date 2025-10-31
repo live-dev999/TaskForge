@@ -25,6 +25,7 @@ import React from "react";
 import { Grid, List } from "semantic-ui-react";
 import TaskItemList from "./TaskItemList";
 import { TaskItem } from "../../../app/models/taskItem";
+import TaskItemDetails from "../details/TaskItemDetails";
 
 interface Props{
     taskItems: TaskItem[]
@@ -34,6 +35,10 @@ export default function TaskItemDashboard({taskItems}: Props) {
         <Grid>
             <Grid.Column width='10'>
                 <TaskItemList taskItems={taskItems}/>
+            </Grid.Column>
+            <Grid.Column width='6'>
+                {taskItems[0] &&
+                <TaskItemDetails taskItem={taskItems[0]}/>}
             </Grid.Column>
         </Grid>
         )

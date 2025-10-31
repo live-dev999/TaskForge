@@ -4,11 +4,11 @@ import { Container } from 'semantic-ui-react';
 import { TaskItem } from '../models/taskItem';
 import NavBar from './NavBar';
 import TaskItemDashboard from '../../features/taskitem/dashboard/TaskItemDashboard';
-
+import { v4 as uuid } from 'uuid';
 
 function App() {
   const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
-  const [selectedTaskItems, setSelectedTaskItems] = useState<TaskItem | undefined>(undefined);
+  const [selectedTaskItems, setSelectedTaskItem] = useState<TaskItem | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
@@ -20,10 +20,10 @@ function App() {
   }, [])
 
   function handleSelectTaskItem(id: string) {
-    setSelectedTaskItems(taskItems.find(x => x.id == id))
+    setSelectedTaskItem(taskItems.find(x => x.id == id))
   }
   function handlecancelSelectedTaskItem() {
-    setSelectedTaskItems(undefined)
+    setSelectedTaskItem(undefined)
   }
   function handleFormOpen(id?: string) {
     id ? handleSelectTaskItem(id) : handlecancelSelectedTaskItem();
@@ -33,6 +33,12 @@ function App() {
     setEditMode(false);
   }
 
+    function handleCreateOrEditTaskItem(taskItem: TaskItem) {
+    taskItem.id ? setTaskItems([...taskItems.filter(x => x.id !== taskItem.id), taskItem])
+      : setTaskItems([...taskItems, { ...taskItem, id: uuid() }])
+    setEditMode(false);
+    setSelectedTaskItem(taskItem);
+  }
   return (
     <>
       <NavBar openForm={handleFormOpen} />

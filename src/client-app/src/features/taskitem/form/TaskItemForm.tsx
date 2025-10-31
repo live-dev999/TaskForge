@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import { Button, Form, Segment } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
 
+
 interface Props {
     taskItem: TaskItem | undefined;
     closeForm: () => void;

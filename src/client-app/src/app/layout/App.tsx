@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container } from 'semantic-ui-react';
 import { TaskItem } from '../models/taskItem';
 import NavBar from './NavBar';
 import TaskItemDashboard from '../../features/taskitem/dashboard/TaskItemDashboard';
 import { v4 as uuid } from 'uuid';
+import agent from '../api/agent';
 
 function App() {
   const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
@@ -12,7 +12,7 @@ function App() {
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    axios.get<TaskItem[]>("http://localhost:5000/api/taskItems").then(
+     agent.TaskItems.list().then(
       response => {
         setTaskItems(response.data)
       }

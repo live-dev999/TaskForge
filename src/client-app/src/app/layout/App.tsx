@@ -5,19 +5,29 @@ import NavBar from './NavBar';
 import TaskItemDashboard from '../../features/taskitem/dashboard/TaskItemDashboard';
 import { v4 as uuid } from 'uuid';
 import agent from '../api/agent';
+import LoadingComponent from './LoadingComponent';
 
 function App() {
   const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
   const [selectedTaskItems, setSelectedTaskItem] = useState<TaskItem | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-     agent.TaskItems.list().then(
+    agent.TaskItems.list().then(
       response => {
-        setTaskItems(response.data)
+        let activities: TaskItem[] = [];
+        response.forEach(taskItem => {
+          taskItem.createdAt = taskItem.createdAt.split('T')[0];
+          taskItem.updatedAt = taskItem.updatedAt.split('T')[0];
+          activities.push(taskItem);
+        });
+        setTaskItems(activities)
+        setLoading(false)
       }
     );
   }, [])
+
 
   function handleSelectTaskItem(id: string) {
     setSelectedTaskItem(taskItems.find(x => x.id == id))
@@ -44,6 +54,8 @@ function App() {
     setTaskItems([...taskItems.filter(x => x.id !== id)])
   }
 
+  if(loading)
+  return (<LoadingComponent content='Loading app...'/>)
   return (
     <>
       <NavBar openForm={handleFormOpen} />

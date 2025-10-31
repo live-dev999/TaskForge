@@ -36,8 +36,8 @@ export default function TaskItemyForm({ taskItem: selectedTaskItemy, closeForm }
             <Form onSubmit={handleSubmit}>
                 <Form.Input placeholder='Title' value={taskItem.title} onChange={handleInputChange}/>
                 <Form.TextArea placeholder='Description' value={taskItem.description} name='description' onChange={handleInputChange} />
-                <Form.Input placeholder='Create Date' value={taskItem.createdAt} name='createDate' onChange={handleInputChange} />
-                <Form.Input placeholder='Update Date' value={taskItem.updatedAt} name='updateDate' onChange={handleInputChange} />
+                <Form.Input type="date" placeholder='Create Date' value={taskItem.createdAt} name='createDate' onChange={handleInputChange} />
+                <Form.Input type="date" placeholder='Update Date' value={taskItem.updatedAt} name='updateDate' onChange={handleInputChange} />
                 <Form.Input placeholder='Status' value={taskItem.status} name='status' onChange={handleInputChange} />
                 <Button floated='right' positive type='submit' content='Submit' />
                 <Button onClick={closeForm} floated='right' positive type='button' content='Cancel' />
@@ -45,17 +45,3 @@ export default function TaskItemyForm({ taskItem: selectedTaskItemy, closeForm }
         </Segment>
     )
 }
-//     return (
-//         <Segment clearing>
-//             <Form>
-//                 <Form.Input placeholder='Title'/>
-//                 <Form.TextArea placeholder='Description' />
-//                 <Form.Input placeholder='Create Date' />
-//                 <Form.Input placeholder='Update Date' />
-//                 <Form.Input placeholder='Status' />
-//                <Button floated='right' positive type='submit' content='Submit' />
-//                 <Button onClick={closeForm} floated='right' positive type='button' content='Cancel' />
-//             </Form>
-//         </Segment>
-//     )
-// }

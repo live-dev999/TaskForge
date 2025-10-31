@@ -39,6 +39,11 @@ function App() {
     setEditMode(false);
     setSelectedTaskItem(taskItem);
   }
+
+  function handleDelete(id: string) {
+    setTaskItems([...taskItems.filter(x => x.id !== id)])
+  }
+
   return (
     <>
       <NavBar openForm={handleFormOpen} />
@@ -51,7 +56,7 @@ function App() {
           editMode={editMode}
           openForm={handleFormOpen}
           closeForm={handlerFormClose}
-          
+          deleteTaskItem={handleDelete}
         />
       </Container>
     </>

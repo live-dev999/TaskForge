@@ -35,14 +35,15 @@ interface Props {
     editMode: boolean;
     openForm: (id: string) => void;
     closeForm: () => void;
+    deleteTaskItem: (id: string) => void;
 }
 
-export default function TaskItemDashboard({ taskItems, selectedTaskItem,
+export default function TaskItemDashboard({ taskItems, selectedTaskItem, deleteTaskItem: deleteTaskItem,
     selectTaskItem, cancelSelectedTaskItem, editMode, openForm, closeForm }: Props) {
     return (
         <Grid>
             <Grid.Column width='10'>
-                <TaskItemList taskItems={taskItems} selectTaskItem={selectTaskItem} />
+                <TaskItemList taskItems={taskItems} selectTaskItem={selectTaskItem} deleteTaskItem={deleteTaskItem} />
             </Grid.Column>
             <Grid.Column width='6'>
                 {selectedTaskItem && !editMode &&

@@ -28,9 +28,10 @@ import { TaskItem } from "../../../app/models/taskItem";
 interface Props {
     taskItems: TaskItem[];
     selectTaskItem: (id: string) => void;
+    deleteTaskItem: (id: string) => void;
 }
 
-export default function TaskItemList({ taskItems, selectTaskItem }: Props) {
+export default function TaskItemList({ taskItems, selectTaskItem, deleteTaskItem: deleteTaskItem }: Props) {
     return (
         <Segment>
             <Item.Group divided>
@@ -49,6 +50,7 @@ export default function TaskItemList({ taskItems, selectTaskItem }: Props) {
                             </Item.Description>
                             <Item.Extra>
                                 <Button onClick={() => selectTaskItem(taskItem.id)} floated='right' content='View' color='blue' />
+                              <Button onClick={() => deleteTaskItem(taskItem.id)} floated='right' content='Delete' color='red' />
                                 <Label basic content={taskItem.status}/>
                             </Item.Extra>
                         </Item.Content>

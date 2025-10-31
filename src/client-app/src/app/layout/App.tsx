@@ -1,29 +1,15 @@
-import { useEffect } from 'react';
 import { Container } from 'semantic-ui-react';
 import NavBar from './NavBar';
-import LoadingComponent from './LoadingComponent';
-import { useStore } from '../stores/store';
 import { observer } from 'mobx-react-lite';
-import TaskItemDashboard from '../../features/taskitem/dashboard/TaskItemDashboard';
+import { Outlet } from 'react-router-dom';
 
 function App() {
-
-  const {taskItemStore} = useStore();
-
-  useEffect(() => {
-    taskItemStore.loadTaskItems();
-  }, [taskItemStore])
-
-  if (taskItemStore.loadingInitial)
-    return (<LoadingComponent content='Loading app...' />)
   return (
     <>
       <NavBar/>
       
       <Container style={{ marginTop: '7em' }}>
-   
-        <TaskItemDashboard
-        />
+        <Outlet/>
       </Container>
     </>
   );

@@ -4,10 +4,19 @@ import { useStore } from "../../../app/stores/store";
 import TaskItemDetails from "../details/TaskItemDetails";
 import TaskItemForm from "../form/TaskItemForm";
 import TaskItemList from "./TaskItemList";
+import { useEffect } from "react";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 
 export default observer(function TaskItemDashboard() {
+    const { taskItemStore } = useStore();
 
-    const { taskItemStore } = useStore()
+    useEffect(() => {
+        taskItemStore.loadTaskItems();
+    }, [taskItemStore])
+
+    if (taskItemStore.loadingInitial)
+        return (<LoadingComponent content='Loading app...' />)
+        
     const { selectedTaskItem, editMode } = taskItemStore;
     return (
         <Grid>

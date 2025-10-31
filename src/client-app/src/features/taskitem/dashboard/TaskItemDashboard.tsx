@@ -29,23 +29,32 @@ import TaskItemDetails from "../details/TaskItemDetails";
 import TaskItemForm from "../form/TaskItemForm";
 
 interface Props {
-    taskItem: TaskItem[];
+    taskItems: TaskItem[];
     selectedTaskItem: TaskItem | undefined;
     selectTaskItem: (id: string) => void;
     cancelSelectedTaskItem: () => void;
+    editMode: boolean;
+    openForm: (id: string) => void;
+    closeForm: () => void;
 }
 
-export default function TaskItemDashboard({ taskItem, selectedTaskItem, 
-    selectTaskItem, cancelSelectedTaskItem }: Props) {
+export default function TaskItemDashboard({ taskItems, selectedTaskItem,
+    selectTaskItem, cancelSelectedTaskItem, editMode, openForm, closeForm }: Props) {
     return (
         <Grid>
             <Grid.Column width='10'>
-                <TaskItemList taskItems={taskItem} selectTaskItem={selectTaskItem} />
+                <TaskItemList taskItems={taskItems} selectTaskItem={selectTaskItem} />
             </Grid.Column>
             <Grid.Column width='6'>
-                {selectedTaskItem &&
-                    <TaskItemDetails taskItem={selectedTaskItem} cancelSelectedTaskItem={cancelSelectedTaskItem}/>}
-                <TaskItemForm />
+                {selectedTaskItem && !editMode &&
+                    <TaskItemDetails
+                        taskItem={selectedTaskItem}
+                        cancelSelectedTaskItem={cancelSelectedTaskItem}
+                        openForm={openForm} />}
+                {editMode &&
+                 <TaskItemForm
+                    closeForm={closeForm}
+                    taskItem={selectedTaskItem} />}
             </Grid.Column>
 
         </Grid>

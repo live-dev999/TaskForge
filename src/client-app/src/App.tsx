@@ -31,32 +31,45 @@ import TaskItemDashboard from './features/taskitem/dashboard/TaskItemDashboard';
 import { TaskItem } from './app/models/taskItem';
 
 function App() {
-  const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
+  const [taskItem, setTaskItems] = useState<TaskItem[]>([]);
   const [selectedTaskItems, setSelectedTaskItems] = useState<TaskItem | undefined>(undefined);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    axios.get<TaskItem[]>("http://localhost:5000/api/taskItems").then(
+    axios.get<TaskItem[]>("http://localhost:5000/api/taskItem").then(
       response => {
         setTaskItems(response.data)
       }
     );
   }, [])
 
-  function handleSelectedTaskItem(id: string){
-    setSelectedTaskItems(taskItems.find(x=>x.id == id ))
+  function handleSelectTaskItem(id: string) {
+    setSelectedTaskItems(taskItem.find(x => x.id == id))
   }
   function handlecancelSelectedTaskItem() {
     setSelectedTaskItems(undefined)
   }
+  function handleFormOpen(id?: string) {
+    id ? handleSelectTaskItem(id) : handlecancelSelectedTaskItem();
+    setEditMode(true);
+  }
+  function handlerFormClose() {
+    setEditMode(false);
+  }
+
   return (
     <>
-      <NavBar />
+      <NavBar openForm={handleFormOpen} />
       <Container style={{ marginTop: '7em' }}>
-        <TaskItemDashboard 
-        taskItem={taskItems}
+        <TaskItemDashboard
+          taskItems={taskItem}
           selectedTaskItem={selectedTaskItems}
-          selectTaskItem={handleSelectedTaskItem}
+          selectTaskItem={handleSelectTaskItem}
           cancelSelectedTaskItem={handlecancelSelectedTaskItem}
+          editMode={editMode}
+          openForm={handleFormOpen}
+          closeForm={handlerFormClose}
+          
         />
       </Container>
     </>

@@ -31,13 +31,13 @@ namespace TaskForge.API.Controllers
     public class TaskItemsController : BaseApiController
     {
         [HttpGet] //api/taskitems
-        public async Task<ActionResult<List<TaskItem>>> GetTaskItems(CancellationToken ct)
+        public async Task<IActionResult> GetTaskItems(CancellationToken ct)
         {
-            return await Mediator.Send(new List.Query(), ct);
+            return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
         [HttpGet("{id}")] //api/taskitems/{id}
-        public async Task<ActionResult<TaskItem>> GetTaskItem(Guid id)
+        public async Task<IActionResult> GetTaskItem(Guid id)
         {
             return HandleResult(await Mediator.Send(new Details.Query() { Id = id }));
         }
@@ -45,7 +45,7 @@ namespace TaskForge.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTaskItem([FromBody] TaskItem TaskItem)
         {
-            return Ok(await Mediator.Send(new Create.Command { TaskItem = TaskItem }));
+            return HandleResult(await Mediator.Send(new Create.Command { TaskItem = TaskItem }));
         }
 
         [HttpPut("{id}")]

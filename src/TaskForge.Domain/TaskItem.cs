@@ -21,6 +21,8 @@
  *   SOFTWARE.
  */
 
+using TaskForge.Domain.Enum;
+
 namespace TaskForge.Domain;
 
 public class TaskItem
@@ -30,7 +32,7 @@ public class TaskItem
     public Guid Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public Enum.TaskStatus Status { get; set; }
+    public TaskItemStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

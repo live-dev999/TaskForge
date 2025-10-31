@@ -11,7 +11,7 @@ using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for Details.Handler
@@ -29,14 +29,14 @@ public class DetailsHandlerTests
         return new DataContext(options);
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -250,7 +250,7 @@ public class DetailsHandlerTests
         var handler = new Details.Handler(context);
         
         var existingTaskItem = CreateValidTaskItem();
-        existingTaskItem.Status = TaskStatus.InProgress;
+        existingTaskItem.Status = TaskItemStatus.InProgress;
         existingTaskItem.CreatedAt = DateTime.UtcNow.AddDays(-10);
         existingTaskItem.UpdatedAt = DateTime.UtcNow.AddDays(-5);
         

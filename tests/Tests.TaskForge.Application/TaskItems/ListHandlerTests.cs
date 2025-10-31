@@ -13,7 +13,7 @@ using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for List.Handler
@@ -31,14 +31,14 @@ public class ListHandlerTests
         return new DataContext(options);
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -143,7 +143,7 @@ public class ListHandlerTests
         
         var taskItem2 = CreateValidTaskItem();
         taskItem2.Id = Guid.NewGuid();
-        taskItem2.Status = TaskStatus.InProgress;
+        taskItem2.Status = TaskItemStatus.InProgress;
 
         await context.TaskItems.AddRangeAsync(taskItem1, taskItem2);
         await context.SaveChangesAsync();
@@ -155,8 +155,8 @@ public class ListHandlerTests
 
         // Assert
         Assert.Equal(2, result.Value.Count);
-        Assert.Contains(result.Value, x => x.Id == taskItem1.Id && x.Status == TaskStatus.New);
-        Assert.Contains(result.Value, x => x.Id == taskItem2.Id && x.Status == TaskStatus.InProgress);
+        Assert.Contains(result.Value, x => x.Id == taskItem1.Id && x.Status == TaskItemStatus.New);
+        Assert.Contains(result.Value, x => x.Id == taskItem2.Id && x.Status == TaskItemStatus.InProgress);
     }
 
     #endregion
@@ -209,7 +209,7 @@ public class ListHandlerTests
         var logger = CreateLogger();
         var handler = new List.Handler(context, logger);
         
-        var taskItems = new List<Domain.TaskItem>();
+        var taskItems = new List<TaskItem>();
         for (int i = 0; i < 100; i++)
         {
             var taskItem = CreateValidTaskItem();
@@ -239,8 +239,8 @@ public class ListHandlerTests
         var logger = CreateLogger();
         var handler = new List.Handler(context, logger);
         
-        var statuses = new[] { TaskStatus.New, TaskStatus.InProgress, TaskStatus.Completed, TaskStatus.Pending };
-        var taskItems = new List<Domain.TaskItem>();
+        var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
+        var taskItems = new List<TaskItem>();
 
         for (int i = 0; i < statuses.Length; i++)
         {

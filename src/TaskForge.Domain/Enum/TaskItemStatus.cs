@@ -1,6 +1,6 @@
 ﻿namespace TaskForge.Domain.Enum
 {
-    public enum TaskStatus
+    public enum TaskItemStatus
     {
         New = 0,
         InProgress = 1,

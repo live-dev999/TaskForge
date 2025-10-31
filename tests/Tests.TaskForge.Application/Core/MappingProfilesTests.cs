@@ -27,14 +27,14 @@ public class MappingProfilesTests
         return configuration.CreateMapper();
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -69,7 +69,7 @@ public class MappingProfilesTests
         var source = CreateValidTaskItem();
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.Equal(source.Id, destination.Id);
@@ -88,7 +88,7 @@ public class MappingProfilesTests
         var source = CreateValidTaskItem();
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.NotSame(source, destination);
@@ -99,7 +99,7 @@ public class MappingProfilesTests
     {
         // Arrange
         var mapper = CreateMapper();
-        var statuses = new[] { TaskStatus.New, TaskStatus.InProgress, TaskStatus.Completed, TaskStatus.Pending };
+        var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
 
         foreach (var status in statuses)
         {
@@ -107,7 +107,7 @@ public class MappingProfilesTests
             source.Status = status;
 
             // Act
-            var destination = mapper.Map<Domain.TaskItem>(source);
+            var destination = mapper.Map<TaskItem>(source);
 
             // Assert
             Assert.Equal(status, destination.Status);
@@ -123,7 +123,7 @@ public class MappingProfilesTests
         source.Title = null;
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.Null(destination.Title);
@@ -138,7 +138,7 @@ public class MappingProfilesTests
         source.Id = Guid.Empty;
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.Equal(Guid.Empty, destination.Id);
@@ -154,7 +154,7 @@ public class MappingProfilesTests
         source.UpdatedAt = DateTime.MinValue;
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.Equal(DateTime.MinValue, destination.CreatedAt);
@@ -171,7 +171,7 @@ public class MappingProfilesTests
         source.UpdatedAt = DateTime.MaxValue;
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.Equal(DateTime.MaxValue, destination.CreatedAt);
@@ -184,7 +184,7 @@ public class MappingProfilesTests
         // Arrange
         var mapper = CreateMapper();
         var source = CreateValidTaskItem();
-        var destination = new Domain.TaskItem
+        var destination = new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Old Title"
@@ -210,7 +210,7 @@ public class MappingProfilesTests
         source.Description = new string('B', 50000);
 
         // Act
-        var destination = mapper.Map<Domain.TaskItem>(source);
+        var destination = mapper.Map<TaskItem>(source);
 
         // Assert
         Assert.Equal(source.Title, destination.Title);
@@ -228,7 +228,7 @@ public class MappingProfilesTests
         var mapper = CreateMapper();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => mapper.Map<Domain.TaskItem>(null));
+        Assert.Throws<ArgumentNullException>(() => mapper.Map<TaskItem>(null));
     }
 
     [Fact]
@@ -239,7 +239,7 @@ public class MappingProfilesTests
         var source = CreateValidTaskItem();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => mapper.Map(source, null));
+        Assert.Throws<ArgumentNullException>(() => mapper.Map<TaskItem>(source, null));
     }
 
     #endregion

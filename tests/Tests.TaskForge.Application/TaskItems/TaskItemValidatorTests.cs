@@ -4,12 +4,12 @@
  */
 
 using FluentValidation.TestHelper;
-using TaskForge.Application.TaskItem;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for TaskItemValidator
@@ -230,7 +230,7 @@ public class TaskItemValidatorTests
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = default(TaskStatus); // default = 0 = New
+        taskItem.Status = default(TaskItemStatus); // default = 0 = New
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -245,7 +245,7 @@ public class TaskItemValidatorTests
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = (TaskStatus)999; // Invalid enum value
+        taskItem.Status = (TaskItemStatus)999; // Invalid enum value
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -259,7 +259,7 @@ public class TaskItemValidatorTests
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = TaskStatus.New;
+        taskItem.Status = TaskItemStatus.New;
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -273,7 +273,7 @@ public class TaskItemValidatorTests
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = TaskStatus.InProgress;
+        taskItem.Status = TaskItemStatus.InProgress;
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -287,7 +287,7 @@ public class TaskItemValidatorTests
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = TaskStatus.Completed;
+        taskItem.Status = TaskItemStatus.Completed;
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -301,7 +301,7 @@ public class TaskItemValidatorTests
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = TaskStatus.Pending;
+        taskItem.Status = TaskItemStatus.Pending;
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -332,11 +332,11 @@ public class TaskItemValidatorTests
     public void Validate_WhenMultipleFieldsAreInvalid_ShouldHaveMultipleValidationErrors()
     {
         // Arrange
-        var taskItem = new Domain.TaskItem
+        var taskItem = new TaskItem
         {
             Title = null,
             Description = null,
-            Status = (TaskStatus)999, // Invalid enum value
+            Status = (TaskItemStatus)999, // Invalid enum value
             CreatedAt = default(DateTime),
             UpdatedAt = default(DateTime)
         };
@@ -354,14 +354,14 @@ public class TaskItemValidatorTests
 
     #region Helper Methods
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

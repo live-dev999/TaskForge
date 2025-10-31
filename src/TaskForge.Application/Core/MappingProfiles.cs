@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using TaskForge.Domain;
 
 namespace TaskForge.Application.Core
 {
@@ -6,7 +7,7 @@ namespace TaskForge.Application.Core
     {
         public MappingProfiles()
         {
-            CreateMap<Domain.TaskItem, Domain.TaskItem>();
+            CreateMap<TaskItem, TaskItem>();
         }
     }
 }

@@ -11,7 +11,7 @@ using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for Create.Handler
@@ -29,14 +29,14 @@ public class CreateHandlerTests
         return new DataContext(options);
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -289,7 +289,7 @@ public class CreateHandlerTests
         using var context = CreateInMemoryContext();
         var handler = new Create.Handler(context);
 
-        var statuses = new[] { TaskStatus.New, TaskStatus.InProgress, TaskStatus.Completed, TaskStatus.Pending };
+        var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
 
         foreach (var status in statuses)
         {

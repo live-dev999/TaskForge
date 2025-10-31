@@ -3,7 +3,7 @@ using MediatR;
 using TaskForge.Application.Core;
 using TaskForge.Persistence;
 
-namespace TaskForge.Application.TaskItem
+namespace TaskForge.Application.TaskItems
 {
     public class Delete
     {

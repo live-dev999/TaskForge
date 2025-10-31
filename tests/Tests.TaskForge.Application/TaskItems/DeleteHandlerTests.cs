@@ -6,13 +6,13 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TaskForge.Application.Core;
-using TaskForge.Application.TaskItem;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for Delete.Handler
@@ -30,14 +30,14 @@ public class DeleteHandlerTests
         return new DataContext(options);
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -47,7 +47,7 @@ public class DeleteHandlerTests
     {
         var configuration = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<TaskForge.Application.Core.MappingProfiles>();
+            cfg.AddProfile<MappingProfiles>();
         });
         return configuration.CreateMapper();
     }

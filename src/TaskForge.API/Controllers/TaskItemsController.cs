@@ -23,7 +23,7 @@
 
 using Application.TaskItems;
 using Microsoft.AspNetCore.Mvc;
-using TaskForge.Application.TaskItem;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 
 

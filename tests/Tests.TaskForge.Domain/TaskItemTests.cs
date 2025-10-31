@@ -26,7 +26,7 @@ public class TaskItemTests
         var id = Guid.NewGuid();
         var title = "Test Title";
         var description = "Test Description";
-        var status = TaskStatus.New;
+        var status = TaskItemStatus.New;
         var createdAt = DateTime.UtcNow;
         var updatedAt = DateTime.UtcNow;
 
@@ -56,7 +56,7 @@ public class TaskItemTests
         Assert.Equal(Guid.Empty, taskItem.Id);
         Assert.Null(taskItem.Title);
         Assert.Null(taskItem.Description);
-        Assert.Equal(default(TaskStatus), taskItem.Status);
+        Assert.Equal(default(TaskItemStatus), taskItem.Status);
         Assert.Equal(default(DateTime), taskItem.CreatedAt);
         Assert.Equal(default(DateTime), taskItem.UpdatedAt);
     }
@@ -219,10 +219,10 @@ public class TaskItemTests
         var taskItem = new TaskItem();
 
         // Act
-        taskItem.Status = TaskStatus.New;
+        taskItem.Status = TaskItemStatus.New;
 
         // Assert
-        Assert.Equal(TaskStatus.New, taskItem.Status);
+        Assert.Equal(TaskItemStatus.New, taskItem.Status);
     }
 
     [Fact]
@@ -232,10 +232,10 @@ public class TaskItemTests
         var taskItem = new TaskItem();
 
         // Act
-        taskItem.Status = TaskStatus.InProgress;
+        taskItem.Status = TaskItemStatus.InProgress;
 
         // Assert
-        Assert.Equal(TaskStatus.InProgress, taskItem.Status);
+        Assert.Equal(TaskItemStatus.InProgress, taskItem.Status);
     }
 
     [Fact]
@@ -245,10 +245,10 @@ public class TaskItemTests
         var taskItem = new TaskItem();
 
         // Act
-        taskItem.Status = TaskStatus.Completed;
+        taskItem.Status = TaskItemStatus.Completed;
 
         // Assert
-        Assert.Equal(TaskStatus.Completed, taskItem.Status);
+        Assert.Equal(TaskItemStatus.Completed, taskItem.Status);
     }
 
     [Fact]
@@ -258,10 +258,10 @@ public class TaskItemTests
         var taskItem = new TaskItem();
 
         // Act
-        taskItem.Status = TaskStatus.Pending;
+        taskItem.Status = TaskItemStatus.Pending;
 
         // Assert
-        Assert.Equal(TaskStatus.Pending, taskItem.Status);
+        Assert.Equal(TaskItemStatus.Pending, taskItem.Status);
     }
 
     [Fact]
@@ -269,15 +269,15 @@ public class TaskItemTests
     {
         // Arrange
         var taskItem = new TaskItem();
-        taskItem.Status = TaskStatus.New;
+        taskItem.Status = TaskItemStatus.New;
 
         // Act
-        taskItem.Status = TaskStatus.InProgress;
-        taskItem.Status = TaskStatus.Completed;
-        taskItem.Status = TaskStatus.Pending;
+        taskItem.Status = TaskItemStatus.InProgress;
+        taskItem.Status = TaskItemStatus.Completed;
+        taskItem.Status = TaskItemStatus.Pending;
 
         // Assert
-        Assert.Equal(TaskStatus.Pending, taskItem.Status);
+        Assert.Equal(TaskItemStatus.Pending, taskItem.Status);
     }
 
     #endregion
@@ -437,7 +437,7 @@ public class TaskItemTests
             Id = Guid.NewGuid(),
             Title = "Complete Task",
             Description = "Complete Description",
-            Status = TaskStatus.InProgress,
+            Status = TaskItemStatus.InProgress,
             CreatedAt = DateTime.UtcNow.AddDays(-5),
             UpdatedAt = DateTime.UtcNow.AddDays(-1)
         };
@@ -446,7 +446,7 @@ public class TaskItemTests
         Assert.NotEqual(Guid.Empty, taskItem.Id);
         Assert.NotNull(taskItem.Title);
         Assert.NotNull(taskItem.Description);
-        Assert.NotEqual(default(TaskStatus), taskItem.Status);
+        Assert.NotEqual(default(TaskItemStatus), taskItem.Status);
         Assert.NotEqual(default(DateTime), taskItem.CreatedAt);
         Assert.NotEqual(default(DateTime), taskItem.UpdatedAt);
     }
@@ -477,19 +477,19 @@ public class TaskItemTests
             Id = Guid.NewGuid(),
             Title = "Task",
             Description = "Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
         // Act - Modify properties
         taskItem.Title = "Updated Title";
-        taskItem.Status = TaskStatus.InProgress;
+        taskItem.Status = TaskItemStatus.InProgress;
         taskItem.UpdatedAt = DateTime.UtcNow;
 
         // Assert
         Assert.Equal("Updated Title", taskItem.Title);
-        Assert.Equal(TaskStatus.InProgress, taskItem.Status);
+        Assert.Equal(TaskItemStatus.InProgress, taskItem.Status);
         Assert.NotEqual(DateTime.MinValue, taskItem.UpdatedAt);
     }
 

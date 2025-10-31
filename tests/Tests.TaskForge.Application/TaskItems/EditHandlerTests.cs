@@ -7,13 +7,13 @@ using Application.TaskItems;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TaskForge.Application.Core;
-using TaskForge.Application.TaskItem;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for Edit.Handler
@@ -31,14 +31,14 @@ public class EditHandlerTests
         return new DataContext(options);
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -48,7 +48,7 @@ public class EditHandlerTests
     {
         var configuration = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<TaskForge.Application.Core.MappingProfiles>();
+            cfg.AddProfile<MappingProfiles>();
         });
         return configuration.CreateMapper();
     }
@@ -104,7 +104,7 @@ public class EditHandlerTests
         updatedTaskItem.Id = existingTaskItem.Id;
         updatedTaskItem.Title = "New Title";
         updatedTaskItem.Description = "New Description";
-        updatedTaskItem.Status = TaskStatus.InProgress;
+        updatedTaskItem.Status = TaskItemStatus.InProgress;
 
         var command = new Edit.Command
         {
@@ -119,7 +119,7 @@ public class EditHandlerTests
         Assert.NotNull(savedItem);
         Assert.Equal("New Title", savedItem.Title);
         Assert.Equal("New Description", savedItem.Description);
-        Assert.Equal(TaskStatus.InProgress, savedItem.Status);
+        Assert.Equal(TaskItemStatus.InProgress, savedItem.Status);
         Assert.NotEqual(originalTitle, savedItem.Title);
     }
 
@@ -308,7 +308,7 @@ public class EditHandlerTests
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
-        var statuses = new[] { TaskStatus.New, TaskStatus.InProgress, TaskStatus.Completed, TaskStatus.Pending };
+        var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
 
         foreach (var status in statuses)
         {

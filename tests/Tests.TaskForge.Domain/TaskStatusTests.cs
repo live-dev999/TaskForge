@@ -9,47 +9,47 @@ using Xunit;
 namespace Tests.TaskForge.Domain;
 
 /// <summary>
-/// Unit tests for TaskStatus enum
+/// Unit tests for TaskItemStatus enum
 /// </summary>
-public class TaskStatusTests
+public class TaskItemStatusTests
 {
     #region Enum Value Tests
 
     [Fact]
-    public void TaskStatus_New_HasCorrectValue()
+    public void TaskItemStatus_New_HasCorrectValue()
     {
         // Arrange & Act
-        var status = TaskStatus.New;
+        var status = TaskItemStatus.New;
 
         // Assert
         Assert.Equal(0, (int)status);
     }
 
     [Fact]
-    public void TaskStatus_InProgress_HasCorrectValue()
+    public void TaskItemStatus_InProgress_HasCorrectValue()
     {
         // Arrange & Act
-        var status = TaskStatus.InProgress;
+        var status = TaskItemStatus.InProgress;
 
         // Assert
         Assert.Equal(1, (int)status);
     }
 
     [Fact]
-    public void TaskStatus_Completed_HasCorrectValue()
+    public void TaskItemStatus_Completed_HasCorrectValue()
     {
         // Arrange & Act
-        var status = TaskStatus.Completed;
+        var status = TaskItemStatus.Completed;
 
         // Assert
         Assert.Equal(2, (int)status);
     }
 
     [Fact]
-    public void TaskStatus_Pending_HasCorrectValue()
+    public void TaskItemStatus_Pending_HasCorrectValue()
     {
         // Arrange & Act
-        var status = TaskStatus.Pending;
+        var status = TaskItemStatus.Pending;
 
         // Assert
         Assert.Equal(3, (int)status);
@@ -60,10 +60,10 @@ public class TaskStatusTests
     #region Enum Conversion Tests
 
     [Fact]
-    public void TaskStatus_CanBeConvertedToInt()
+    public void TaskItemStatus_CanBeConvertedToInt()
     {
         // Arrange
-        var status = TaskStatus.InProgress;
+        var status = TaskItemStatus.InProgress;
 
         // Act
         var intValue = (int)status;
@@ -73,26 +73,26 @@ public class TaskStatusTests
     }
 
     [Fact]
-    public void TaskStatus_CanBeConvertedFromInt()
+    public void TaskItemStatus_CanBeConvertedFromInt()
     {
         // Arrange
         var intValue = 2;
 
         // Act
-        var status = (TaskStatus)intValue;
+        var status = (TaskItemStatus)intValue;
 
         // Assert
-        Assert.Equal(TaskStatus.Completed, status);
+        Assert.Equal(TaskItemStatus.Completed, status);
     }
 
     [Fact]
-    public void TaskStatus_CanBeConvertedFromInvalidInt_ReturnsInvalidEnum()
+    public void TaskItemStatus_CanBeConvertedFromInvalidInt_ReturnsInvalidEnum()
     {
         // Arrange
         var intValue = 999;
 
         // Act
-        var status = (TaskStatus)intValue;
+        var status = (TaskItemStatus)intValue;
 
         // Assert
         // Enum allows any integer value, even if not defined
@@ -104,12 +104,12 @@ public class TaskStatusTests
     #region Enum Comparison Tests
 
     [Fact]
-    public void TaskStatus_CanBeCompared()
+    public void TaskItemStatus_CanBeCompared()
     {
         // Arrange
-        var status1 = TaskStatus.New;
-        var status2 = TaskStatus.InProgress;
-        var status3 = TaskStatus.New;
+        var status1 = TaskItemStatus.New;
+        var status2 = TaskItemStatus.InProgress;
+        var status3 = TaskItemStatus.New;
 
         // Assert
         Assert.NotEqual(status1, status2);
@@ -119,25 +119,25 @@ public class TaskStatusTests
     }
 
     [Fact]
-    public void TaskStatus_CanUseSwitchStatement()
+    public void TaskItemStatus_CanUseSwitchStatement()
     {
         // Arrange
-        var status = TaskStatus.Completed;
+        var status = TaskItemStatus.Completed;
         string result = null;
 
         // Act
         switch (status)
         {
-            case TaskStatus.New:
+            case TaskItemStatus.New:
                 result = "New";
                 break;
-            case TaskStatus.InProgress:
+            case TaskItemStatus.InProgress:
                 result = "In Progress";
                 break;
-            case TaskStatus.Completed:
+            case TaskItemStatus.Completed:
                 result = "Completed";
                 break;
-            case TaskStatus.Pending:
+            case TaskItemStatus.Pending:
                 result = "Pending";
                 break;
         }
@@ -151,33 +151,33 @@ public class TaskStatusTests
     #region Enum All Values Tests
 
     [Fact]
-    public void TaskStatus_AllValuesAreDefined()
+    public void TaskItemStatus_AllValuesAreDefined()
     {
         // Arrange & Act
-        var values = Enum.GetValues<TaskStatus>();
+        var values = Enum.GetValues<TaskItemStatus>();
 
         // Assert
-        Assert.Contains(TaskStatus.New, values);
-        Assert.Contains(TaskStatus.InProgress, values);
-        Assert.Contains(TaskStatus.Completed, values);
-        Assert.Contains(TaskStatus.Pending, values);
+        Assert.Contains(TaskItemStatus.New, values);
+        Assert.Contains(TaskItemStatus.InProgress, values);
+        Assert.Contains(TaskItemStatus.Completed, values);
+        Assert.Contains(TaskItemStatus.Pending, values);
         Assert.Equal(4, values.Length);
     }
 
     [Fact]
-    public void TaskStatus_CanIterateAllValues()
+    public void TaskItemStatus_CanIterateAllValues()
     {
         // Arrange
         var expectedValues = new[]
         {
-            TaskStatus.New,
-            TaskStatus.InProgress,
-            TaskStatus.Completed,
-            TaskStatus.Pending
+            TaskItemStatus.New,
+            TaskItemStatus.InProgress,
+            TaskItemStatus.Completed,
+            TaskItemStatus.Pending
         };
 
         // Act
-        var actualValues = Enum.GetValues<TaskStatus>();
+        var actualValues = Enum.GetValues<TaskItemStatus>();
 
         // Assert
         Assert.Equal(expectedValues.Length, actualValues.Length);
@@ -192,10 +192,10 @@ public class TaskStatusTests
     #region Enum String Tests
 
     [Fact]
-    public void TaskStatus_CanBeConvertedToString()
+    public void TaskItemStatus_CanBeConvertedToString()
     {
         // Arrange
-        var status = TaskStatus.InProgress;
+        var status = TaskItemStatus.InProgress;
 
         // Act
         var stringValue = status.ToString();
@@ -205,39 +205,39 @@ public class TaskStatusTests
     }
 
     [Fact]
-    public void TaskStatus_CanBeParsedFromString()
+    public void TaskItemStatus_CanBeParsedFromString()
     {
         // Arrange
         var stringValue = "Completed";
 
         // Act
-        var status = Enum.Parse<TaskStatus>(stringValue);
+        var status = Enum.Parse<TaskItemStatus>(stringValue);
 
         // Assert
-        Assert.Equal(TaskStatus.Completed, status);
+        Assert.Equal(TaskItemStatus.Completed, status);
     }
 
     [Fact]
-    public void TaskStatus_CanBeParsedFromStringCaseInsensitive()
+    public void TaskItemStatus_CanBeParsedFromStringCaseInsensitive()
     {
         // Arrange
         var stringValue = "new";
 
         // Act
-        var status = Enum.Parse<TaskStatus>(stringValue, ignoreCase: true);
+        var status = Enum.Parse<TaskItemStatus>(stringValue, ignoreCase: true);
 
         // Assert
-        Assert.Equal(TaskStatus.New, status);
+        Assert.Equal(TaskItemStatus.New, status);
     }
 
     [Fact]
-    public void TaskStatus_WhenParsingInvalidString_ThrowsArgumentException()
+    public void TaskItemStatus_WhenParsingInvalidString_ThrowsArgumentException()
     {
         // Arrange
         var stringValue = "InvalidStatus";
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Enum.Parse<TaskStatus>(stringValue));
+        Assert.Throws<ArgumentException>(() => Enum.Parse<TaskItemStatus>(stringValue));
     }
 
     #endregion

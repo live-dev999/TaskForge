@@ -9,7 +9,7 @@ using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using Xunit;
 
-namespace Tests.TaskForge.Application.TaskItem;
+namespace Tests.TaskForge.Application.TaskItems;
 
 /// <summary>
 /// Unit tests for Create.CommandValidator and Edit.CommandValidator
@@ -153,7 +153,7 @@ public class CommandValidatorTests
         // Arrange
         var validator = new Edit.CommandValidator();
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = default(TaskStatus);
+        taskItem.Status = default(TaskItemStatus);
         var command = new Edit.Command
         {
             TaskItem = taskItem
@@ -170,14 +170,14 @@ public class CommandValidatorTests
 
     #region Helper Methods
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
-namespace TaskForge.Application.TaskItem
+using TaskForge.Domain;
+namespace TaskForge.Application.TaskItems
 {
-    public class TaskItemValidator : AbstractValidator<Domain.TaskItem>
+    public class TaskItemValidator : AbstractValidator<TaskItem>
     {
         public TaskItemValidator()
         {

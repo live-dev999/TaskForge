@@ -1,14 +1,13 @@
-using AutoMapper;
 using FluentValidation;
 using MediatR;
 using TaskForge.Application.Core;
-using TaskForge.Application.TaskItem;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Persistence;
 
 namespace Application.TaskItems
 {
-    public class Edit
+    public class Create
     {
         public class Command : IRequest<Result<Unit>>
         {
@@ -24,31 +23,29 @@ namespace Application.TaskItems
         public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
-            private readonly IMapper _mapper;
 
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(DataContext context)
             {
-                _mapper = mapper;
                 _context = context;
             }
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(
+                Command request,
+                CancellationToken cancellationToken
+            )
             {
-                var taskItem = await _context.TaskItems.FindAsync(request.TaskItem.Id);
-
-                if (taskItem == null)
-                    return Result<Unit>.Failure("Task item not found");
-                
-                // Preserve CreatedAt and update UpdatedAt automatically
-                request.TaskItem.CreatedAt = taskItem.CreatedAt;
+                // Auto-set ID, CreatedAt and UpdatedAt
+                if (request.TaskItem.Id == Guid.Empty)
+                    request.TaskItem.Id = Guid.NewGuid();
+                    
+                request.TaskItem.CreatedAt = DateTime.UtcNow;
                 request.TaskItem.UpdatedAt = DateTime.UtcNow;
                 
-                _mapper.Map(request.TaskItem, taskItem);
-                _context.Update(taskItem);
+                _context.Add(request.TaskItem);
 
                 var result = await _context.SaveChangesAsync() > 0;
                 if (!result)
-                    return Result<Unit>.Failure("Failed to update the taskItem");
+                    return Result<Unit>.Failure("Failed to create task item");
                 return Result<Unit>.Success(Unit.Value);
             }
         }

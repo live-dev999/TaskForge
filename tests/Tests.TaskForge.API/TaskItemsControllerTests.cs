@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TaskForge.API.Controllers;
 using TaskForge.Application.Core;
-using TaskForge.Application.TaskItem;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using Xunit;
@@ -47,14 +47,14 @@ public class TaskItemsControllerTests
         return controller;
     }
 
-    private Domain.TaskItem CreateValidTaskItem()
+    private TaskItem CreateValidTaskItem()
     {
-        return new Domain.TaskItem
+        return new TaskItem
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
             Description = "Test Description",
-            Status = TaskStatus.New,
+            Status = TaskItemStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -538,7 +538,7 @@ public class TaskItemsControllerTests
         // Assert
         Assert.NotNull(capturedCommand);
         Assert.Null(capturedCommand.TaskItem);
-        // Note: In actual code, TaskItem.Id = id would throw NullReferenceException
+        // Note: In actual code, TaskItems.Id = id would throw NullReferenceException
     }
 
     #endregion

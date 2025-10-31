@@ -12,10 +12,6 @@ export const routes: RouteObject[] =
         element: <App />,
         children: [
             {
-                path: '',
-                element: <HomePage />
-            },
-            {
                 path: '/taskItems',
                 element: <TaskItemDashboard />
             },

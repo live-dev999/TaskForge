@@ -21,7 +21,6 @@
  *   SOFTWARE.
  */
 
-import React from "react";
 import { Button, Item, ItemMeta, Label, Segment } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
 

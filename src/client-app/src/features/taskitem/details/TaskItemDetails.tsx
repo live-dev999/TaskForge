@@ -1,5 +1,4 @@
-import React from "react";
-import { Button, ButtonGroup, Card, Icon, Image } from "semantic-ui-react";
+import { Button, ButtonGroup, Card } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
 
 interface Props {

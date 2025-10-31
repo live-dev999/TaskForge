@@ -21,8 +21,7 @@
  *   SOFTWARE.
  */
 
-import React from "react";
-import { Grid, List } from "semantic-ui-react";
+import { Grid } from "semantic-ui-react";
 import TaskItemList from "./TaskItemList";
 import { TaskItem } from "../../../app/models/taskItem";
 import TaskItemDetails from "../details/TaskItemDetails";

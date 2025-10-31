@@ -23,6 +23,7 @@
 
 using Application.TaskItems;
 using Microsoft.AspNetCore.Mvc;
+using TaskForge.Application.TaskItem;
 using TaskForge.Domain;
 
 
@@ -52,7 +53,13 @@ namespace TaskForge.API.Controllers
         public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItem TaskItem)
         {
             TaskItem.Id = id;
-            return Ok(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }));
+            return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }));
+        }
+
+        [HttpDelete("{id}")] //api/activities/{id}
+        public async Task<IActionResult> DeleteAsync(Guid id)
+        {
+            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
         }
     }
 }

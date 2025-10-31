@@ -23,7 +23,6 @@
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Application.Core;
 using TaskForge.Application.Core;
 
 namespace TaskForge.API.Controllers

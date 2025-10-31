@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
 using MediatR;
-using TaskForge.Domain;
+using TaskForge.Application.Core;
 using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItem
 {
     public class Delete
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
-            public Domain.TaskItem TaskItem { get; set; }
+            public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -23,16 +23,22 @@ namespace TaskForge.Application.TaskItem
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(
+                Command request,
+                CancellationToken cancellationToken
+            )
             {
-                var taskItem = await _context.TaskItems.FindAsync(request.TaskItem.Id);
+                var taskItem = await _context.TaskItems.FindAsync(request.Id);
 
-                _mapper.Map(request.TaskItem, taskItem);
-                _context.Update(taskItem);
+                if (taskItem == null)
+                    return null;
 
-                await _context.SaveChangesAsync();
+                _context.Remove(taskItem);
 
-                return Unit.Value;
+                var result = await _context.SaveChangesAsync() > 0;
+                if (!result)
+                    return Result<Unit>.Failure("Failed to delete the taskItem");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

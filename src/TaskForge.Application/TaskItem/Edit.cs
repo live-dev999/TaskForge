@@ -1,5 +1,7 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
+using TaskForge.Application.Core;
 using TaskForge.Application.TaskItem;
 using TaskForge.Domain;
 using TaskForge.Persistence;
@@ -8,7 +10,7 @@ namespace Application.TaskItems
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public TaskItem TaskItem { get; set; }
         }
@@ -19,26 +21,30 @@ namespace Application.TaskItems
                 RuleFor(x => x.TaskItem).SetValidator(new TaskItemValidator());
             }
         }
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
+                _mapper = mapper;
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var TaskItem =await _context.TaskItems.FindAsync(request.TaskItem.Id);
+                var taskItem =await _context.TaskItems.FindAsync(request.TaskItem.Id);
 
-                TaskItem.Title = request.TaskItem.Title ?? TaskItem.Title;
+                if (taskItem == null)
+                    return null;
+                _mapper.Map(request.TaskItem, taskItem);
+                _context.Update(taskItem);
 
-                _context.Update(TaskItem);
-
-                await _context.SaveChangesAsync();
-
-                return Unit.Value;
+                var result = await _context.SaveChangesAsync() > 0;
+                if (!result)
+                    return Result<Unit>.Failure("Failed to update the taskItem");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

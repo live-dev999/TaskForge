@@ -18,13 +18,11 @@ export default observer(function TaskItemList() {
                         {group}
                     </Header>
 
-                    <Segment>
-                        <Item.Group divided>
-                            {taskItems.map(taskItem => (
-                                <TaskItemListItem key={taskItem.id} taskItem={taskItem} />
-                            ))}
-                        </Item.Group>
-                    </Segment>  </Fragment>
+
+                    {taskItems.map(taskItem => (
+                        <TaskItemListItem key={taskItem.id} taskItem={taskItem} />
+                    ))}
+                </Fragment>
             ))}
         </>
 

@@ -1,6 +1,6 @@
 import React, { SyntheticEvent, useState } from "react";
 import { Link } from "react-router-dom";
-import { Item, ItemMeta, Button, Label } from "semantic-ui-react";
+import { Item, ItemMeta, Button, Label, SegmentGroup, Segment, Icon } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
 import { useStore } from "../../../app/stores/store";
 
@@ -18,7 +18,40 @@ export default function TaskItemListItem({ taskItem }: Props) {
     }
 
     return (
-        <Item key={taskItem.id}>
+         <SegmentGroup>
+            <Segment>
+                 <Item.Group>
+                    <Item.Content>
+                        <Item.Header as={Link} to={`/taskItems/${taskItem.id}`}>
+                            {taskItem.title}
+                        </Item.Header>
+                        <Item.Description> 
+                            {taskItem.description}
+                        </Item.Description>
+                    </Item.Content>
+                 </Item.Group>
+                  </Segment>
+                  <Segment>
+                <span>
+                    Create Date:
+                    <Icon name="clock" /> {taskItem.updatedAt}
+                    <br></br>
+                     Update Date:
+                    <Icon name="clock" /> {taskItem.updatedAt}
+                </span>
+               
+            </Segment>
+             <Segment secondary>
+                {taskItem.status}
+            </Segment>   
+            <Segment clearing>
+          
+                <Button as={Link} to={`/taskItems/${taskItem.id}`}
+                    color='teal'
+                    floated='right'
+                    content='View' />
+            </Segment>
+        {/* <Item key={taskItem.id}>
             <Item.Content>
                             <Item.Header as='a'>{taskItem.title}</Item.Header>
                             <ItemMeta>
@@ -40,6 +73,8 @@ export default function TaskItemListItem({ taskItem }: Props) {
                                 <Label basic content={taskItem.status} />
                             </Item.Extra>
                         </Item.Content>
-                    </Item>
+                    </Item> */}
+              
+         </SegmentGroup>
     )
 }

@@ -35,15 +35,21 @@ interface Props {
     editMode: boolean;
     openForm: (id: string) => void;
     closeForm: () => void;
+    createOrEdit: (taskItem: TaskItem) => void;
     deleteTaskItem: (id: string) => void;
+    submitting: boolean;
 }
 
-export default function TaskItemDashboard({ taskItems, selectedTaskItem, deleteTaskItem: deleteTaskItem,
-    selectTaskItem, cancelSelectedTaskItem, editMode, openForm, closeForm }: Props) {
+export default function TaskItemDashboard({ taskItems, selectedTaskItem, deleteTaskItem,
+    selectTaskItem, cancelSelectedTaskItem, editMode, openForm, closeForm, createOrEdit, submitting }: Props) {
     return (
         <Grid>
             <Grid.Column width='10'>
-                <TaskItemList taskItems={taskItems} selectTaskItem={selectTaskItem} deleteTaskItem={deleteTaskItem} />
+                <TaskItemList 
+                taskItems={taskItems} 
+                selectTaskItem={selectTaskItem} 
+                deleteTaskItem={deleteTaskItem} 
+                submitting={submitting}/>
             </Grid.Column>
             <Grid.Column width='6'>
                 {selectedTaskItem && !editMode &&
@@ -52,9 +58,12 @@ export default function TaskItemDashboard({ taskItems, selectedTaskItem, deleteT
                         cancelSelectedTaskItem={cancelSelectedTaskItem}
                         openForm={openForm} />}
                 {editMode &&
-                 <TaskItemForm
-                    closeForm={closeForm}
-                    taskItem={selectedTaskItem} />}
+                    <TaskItemForm
+                        closeForm={closeForm}
+                        taskItem={selectedTaskItem}
+                        createOrEdit={createOrEdit}
+                        submitting={submitting}
+                    />}
             </Grid.Column>
 
         </Grid>

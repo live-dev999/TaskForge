@@ -15,7 +15,7 @@ export default function TaskItemDetails({ taskItem, cancelSelectedTaskItem, open
                 <Card.Meta>
                     <span>{taskItem.createdAt}</span>
                 </Card.Meta>
-                <Card.Meta>
+               <Card.Meta>
                     <span>{taskItem.updatedAt}</span>
                 </Card.Meta>
                 <Card.Description>

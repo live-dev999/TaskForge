@@ -12,17 +12,18 @@ function App() {
   const [selectedTaskItems, setSelectedTaskItem] = useState<TaskItem | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     agent.TaskItems.list().then(
       response => {
-        let activities: TaskItem[] = [];
+        let taskItems: TaskItem[] = [];
         response.forEach(taskItem => {
           taskItem.createdAt = taskItem.createdAt.split('T')[0];
           taskItem.updatedAt = taskItem.updatedAt.split('T')[0];
-          activities.push(taskItem);
+          taskItems.push(taskItem);
         });
-        setTaskItems(activities)
+        setTaskItems(taskItems)
         setLoading(false)
       }
     );
@@ -43,19 +44,37 @@ function App() {
     setEditMode(false);
   }
 
-    function handleCreateOrEditTaskItem(taskItem: TaskItem) {
-    taskItem.id ? setTaskItems([...taskItems.filter(x => x.id !== taskItem.id), taskItem])
-      : setTaskItems([...taskItems, { ...taskItem, id: uuid() }])
-    setEditMode(false);
-    setSelectedTaskItem(taskItem);
+  function handleCreateOrEditTaskItem(taskItem: TaskItem) {
+  setSubmitting(true)
+  if (taskItem.id) {
+    agent.TaskItems.update(taskItem).then(() => {
+      setTaskItems([...taskItems.filter(x => x.id !== taskItem.id), taskItem])
+      setSelectedTaskItem(taskItem);
+      setEditMode(false);
+      setSubmitting(false)
+    })
+  }
+  else {
+    taskItem.id = uuid();
+    agent.TaskItems.create(taskItem).then(() => {
+      setTaskItems([...taskItems, taskItem])
+      setSelectedTaskItem(taskItem);
+      setEditMode(false);
+      setSubmitting(false)
+    })
+  }
+}
+
+function handleDelete(id: string) {
+    setSubmitting(true)
+    agent.TaskItems.delete(id).then(() => {
+      setTaskItems([...taskItems.filter(x => x.id !== id)])
+      setSubmitting(false)
+    })
   }
 
-  function handleDelete(id: string) {
-    setTaskItems([...taskItems.filter(x => x.id !== id)])
-  }
-
-  if(loading)
-  return (<LoadingComponent content='Loading app...'/>)
+if (loading)
+    return (<LoadingComponent content='Loading app...' />)
   return (
     <>
       <NavBar openForm={handleFormOpen} />
@@ -68,7 +87,9 @@ function App() {
           editMode={editMode}
           openForm={handleFormOpen}
           closeForm={handlerFormClose}
+          createOrEdit={handleCreateOrEditTaskItem}
           deleteTaskItem={handleDelete}
+          submitting={submitting}
         />
       </Container>
     </>
@@ -76,3 +97,4 @@ function App() {
 }
 
 export default App;
+

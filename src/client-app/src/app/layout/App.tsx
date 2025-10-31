@@ -69,7 +69,7 @@ function App() {
     })
   }
 
-  if (taskItemStore.loadingInit)
+  if (taskItemStore.loadingInitial)
     return (<LoadingComponent content='Loading app...' />)
   return (
     <>

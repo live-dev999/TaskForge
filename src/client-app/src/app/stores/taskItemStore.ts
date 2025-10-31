@@ -7,25 +7,30 @@ export default class TaskItemStore {
     selectedTaskItem: TaskItem | null = null;
     editMode = false;
     loading = false;
-    loadingInit = false;
+    loadingInitial = false;
 
     constructor() {
         makeAutoObservable(this)
     }
 
     loadTaskItems = async () => {
-        this.loadingInit = true;
+        this.setLoadingInitial(true);
         try {
             const taskItems = await agent.TaskItems.list();
+
             taskItems.forEach(taskItem => {
                 taskItem.createdAt = taskItem.createdAt.split('T')[0];
                 taskItem.updatedAt = taskItem.updatedAt.split('T')[0];
                 this.taskItems.push(taskItem);
             });
-            this.loadingInit = false;
+            this.setLoadingInitial(false);
         } catch (error) {
             console.log(error);
-            this.loadingInit = false;
+            this.setLoadingInitial(false);
         }
+    }
+
+    setLoadingInitial = (state: boolean) => {
+        this.loadingInitial = state;
     }
 }

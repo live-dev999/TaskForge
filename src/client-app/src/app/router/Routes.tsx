@@ -26,6 +26,10 @@ export const routes: RouteObject[] =
         {
             path: 'createTaskItem',
             element: <TaskItemForm />
+        },
+         {
+            path: 'manage/:id',
+            element: <TaskItemForm />
         }
     ]
 }]

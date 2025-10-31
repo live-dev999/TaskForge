@@ -18,6 +18,7 @@ export default class TaskItemStore {
             Date.parse(a.createdAt) - Date.parse(b.createdAt));
     }
     loadTaskItems = async () => {
+        this.setLoadingInitial(true);
         try {
             const taskItems = await agent.TaskItems.list();
 
@@ -34,11 +35,20 @@ export default class TaskItemStore {
     loadTaskItem = async (id: string) => {
         let taskItem = this.getTaskItem(id)
         if (taskItem) this.selectedTaskItem = taskItem;
+        if (taskItem) {
+            this.selectedTaskItem = taskItem;
+            return taskItem;
+        }
         else {
             this.setLoadingInitial(true);
             try {
                 taskItem = await agent.TaskItems.details(id);
                 this.setTaskItem(taskItem);
+                runInAction(() => {
+                    this.selectedTaskItem = taskItem;
+                });
+                this.setLoadingInitial(false)
+                return taskItem;
             } catch (error) {
                 console.log(error);
                 this.setLoadingInitial(false);

@@ -2,6 +2,9 @@ import { Button, ButtonGroup, Card } from "semantic-ui-react";
 import { TaskItem } from "../../../app/models/taskItem";
 import { useStore } from "../../../app/stores/store";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { Link, useParams } from "react-router-dom";
+import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
 
 interface Props {
     taskItem: TaskItem;
@@ -10,11 +13,16 @@ interface Props {
 }
 
 
-export default function TaskItemDetails() {
+export default observer(function TaskItemDetails() {
     const { taskItemStore } = useStore();
-    const { selectedTaskItem: taskItem} = taskItemStore;
+    const { selectedTaskItem: taskItem, loadTaskItem, loadingInitial } = taskItemStore;
+    const { id } = useParams();
 
-    if (!taskItem) return <LoadingComponent/>;
+    useEffect(() => {
+        if (id) loadTaskItem(id);
+    }, [id, loadTaskItem])
+
+    if (loadingInitial || !taskItem) return <LoadingComponent />;
 
     return (
         <Card fluid>
@@ -30,12 +38,12 @@ export default function TaskItemDetails() {
                     {taskItem.description}
                 </Card.Description>
             </Card.Content>
-             <Card.Content extra>
+              <Card.Content extra>
                 <ButtonGroup widths='2'>
-                    <Button basic color='blue' content='Edit' />
-                    <Button basic color='green' content='Cancel' />
+                    <Button as={Link} to={`/manage/${id}`} basic color='blue' content='Edit' />
+                    <Button as={Link} to={'/taskItems'} basic color='green' content='Cancel' />
                 </ButtonGroup>
-        </Card.Content>
+            </Card.Content>
         </Card >
     )
-}
+})

@@ -16,19 +16,16 @@ export default observer(function TaskItemDashboard() {
 
     if (taskItemStore.loadingInitial)
         return (<LoadingComponent content='Loading app...' />)
-        
-    const { selectedTaskItem, editMode } = taskItemStore;
+
     return (
         <Grid>
             <Grid.Column width='10'>
                 <TaskItemList/>
             </Grid.Column>
             <Grid.Column width='6'>
-                {selectedTaskItem && !editMode &&
-                    <TaskItemDetails />}
-                {editMode &&
-                    <TaskItemForm
-                    />}
+                <h2>
+                    TaskItem Filters
+                </h2>
             </Grid.Column>
 
         </Grid>

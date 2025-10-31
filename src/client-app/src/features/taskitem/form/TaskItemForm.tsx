@@ -1,41 +1,39 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Button, Form, Segment } from "semantic-ui-react";
 import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
 import { useStore } from "../../../app/stores/store";
 import { observer } from "mobx-react-lite";
-
-
-interface Props {
-    taskItem: TaskItem | undefined;
-    closeForm: () => void;
-    createOrEdit: (taskItem: TaskItem) => void;
-    submitting: boolean;
-}
+import { useParams } from "react-router-dom";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 
 export default observer(function TaskItemForm() {
     const { taskItemStore } = useStore();
-    const { selectedTaskItem, createTaskItem, updateTaskItem, loading } = taskItemStore;
-    const initialState = selectedTaskItem ?? {
+    const { createTaskItem, updateTaskItem, loading, loadTaskItem, loadingInitial } = taskItemStore;
+    const { id } = useParams();
+    const [taskItem, setTaskItem] = useState<TaskItem>({
         id: '',
         title: '',
         description: '',
         createdAt: '',
         updatedAt:'',
         status: TaskStatus.New
-    }
+});
 
-   function handleSubmit() {
+    useEffect(() => {
+        if (id) loadTaskItem(id).then(taskItem => setTaskItem(taskItem!));
+    }, [id, loadTaskItem])
+    
+
+    function handleSubmit() {
         console.log(taskItem);
         taskItem.id ? updateTaskItem(taskItem) : createTaskItem(taskItem)
     }
-
-    const [taskItem, setTaskItem] = useState(initialState);
 
     function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         const { name, value } = event.target;
         setTaskItem({ ...taskItem, [name]: value });
     }
-
+    if (loadingInitial) return <LoadingComponent content="Loading taskItem ..."/>
     return (
         <Segment clearing>
             <Form onSubmit={handleSubmit}>

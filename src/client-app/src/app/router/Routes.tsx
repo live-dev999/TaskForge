@@ -15,7 +15,7 @@ export const routes: RouteObject[] =
             element: <HomePage/>
         },
         {
-            path: 'taskItem',
+            path: 'taskItems',
             element: <TaskItemDashboard />
         }, {
             path: 'createTaskItem',

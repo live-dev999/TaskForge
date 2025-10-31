@@ -6,32 +6,23 @@ import TaskItemDashboard from '../../features/taskitem/dashboard/TaskItemDashboa
 import { v4 as uuid } from 'uuid';
 import agent from '../api/agent';
 import LoadingComponent from './LoadingComponent';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/store';
 
 function App() {
+
+  const {taskItemStore} = useStore();
+
   const [taskItems, setTaskItems] = useState<TaskItem[]>([]);
   const [selectedTaskItems, setSelectedTaskItem] = useState<TaskItem | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
   useEffect(() => {
-    agent.TaskItems.list().then(
-      response => {
-        let taskItems: TaskItem[] = [];
-        response.forEach(taskItem => {
-          taskItem.createdAt = taskItem.createdAt.split('T')[0];
-          taskItem.updatedAt = taskItem.updatedAt.split('T')[0];
-          taskItems.push(taskItem);
-        });
-        setTaskItems(taskItems)
-        setLoading(false)
-      }
-    );
-  }, [])
-
+    taskItemStore.loadTaskItems();
+  }, [taskItemStore])
 
   function handleSelectTaskItem(id: string) {
-    setSelectedTaskItem(taskItems.find(x => x.id == id))
+    setSelectedTaskItem(taskItems.find(x => x.id === id))
   }
   function handlecancelSelectedTaskItem() {
     setSelectedTaskItem(undefined)
@@ -45,27 +36,32 @@ function App() {
   }
 
   function handleCreateOrEditTaskItem(taskItem: TaskItem) {
-  setSubmitting(true)
-  if (taskItem.id) {
-    agent.TaskItems.update(taskItem).then(() => {
-      setTaskItems([...taskItems.filter(x => x.id !== taskItem.id), taskItem])
-      setSelectedTaskItem(taskItem);
-      setEditMode(false);
-      setSubmitting(false)
-    })
-  }
-  else {
-    taskItem.id = uuid();
-    agent.TaskItems.create(taskItem).then(() => {
-      setTaskItems([...taskItems, taskItem])
-      setSelectedTaskItem(taskItem);
-      setEditMode(false);
-      setSubmitting(false)
-    })
-  }
-}
+    setSubmitting(true)
+    if (taskItem.id) {
+      agent.TaskItems.update(taskItem).then(() => {
+        setTaskItems([...taskItems.filter(x => x.id !== taskItem.id), taskItem])
+        setSelectedTaskItem(taskItem);
+        setEditMode(false);
+        setSubmitting(false)
+      })
+    }
+    else {
+      taskItem.id = uuid();
+      agent.TaskItems.create(taskItem).then(() => {
+        setTaskItems([...taskItems, taskItem])
+        setSelectedTaskItem(taskItem);
+        setEditMode(false);
+        setSubmitting(false)
+      })
+    }
 
-function handleDelete(id: string) {
+    // taskItem.id ? setTaskItems([...taskItems.filter(x => x.id !== taskItem.id), taskItem])
+    //   : setTaskItems([...taskItems, { ...taskItem, id: uuid() }])
+    // setEditMode(false);
+    // setSelectedTaskItem(taskItem);
+  }
+
+  function handleDelete(id: string) {
     setSubmitting(true)
     agent.TaskItems.delete(id).then(() => {
       setTaskItems([...taskItems.filter(x => x.id !== id)])
@@ -73,14 +69,16 @@ function handleDelete(id: string) {
     })
   }
 
-if (loading)
+  if (taskItemStore.loadingInit)
     return (<LoadingComponent content='Loading app...' />)
   return (
     <>
       <NavBar openForm={handleFormOpen} />
+      
       <Container style={{ marginTop: '7em' }}>
+   
         <TaskItemDashboard
-          taskItems={taskItems}
+          taskItems={taskItemStore.taskItems}
           selectedTaskItem={selectedTaskItems}
           selectTaskItem={handleSelectTaskItem}
           cancelSelectedTaskItem={handlecancelSelectedTaskItem}
@@ -96,5 +94,4 @@ if (loading)
   );
 }
 
-export default App;
-
+export default observer(App);

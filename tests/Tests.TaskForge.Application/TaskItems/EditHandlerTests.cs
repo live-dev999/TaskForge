@@ -90,7 +90,7 @@ public class EditHandlerTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
+        // Unit is a value type, no need to check for null
     }
 
     [Fact]

@@ -80,45 +80,66 @@ sudo docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" \
 ```
 
 
-Run database use docker-compose:
-Create docker-compose.yaml file in root folder with code:
-```
-version: '3.7'
+### Run database use docker-compose (Cross-Platform)
 
-services:
-  sql.data:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqldatacontainer
-```
-Create docker-compose.override.yaml in root folder with code:
+Docker Compose automatically detects your platform (Mac Intel/AMD, Mac Apple Silicon M1/M2/M3, Windows, Linux) and uses the appropriate SQL Server image.
 
-For Intel / Amd CPU
-```
-version: '3.7'
+#### Quick Start (Automatic Platform Detection)
 
-services:
-  sql.data:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqldatacontainer
-```
-For Apply Silicon CPU(M1/M2/M3)
-```
-version: '3.7'
+**For Mac/Linux:**
+```bash
+# Make script executable (first time only)
+chmod +x docker-compose-up.sh
 
-services:
-  sql.data:
-    image: mcr.microsoft.com/azure-sql-edge
-    container_name: sqldatacontainer
+# Run with automatic platform detection
+./docker-compose-up.sh
 ```
-So, Now we can run docker-compose command for create local docker image
-if you use docker-compose for Intel / Amd CPU (x86/x64)
+
+**For Windows PowerShell:**
+```powershell
+.\docker-compose-up.ps1
 ```
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+**For Windows Command Prompt:**
+```cmd
+docker-compose-up.bat
 ```
-if you use docker-compose for Apply Silicon CPU - M1/M2/M3 (ARM)
+
+#### Manual Setup (Optional)
+
+If you prefer to set environment variables manually:
+
+**For Intel/AMD (x86_64) systems:**
+```bash
+export PLATFORM=linux/amd64
+export SQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest
+docker-compose up
 ```
-docker-compose -f docker-compose.arm.yml -f docker-compose.override.yml up
+
+**For Apple Silicon (ARM64) systems:**
+```bash
+export PLATFORM=linux/arm64
+export SQL_IMAGE=mcr.microsoft.com/azure-sql-edge:latest
+docker-compose up
 ```
+
+**For Windows:**
+```cmd
+set PLATFORM=linux/amd64
+set SQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest
+docker-compose up
+```
+
+#### Platform Detection Details
+
+The docker-compose configuration automatically:
+- Detects your system architecture (ARM64 or AMD64/x86_64)
+- Selects the appropriate SQL Server image:
+  - **AMD64/x86_64**: `mcr.microsoft.com/mssql/server:2019-latest`
+  - **ARM64**: `mcr.microsoft.com/azure-sql-edge:latest`
+- Sets the correct platform for all containers
+
+All services (API, EventProcessor, SQL Server) will use the detected platform automatically.
 
 
 ### **Deploy local database in your machine (alternative method)**

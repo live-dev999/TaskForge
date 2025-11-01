@@ -1,17 +1,28 @@
+version: '3.8'
+
 services:
   sql.data:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: ${SQL_IMAGE:-mcr.microsoft.com/mssql/server:2019-latest}
+    platform: ${PLATFORM:-linux/amd64}
     container_name: sqldatacontainer
 
   taskforge.api:
     image: ${DOCKER_REGISTRY-}taskforgeapi
+    platform: ${PLATFORM:-linux/amd64}
     build:
       context: .
       dockerfile: src/TaskForge.API/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
 
   taskforge.eventprocessor:
     image: ${DOCKER_REGISTRY-}taskforgeeventprocessor
+    platform: ${PLATFORM:-linux/amd64}
     build:
       context: .
       dockerfile: src/TaskForge.EventProcessor/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
 

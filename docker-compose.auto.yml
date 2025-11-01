@@ -1,0 +1,11 @@
+# Auto-generated docker-compose override file
+# This file is automatically created by platform detection scripts
+# DO NOT EDIT MANUALLY - it will be regenerated
+
+version: '3.8'
+
+services:
+  sql.data:
+    image: ${SQL_IMAGE}
+    platform: ${PLATFORM}
+

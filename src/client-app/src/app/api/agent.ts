@@ -6,7 +6,22 @@ const sleep = (delay: number) => {
         setTimeout(resolve, delay)
     })
 }
-axios.defaults.baseURL = "http://localhost:5000/api"
+// Use environment variable for API URL
+// In Docker, use relative path to leverage nginx proxy
+// For local development without Docker, use full URL
+const getApiBaseURL = () => {
+    const envUrl = process.env.REACT_APP_API_URL;
+    if (envUrl) {
+        return envUrl;
+    }
+    // If no env var, check if we're in Docker (relative path will work with nginx proxy)
+    // For local development, use full URL
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? "http://localhost:5009/api"
+        : "/api"; // Relative path for Docker/production (nginx will proxy)
+};
+
+axios.defaults.baseURL = getApiBaseURL();
 
 axios.interceptors.response.use(async respose => {
     try {

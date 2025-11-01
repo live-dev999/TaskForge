@@ -154,7 +154,30 @@ stages:
         command: 'publish'
         projects: 'src/TaskForge.API/TaskForge.API.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api --no-restore'
-        zipAfterPublish: true
+        zipAfterPublish: false
+    
+    - task: PowerShell@2
+      displayName: 'Clean conflicting appsettings files from API publish'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Remove appsettings files from EventProcessor and MessageConsumer if they were copied
+          $apiDir = "$(Build.ArtifactStagingDirectory)/api"
+          if (Test-Path $apiDir) {
+            Get-ChildItem -Path $apiDir -Filter "appsettings*.json" -Recurse | 
+              Where-Object { $_.DirectoryName -notlike "*TaskForge.API*" } | 
+              Remove-Item -Force
+            Write-Host "Cleaned conflicting appsettings files"
+          }
+    
+    - task: PowerShell@2
+      displayName: 'Create ZIP for API'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/api/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/api.zip" -Force
 
   - job: BuildAndTestEventProcessor
     displayName: 'Build and Test EventProcessor'
@@ -233,7 +256,15 @@ stages:
         command: 'publish'
         projects: 'src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/eventprocessor --no-restore'
-        zipAfterPublish: true
+        zipAfterPublish: false
+    
+    - task: PowerShell@2
+      displayName: 'Create ZIP for EventProcessor'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/eventprocessor/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/eventprocessor.zip" -Force
 
   - job: BuildAndTestMessageConsumer
     displayName: 'Build and Test MessageConsumer'
@@ -312,7 +343,15 @@ stages:
         command: 'publish'
         projects: 'src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/messageconsumer --no-restore'
-        zipAfterPublish: true
+        zipAfterPublish: false
+    
+    - task: PowerShell@2
+      displayName: 'Create ZIP for MessageConsumer'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/messageconsumer/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/messageconsumer.zip" -Force
 
   - job: RunCommonTests
     displayName: 'Run Common Tests (Application, Domain, Persistence)'

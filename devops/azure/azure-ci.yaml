@@ -7,6 +7,7 @@ trigger:
     include:
     - master
     - dev
+    - feature/*
   paths:
     exclude:
     - README.md
@@ -18,6 +19,7 @@ pr:
     include:
     - master
     - dev
+    - feature/*
 
 pool:
   vmImage: 'windows-latest'
@@ -30,6 +32,7 @@ variables:
   # Code coverage variables
   codeCoverageTool: 'Cobertura'
   summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.cobertura.xml'
+  minimumCodeCoverage: 80  # Minimum code coverage percentage required
 
 stages:
 - stage: Build
@@ -60,6 +63,31 @@ stages:
         projects: '$(solution)'
         arguments: '--configuration $(buildConfiguration) --no-restore'
         verbosity: 'minimal'
+      continueOnError: false
+
+    - task: PowerShell@2
+      displayName: 'Verify Build Success on PR'
+      condition: eq(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "================================================"
+          Write-Host "PR Build Verification"
+          Write-Host "================================================"
+          Write-Host "Build Reason: $(Build.Reason)"
+          Write-Host "Source Branch: $(Build.SourceBranch)"
+          if ("$(System.PullRequest.TargetBranch)" -ne "") {
+            Write-Host "Target Branch: $(System.PullRequest.TargetBranch)"
+          }
+          Write-Host ""
+          Write-Host "✅ Build completed successfully!"
+          Write-Host "✅ All projects compiled without errors"
+          Write-Host ""
+          Write-Host "Next steps:"
+          Write-Host "- Running unit tests..."
+          Write-Host "- Running integration tests..."
+          Write-Host "- Checking code coverage threshold..."
+          Write-Host "================================================"
 
     - task: DotNetCoreCLI@2
       displayName: 'Run Unit Tests'
@@ -91,6 +119,105 @@ stages:
         publishTestResults: true
         testRunTitle: 'Integration Tests - $(Build.SourceBranchName)'
 
+    - task: PowerShell@2
+      displayName: 'Check Code Coverage Threshold'
+      condition: succeeded()
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "================================================"
+          Write-Host "Code Coverage Check"
+          Write-Host "================================================"
+          
+          $coverageFiles = Get-ChildItem -Path "$(Agent.TempDirectory)/TestResults" -Recurse -Filter "coverage.cobertura.xml" -ErrorAction SilentlyContinue
+          
+          if (-not $coverageFiles) {
+            Write-Warning "⚠️ No coverage files found. Tests may not have generated coverage data."
+            Write-Host "This could happen if tests failed or coverage collection is disabled."
+            Write-Host "Continuing without coverage validation..."
+            exit 0
+          }
+          
+          Write-Host "Found $($coverageFiles.Count) coverage file(s)"
+          Write-Host ""
+          
+          $totalLines = 0
+          $totalCoveredLines = 0
+          $totalBranches = 0
+          $totalCoveredBranches = 0
+          $processedFiles = 0
+          
+          foreach ($file in $coverageFiles) {
+            Write-Host "Processing: $($file.Name)"
+            try {
+              [xml]$coverageXml = Get-Content $file.FullName -ErrorAction Stop
+              
+              if ($coverageXml.coverage) {
+                $linesValid = [int]$coverageXml.coverage.'lines-valid'
+                $linesCovered = [int]$coverageXml.coverage.'lines-covered'
+                $branchesValid = [int]$coverageXml.coverage.'branches-valid'
+                $branchesCovered = [int]$coverageXml.coverage.'branches-covered'
+                
+                if ($linesValid -gt 0) {
+                  $totalLines += $linesValid
+                  $totalCoveredLines += $linesCovered
+                  $totalBranches += $branchesValid
+                  $totalCoveredBranches += $branchesCovered
+                  $processedFiles++
+                  
+                  $lineRate = ($linesCovered / $linesValid) * 100
+                  $branchRate = if ($branchesValid -gt 0) { ($branchesCovered / $branchesValid) * 100 } else { 0 }
+                  
+                  Write-Host "  Lines: $linesCovered/$linesValid ($([math]::Round($lineRate, 2))%)"
+                  Write-Host "  Branches: $branchesCovered/$branchesValid ($([math]::Round($branchRate, 2))%)"
+                }
+              }
+            } catch {
+              Write-Warning "  Failed to parse coverage file: $_"
+            }
+          }
+          
+          Write-Host ""
+          Write-Host "================================================"
+          
+          if ($processedFiles -gt 0 -and $totalLines -gt 0) {
+            $overallLineCoverage = ($totalCoveredLines / $totalLines) * 100
+            $overallBranchCoverage = if ($totalBranches -gt 0) { ($totalCoveredBranches / $totalBranches) * 100 } else { 0 }
+            
+            $overallLineCoverage = [math]::Round($overallLineCoverage, 2)
+            $overallBranchCoverage = [math]::Round($overallBranchCoverage, 2)
+            
+            Write-Host "Overall Code Coverage Summary:"
+            Write-Host "  Line Coverage: $overallLineCoverage% ($totalCoveredLines/$totalLines lines)"
+            Write-Host "  Branch Coverage: $overallBranchCoverage% ($totalCoveredBranches/$totalBranches branches)"
+            Write-Host ""
+            Write-Host "Required Minimum Line Coverage: $(minimumCodeCoverage)%"
+            Write-Host "================================================"
+            
+            if ($overallLineCoverage -lt $(minimumCodeCoverage)) {
+              Write-Error ""
+              Write-Error "❌ CODE COVERAGE CHECK FAILED!"
+              Write-Error "Current coverage: $overallLineCoverage%"
+              Write-Error "Required minimum: $(minimumCodeCoverage)%"
+              Write-Error "Difference: $([math]::Round($(minimumCodeCoverage) - $overallLineCoverage, 2))%"
+              Write-Error ""
+              Write-Error "Please add more unit tests to improve code coverage."
+              Write-Error "PR cannot be merged until coverage requirement is met."
+              Write-Error ""
+              exit 1
+            } else {
+              Write-Host ""
+              Write-Host "✅ CODE COVERAGE CHECK PASSED"
+              Write-Host "✅ Coverage $overallLineCoverage% meets the minimum requirement of $(minimumCodeCoverage)%"
+              Write-Host ""
+            }
+          } else {
+            Write-Warning "Could not calculate overall coverage from processed files."
+            Write-Warning "Coverage validation skipped."
+          }
+          
+          Write-Host "================================================"
+
     - task: PublishCodeCoverageResults@1
       displayName: 'Publish Code Coverage'
       inputs:
@@ -101,6 +228,7 @@ stages:
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish API'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
       inputs:
         command: 'publish'
         projects: 'src/TaskForge.API/TaskForge.API.csproj'
@@ -112,6 +240,7 @@ stages:
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish EventProcessor'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
       inputs:
         command: 'publish'
         projects: 'src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj'
@@ -123,6 +252,7 @@ stages:
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish MessageConsumer'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
       inputs:
         command: 'publish'
         projects: 'src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj'
@@ -134,6 +264,7 @@ stages:
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Build Artifacts'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
       inputs:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop'

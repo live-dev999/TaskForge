@@ -132,18 +132,20 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'API Unit Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Run API Integration Tests'
       inputs:
         command: 'test'
         projects: 'tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'API Integration Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish API'
@@ -209,18 +211,20 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'EventProcessor Unit Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Run EventProcessor Integration Tests'
       inputs:
         command: 'test'
         projects: 'tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'EventProcessor Integration Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish EventProcessor'
@@ -286,18 +290,20 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'MessageConsumer Unit Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Run MessageConsumer Integration Tests'
       inputs:
         command: 'test'
         projects: 'tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'MessageConsumer Integration Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish MessageConsumer'
@@ -354,9 +360,10 @@ stages:
           tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
           tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
           tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'Common Unit Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
     - task: DotNetCoreCLI@2
       displayName: 'Run Common Integration Tests'
@@ -365,9 +372,10 @@ stages:
         projects: |
           tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
           tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal" --blame'
         publishTestResults: true
         testRunTitle: 'Common Integration Tests - $(Build.SourceBranchName)'
+      continueOnError: false
 
   - job: CheckCodeCoverage
     displayName: 'Check Code Coverage Threshold'

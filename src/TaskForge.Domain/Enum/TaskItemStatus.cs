@@ -1,10 +1,9 @@
-﻿namespace TaskForge.Domain.Enum
+﻿namespace TaskForge.Domain.Enum;
+
+public enum TaskItemStatus
 {
-    public enum TaskItemStatus
-    {
-        New = 0,
-        InProgress = 1,
-        Completed = 2,
-        Pending = 3
-    }
+    New = 0,
+    InProgress = 1,
+    Completed = 2,
+    Pending = 3
 }

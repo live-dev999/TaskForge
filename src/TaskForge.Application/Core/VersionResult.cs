@@ -1,8 +1,7 @@
-﻿namespace TaskForge.Application.Core
+﻿namespace TaskForge.Application.Core;
+
+public class VersionResult
 {
-    public class VersionResult
-    {
-        public string Environment { get; set; }
-        public string Version { get; set; }
-    }
+    public string Environment { get; set; }
+    public string Version { get; set; }
 }

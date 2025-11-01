@@ -23,53 +23,53 @@
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using TaskForge.Application.Core;
 
-namespace TaskForge.API.Controllers
+namespace TaskForge.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class BaseApiController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class BaseApiController : ControllerBase
+    private IMediator _mediator;
+    protected IMediator Mediator =>
+        _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
+
+    protected IActionResult HandleResult<T>(Result<T> result)
     {
-        private IMediator _mediator;
-        protected IMediator Mediator =>
-            _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
+        if (result == null)
+            return StatusCode(500, "Internal server error: result is null");
 
-        protected IActionResult HandleResult<T>(Result<T> result)
+        if (result.IsSuccess)
         {
-            if (result == null)
-                return StatusCode(500, "Internal server error: result is null");
+            // For reference types, check for null
+            if (result.Value == null)
+                return NotFound();
 
-            if (result.IsSuccess)
+            // For numeric value types (int, long, decimal, etc.), treat default (0) as NotFound
+            // But allow Guid.Empty, empty strings, empty collections, enums, Unit as valid values
+            var type = typeof(T);
+            if (type.IsValueType && !type.IsEnum)
             {
-                // For reference types, check for null
-                if (result.Value == null)
-                    return NotFound();
-
-                // For numeric value types (int, long, decimal, etc.), treat default (0) as NotFound
-                // But allow Guid.Empty, empty strings, empty collections, enums, Unit as valid values
-                var type = typeof(T);
-                if (type.IsValueType && !type.IsEnum)
+                // Exclude Guid, DateTime, TimeSpan, bool, char, Unit (MediatR), and other non-numeric types
+                if (type != typeof(Guid) && 
+                    type != typeof(DateTime) && 
+                    type != typeof(DateTimeOffset) &&
+                    type != typeof(TimeSpan) &&
+                    type != typeof(bool) &&
+                    type != typeof(char) &&
+                    !(type.Name == "Unit" && type.Namespace == "MediatR")) // Unit from MediatR
                 {
-                    // Exclude Guid, DateTime, TimeSpan, bool, char, Unit (MediatR), and other non-numeric types
-                    if (type != typeof(Guid) && 
-                        type != typeof(DateTime) && 
-                        type != typeof(DateTimeOffset) &&
-                        type != typeof(TimeSpan) &&
-                        type != typeof(bool) &&
-                        type != typeof(char) &&
-                        !(type.Name == "Unit" && type.Namespace == "MediatR")) // Unit from MediatR
-                    {
-                        // Check if value equals default (0 for numbers)
-                        if (Equals(result.Value, default(T)))
-                            return NotFound();
-                    }
+                    // Check if value equals default (0 for numbers)
+                    if (Equals(result.Value, default(T)))
+                        return NotFound();
                 }
-                
-                return Ok(result.Value);
             }
-
-            return BadRequest(result.Error);
+            
+            return Ok(result.Value);
         }
+
+        return BadRequest(result.Error);
     }
 }

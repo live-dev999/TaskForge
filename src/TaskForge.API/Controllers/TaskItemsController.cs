@@ -25,40 +25,38 @@ using Microsoft.AspNetCore.Mvc;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 
+namespace TaskForge.API.Controllers;
 
-namespace TaskForge.API.Controllers
+public class TaskItemsController : BaseApiController
 {
-    public class TaskItemsController : BaseApiController
+    [HttpGet] //api/taskitems
+    public async Task<IActionResult> GetTaskItems(CancellationToken ct)
     {
-        [HttpGet] //api/taskitems
-        public async Task<IActionResult> GetTaskItems(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new List.Query(), ct));
-        }
+        return HandleResult(await Mediator.Send(new List.Query(), ct));
+    }
 
-        [HttpGet("{id}")] //api/taskitems/{id}
-        public async Task<IActionResult> GetTaskItem(Guid id)
-        {
-            return HandleResult(await Mediator.Send(new Details.Query() { Id = id }));
-        }
+    [HttpGet("{id}")] //api/taskitems/{id}
+    public async Task<IActionResult> GetTaskItem(Guid id)
+    {
+        return HandleResult(await Mediator.Send(new Details.Query() { Id = id }));
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateTaskItem([FromBody] TaskItem TaskItem)
-        {
-            return HandleResult(await Mediator.Send(new Create.Command { TaskItem = TaskItem }));
-        }
+    [HttpPost]
+    public async Task<IActionResult> CreateTaskItem([FromBody] TaskItem TaskItem)
+    {
+        return HandleResult(await Mediator.Send(new Create.Command { TaskItem = TaskItem }));
+    }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItem TaskItem)
-        {
-            TaskItem.Id = id;
-            return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }));
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItem TaskItem)
+    {
+        TaskItem.Id = id;
+        return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }));
+    }
 
-        [HttpDelete("{id}")] //api/taskitems/{id}
-        public async Task<IActionResult> DeleteAsync(Guid id)
-        {
-            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
-        }
+    [HttpDelete("{id}")] //api/taskitems/{id}
+    public async Task<IActionResult> DeleteAsync(Guid id)
+    {
+        return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
     }
 }

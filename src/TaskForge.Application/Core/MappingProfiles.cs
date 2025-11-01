@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
 using TaskForge.Domain;
 
-namespace TaskForge.Application.Core
+namespace TaskForge.Application.Core;
+
+public class MappingProfiles : Profile
 {
-    public class MappingProfiles : Profile
+    public MappingProfiles()
     {
-        public MappingProfiles()
-        {
-            CreateMap<TaskItem, TaskItem>();
-        }
+        CreateMap<TaskItem, TaskItem>();
     }
 }

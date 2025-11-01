@@ -1,45 +1,169 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
+# Azure DevOps Pipeline for TaskForge .NET 8
+# Build, test and publish .NET 8 application
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
-- dev
+  branches:
+    include:
+    - master
+    - dev
+  paths:
+    exclude:
+    - README.md
+    - docs/*
+    - design/*
+
+pr:
+  branches:
+    include:
+    - master
+    - dev
 
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
+  solution: '**/TaskForge.sln'
   buildConfiguration: 'Release'
+  dotNetVersion: '8.0.411'
+  
+  # Code coverage variables
+  codeCoverageTool: 'Cobertura'
+  summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.cobertura.xml'
 
-steps:
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '8.0.411'
-    
-- task: NuGetToolInstaller@1
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: BuildAndTest
+    displayName: 'Build Solution and Run Tests'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotNetVersion)'
+      inputs:
+        packageType: 'sdk'
+        version: '$(dotNetVersion)'
+        installationPath: '$(Agent.ToolsDirectory)/dotnet'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet packages'
+      inputs:
+        command: 'restore'
+        projects: '$(solution)'
+        feedsToUse: 'select'
+        verbosityRestore: 'Minimal'
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Build solution'
+      inputs:
+        command: 'build'
+        projects: '$(solution)'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
 
-- task: VSTest@2
-  inputs:
-    testAssemblyVer2: |
-        **\*[Tt]est*.dll
-        !**\*[Tt]estAdapter*.dll
-        !**\obj\**
-    searchFolder: '$(System.DefaultWorkingDirectory)\tests'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Unit Tests'
+      inputs:
+        command: 'test'
+        projects: 'tests/**/*Tests.*.csproj'
+        arguments: |
+          --configuration $(buildConfiguration)
+          --collect:"XPlat Code Coverage"
+          --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings
+          --logger trx
+          --logger "console;verbosity=normal"
+          --results-directory $(Agent.TempDirectory)/TestResults
+        publishTestResults: true
+        testRunTitle: 'Unit Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Integration Tests'
+      inputs:
+        command: 'test'
+        projects: 'tests/**/IntegratonTests.*.csproj'
+        arguments: |
+          --configuration $(buildConfiguration)
+          --collect:"XPlat Code Coverage"
+          --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings
+          --logger trx
+          --logger "console;verbosity=normal"
+          --results-directory $(Agent.TempDirectory)/TestResults
+        publishTestResults: true
+        testRunTitle: 'Integration Tests - $(Build.SourceBranchName)'
+
+    - task: PublishCodeCoverageResults@1
+      displayName: 'Publish Code Coverage'
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml'
+        reportDirectory: '$(Agent.TempDirectory)/TestResults/**/coverage'
+        failIfCoverageEmpty: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish API'
+      inputs:
+        command: 'publish'
+        projects: 'src/TaskForge.API/TaskForge.API.csproj'
+        arguments: |
+          --configuration $(buildConfiguration)
+          --output $(Build.ArtifactStagingDirectory)/api
+          --no-build
+        zipAfterPublish: true
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish EventProcessor'
+      inputs:
+        command: 'publish'
+        projects: 'src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj'
+        arguments: |
+          --configuration $(buildConfiguration)
+          --output $(Build.ArtifactStagingDirectory)/eventprocessor
+          --no-build
+        zipAfterPublish: true
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish MessageConsumer'
+      inputs:
+        command: 'publish'
+        projects: 'src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj'
+        arguments: |
+          --configuration $(buildConfiguration)
+          --output $(Build.ArtifactStagingDirectory)/messageconsumer
+          --no-build
+        zipAfterPublish: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Build Artifacts'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'drop'
+        publishLocation: 'Container'
+
+- stage: Docker
+  displayName: 'Build Docker Images'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - job: BuildDockerImages
+    displayName: 'Build Docker Images'
+    steps:
+    - task: Docker@2
+      displayName: 'Build API Docker Image'
+      inputs:
+        command: 'build'
+        repository: 'taskforge-api'
+        dockerfile: 'src/TaskForge.API/Dockerfile'
+        buildContext: '$(System.DefaultWorkingDirectory)'
+        tags: |
+          $(Build.BuildId)
+          latest
+
+    - task: Docker@2
+      displayName: 'Build EventProcessor Docker Image'
+      inputs:
+        command: 'build'
+        repository: 'taskforge-eventprocessor'
+        dockerfile: 'src/TaskForge.EventProcessor/Dockerfile'
+        buildContext: '$(System.DefaultWorkingDirectory)'
+        tags: |
+          $(Build.BuildId)
+          latest

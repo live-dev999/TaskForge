@@ -17,8 +17,8 @@ trigger:
 pr:
   branches:
     include:
-- master
-- dev
+    - master
+    - dev
     - feature/*
 
 pool:
@@ -474,7 +474,7 @@ stages:
 
     - task: PublishCodeCoverageResults@1
       displayName: 'Publish Code Coverage'
-  inputs:
+      inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml'
         reportDirectory: '$(Agent.TempDirectory)/TestResults/**/coverage'
@@ -490,7 +490,7 @@ stages:
     steps:
     - task: PublishBuildArtifacts@1
       displayName: 'Publish All Artifacts'
-  inputs:
+      inputs:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop'
         publishLocation: 'Container'
@@ -504,7 +504,7 @@ stages:
     steps:
     - task: Docker@2
       displayName: 'Build API Docker Image'
-  inputs:
+      inputs:
         command: 'build'
         repository: 'taskforge-api'
         dockerfile: 'src/TaskForge.API/Dockerfile'

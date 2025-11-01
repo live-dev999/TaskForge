@@ -23,6 +23,7 @@
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using TaskForge.Application.Core;
 
 namespace TaskForge.API.Controllers
@@ -40,11 +41,34 @@ namespace TaskForge.API.Controllers
             if (result == null)
                 return StatusCode(500, "Internal server error: result is null");
 
-            if (result.IsSuccess && result.Value != null)
-                return Ok(result.Value);
+            if (result.IsSuccess)
+            {
+                // For reference types, check for null
+                if (result.Value == null)
+                    return NotFound();
 
-            if (result.IsSuccess && result.Value == null)
-                return NotFound();
+                // For numeric value types (int, long, decimal, etc.), treat default (0) as NotFound
+                // But allow Guid.Empty, empty strings, empty collections, enums, Unit as valid values
+                var type = typeof(T);
+                if (type.IsValueType && !type.IsEnum)
+                {
+                    // Exclude Guid, DateTime, TimeSpan, bool, char, Unit (MediatR), and other non-numeric types
+                    if (type != typeof(Guid) && 
+                        type != typeof(DateTime) && 
+                        type != typeof(DateTimeOffset) &&
+                        type != typeof(TimeSpan) &&
+                        type != typeof(bool) &&
+                        type != typeof(char) &&
+                        !(type.Name == "Unit" && type.Namespace == "MediatR")) // Unit from MediatR
+                    {
+                        // Check if value equals default (0 for numbers)
+                        if (Equals(result.Value, default(T)))
+                            return NotFound();
+                    }
+                }
+                
+                return Ok(result.Value);
+            }
 
             return BadRequest(result.Error);
         }

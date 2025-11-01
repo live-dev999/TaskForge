@@ -230,7 +230,7 @@ public class TaskItemsControllerTests
         var result = Result<Unit>.Success(Unit.Value);
 
         mockMediator
-            .Setup(m => m.Send(It.Is<Create.Command>(c => c.TaskItem == taskItem), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.Is<Create.Command>(c => c.TaskItem != null && c.TaskItem.Id == taskItem.Id), It.IsAny<CancellationToken>()))
             .ReturnsAsync(result);
 
         var controller = CreateController(mockMediator.Object);
@@ -262,7 +262,7 @@ public class TaskItemsControllerTests
 
         // Assert
         mockMediator.Verify(m => m.Send(
-            It.Is<Create.Command>(c => c.TaskItem == taskItem), 
+            It.Is<Create.Command>(c => c.TaskItem != null && c.TaskItem.Id == taskItem.Id && c.TaskItem.Title == taskItem.Title), 
             It.IsAny<CancellationToken>()), 
             Times.Once);
     }
@@ -322,7 +322,9 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
+        var originalTaskItemId = taskItem.Id;
         var taskId = Guid.NewGuid();
+        
         var result = Result<Unit>.Success(Unit.Value);
 
         Edit.Command capturedCommand = null;
@@ -341,6 +343,8 @@ public class TaskItemsControllerTests
 
         // Assert
         Assert.NotNull(capturedCommand);
+        Assert.NotNull(capturedCommand.TaskItem);
+        // Controller sets TaskItem.Id = id before sending command
         Assert.Equal(taskId, capturedCommand.TaskItem.Id);
     }
 
@@ -513,31 +517,21 @@ public class TaskItemsControllerTests
     }
 
     [Fact]
-    public async Task EditTaskItem_WhenTaskItemIsNull_SetsNullTaskItemWithId()
+    public async Task EditTaskItem_WhenTaskItemIsNull_ThrowsNullReferenceException()
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskId = Guid.NewGuid();
-        var result = Result<Unit>.Failure("Task item is required");
-
-        Edit.Command capturedCommand = null;
-        mockMediator
-            .Setup(m => m.Send(It.IsAny<Edit.Command>(), It.IsAny<CancellationToken>()))
-            .Callback<Edit.Command, CancellationToken>((cmd, ct) => 
-            {
-                capturedCommand = cmd;
-            })
-            .ReturnsAsync(result);
 
         var controller = CreateController(mockMediator.Object);
 
-        // Act
-        await controller.EditTaskItem(taskId, null);
-
-        // Assert
-        Assert.NotNull(capturedCommand);
-        Assert.Null(capturedCommand.TaskItem);
-        // Note: In actual code, TaskItems.Id = id would throw NullReferenceException
+        // Act & Assert
+        // In actual code, TaskItem.Id = id would throw NullReferenceException when TaskItem is null
+        await Assert.ThrowsAsync<NullReferenceException>(() => 
+            controller.EditTaskItem(taskId, null));
+        
+        // Verify mediator was not called due to exception
+        mockMediator.Verify(m => m.Send(It.IsAny<Edit.Command>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     #endregion

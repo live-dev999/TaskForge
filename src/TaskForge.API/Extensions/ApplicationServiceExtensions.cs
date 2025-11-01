@@ -21,9 +21,9 @@
  *   SOFTWARE.
  */
 
-using Application.TaskItems;
 using Microsoft.EntityFrameworkCore;
 using TaskForge.Application.Core;
+using TaskForge.Application.TaskItems;
 using MediatR;
 using FluentValidation.AspNetCore;
 using FluentValidation;

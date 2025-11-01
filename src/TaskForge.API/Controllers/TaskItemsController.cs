@@ -21,7 +21,6 @@
  *   SOFTWARE.
  */
 
-using Application.TaskItems;
 using Microsoft.AspNetCore.Mvc;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
@@ -56,7 +55,7 @@ namespace TaskForge.API.Controllers
             return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }));
         }
 
-        [HttpDelete("{id}")] //api/activities/{id}
+        [HttpDelete("{id}")] //api/taskitems/{id}
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));

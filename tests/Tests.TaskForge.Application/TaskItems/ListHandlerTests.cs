@@ -3,11 +3,11 @@
  *   All rights reserved.
  */
 
-using Application.TaskItems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TaskForge.Application.Core;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;

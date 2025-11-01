@@ -3,8 +3,9 @@
  *   All rights reserved.
  */
 
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
@@ -43,13 +44,9 @@ public class DeleteHandlerTests
         };
     }
 
-    private IMapper CreateMapper()
+    private ILogger<Delete.Handler> CreateLogger()
     {
-        var configuration = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfiles>();
-        });
-        return configuration.CreateMapper();
+        return new Mock<ILogger<Delete.Handler>>().Object;
     }
 
     #endregion
@@ -61,8 +58,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -86,8 +83,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -111,8 +108,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
@@ -144,8 +141,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var command = new Delete.Command
         {
@@ -165,8 +162,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -193,8 +190,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -222,8 +219,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var command = new Delete.Command
         {
@@ -243,8 +240,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -271,8 +268,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var command = new Delete.Command
         {
@@ -296,8 +293,8 @@ public class DeleteHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var mapper = CreateMapper();
-        var handler = new Delete.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Delete.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);

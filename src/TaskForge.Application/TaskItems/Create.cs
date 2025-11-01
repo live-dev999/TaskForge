@@ -1,11 +1,12 @@
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Persistence;
 
-namespace Application.TaskItems
+namespace TaskForge.Application.TaskItems
 {
     public class Create
     {
@@ -23,10 +24,12 @@ namespace Application.TaskItems
         public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
+            private readonly ILogger<Handler> _logger;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, ILogger<Handler> logger)
             {
                 _context = context;
+                _logger = logger;
             }
 
             public async Task<Result<Unit>> Handle(
@@ -38,14 +41,24 @@ namespace Application.TaskItems
                 if (request.TaskItem.Id == Guid.Empty)
                     request.TaskItem.Id = Guid.NewGuid();
                     
+                _logger.LogInformation(
+                    "Executing command: Create TaskItem with Id: {TaskItemId}, Title: {Title}",
+                    request.TaskItem.Id,
+                    request.TaskItem.Title);
+                
                 request.TaskItem.CreatedAt = DateTime.UtcNow;
                 request.TaskItem.UpdatedAt = DateTime.UtcNow;
                 
                 _context.Add(request.TaskItem);
 
-                var result = await _context.SaveChangesAsync() > 0;
+                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
                 if (!result)
+                {
+                    _logger.LogError("Failed to create task item with Id: {TaskItemId}", request.TaskItem.Id);
                     return Result<Unit>.Failure("Failed to create task item");
+                }
+                
+                _logger.LogInformation("Command Create TaskItem completed successfully for Id: {TaskItemId}", request.TaskItem.Id);
                 return Result<Unit>.Success(Unit.Value);
             }
         }

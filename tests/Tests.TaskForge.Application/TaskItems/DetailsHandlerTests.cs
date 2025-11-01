@@ -3,9 +3,11 @@
  *   All rights reserved.
  */
 
-using Application.TaskItems;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using TaskForge.Application.Core;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
@@ -42,6 +44,11 @@ public class DetailsHandlerTests
         };
     }
 
+    private ILogger<Details.Handler> CreateLogger()
+    {
+        return new Mock<ILogger<Details.Handler>>().Object;
+    }
+
     #endregion
 
     #region Success Tests
@@ -51,7 +58,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -76,7 +84,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -104,7 +113,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
@@ -140,7 +150,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var query = new Details.Query
         {
@@ -161,7 +172,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -189,7 +201,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var query = new Details.Query
         {
@@ -210,7 +223,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var query = new Details.Query
         {
@@ -231,7 +245,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() => 
@@ -247,7 +262,8 @@ public class DetailsHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Details.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Details.Handler(context, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         existingTaskItem.Status = TaskItemStatus.InProgress;

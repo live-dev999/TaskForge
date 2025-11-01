@@ -196,61 +196,55 @@ public class ResultTests
     #region Property Tests
 
     [Fact]
-    public void IsSuccess_CanBeSetDirectly()
+    public void IsSuccess_IsReadOnly_ReturnsTrueForSuccess()
     {
         // Arrange
-        var result = new Result<string>
-        {
-            IsSuccess = true
-        };
+        var result = Result<string>.Success("test");
 
         // Assert
         Assert.True(result.IsSuccess);
+        // Cannot set IsSuccess directly - it's readonly (immutable)
     }
 
     [Fact]
-    public void Value_CanBeSetDirectly()
+    public void Value_IsReadOnly_ReturnsCorrectValue()
     {
         // Arrange
         var testValue = "test";
-        var result = new Result<string>
-        {
-            Value = testValue
-        };
+        var result = Result<string>.Success(testValue);
 
         // Assert
         Assert.Equal(testValue, result.Value);
+        // Cannot set Value directly - it's readonly (immutable)
     }
 
     [Fact]
-    public void Error_CanBeSetDirectly()
+    public void Error_IsReadOnly_ReturnsCorrectError()
     {
         // Arrange
         var errorMessage = "Error";
-        var result = new Result<string>
-        {
-            Error = errorMessage
-        };
+        var result = Result<string>.Failure(errorMessage);
 
         // Assert
         Assert.Equal(errorMessage, result.Error);
+        // Cannot set Error directly - it's readonly (immutable)
     }
 
     [Fact]
-    public void Result_CanHaveBothSuccessAndError_WhenSetManually()
+    public void Result_IsImmutable_SuccessAndFailureAreSeparate()
     {
         // Arrange
-        var result = new Result<string>
-        {
-            IsSuccess = true,
-            Value = "value",
-            Error = "error"
-        };
+        var successResult = Result<string>.Success("value");
+        var failureResult = Result<string>.Failure("error");
 
-        // Assert - This is a potential issue in the design, but testing current behavior
-        Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
-        Assert.NotNull(result.Error);
+        // Assert - Result is immutable, cannot have both success and error
+        Assert.True(successResult.IsSuccess);
+        Assert.NotNull(successResult.Value);
+        Assert.Null(successResult.Error);
+        
+        Assert.False(failureResult.IsSuccess);
+        Assert.Null(failureResult.Value);
+        Assert.NotNull(failureResult.Error);
     }
 
     #endregion

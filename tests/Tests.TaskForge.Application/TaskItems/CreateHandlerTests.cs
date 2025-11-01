@@ -3,9 +3,11 @@
  *   All rights reserved.
  */
 
-using Application.TaskItems;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using TaskForge.Application.Core;
+using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
@@ -42,6 +44,11 @@ public class CreateHandlerTests
         };
     }
 
+    private ILogger<Create.Handler> CreateLogger()
+    {
+        return new Mock<ILogger<Create.Handler>>().Object;
+    }
+
     #endregion
 
     #region Success Tests
@@ -51,7 +58,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var command = new Create.Command
         {
             TaskItem = CreateValidTaskItem()
@@ -70,7 +78,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         var command = new Create.Command
         {
@@ -93,7 +102,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         taskItem.Id = Guid.Empty; // Should be auto-set
         taskItem.CreatedAt = default(DateTime); // Should be auto-set
@@ -122,7 +132,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
         var taskItem2 = CreateValidTaskItem();
@@ -150,7 +161,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
 
         // Act & Assert
         await Assert.ThrowsAsync<NullReferenceException>(() => handler.Handle(null, CancellationToken.None));
@@ -161,7 +173,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var command = new Create.Command
         {
             TaskItem = CreateValidTaskItem()
@@ -183,7 +196,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         taskItem.Id = Guid.Empty;
         var command = new Create.Command
@@ -205,7 +219,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         taskItem.CreatedAt = DateTime.MinValue;
         taskItem.UpdatedAt = DateTime.MinValue;
@@ -226,7 +241,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         taskItem.CreatedAt = DateTime.MaxValue;
         taskItem.UpdatedAt = DateTime.MaxValue;
@@ -247,7 +263,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         taskItem.Title = new string('A', 10000);
         var command = new Create.Command
@@ -267,7 +284,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var taskItem = CreateValidTaskItem();
         taskItem.Description = new string('B', 10000);
         var command = new Create.Command
@@ -287,7 +305,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
 
         var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
 
@@ -318,7 +337,8 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
 
         for (int i = 0; i < 5; i++)
         {
@@ -341,22 +361,25 @@ public class CreateHandlerTests
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var originalTaskItem = CreateValidTaskItem();
         var originalId = originalTaskItem.Id;
         var originalTitle = originalTaskItem.Title;
         var originalDescription = originalTaskItem.Description;
         var originalStatus = originalTaskItem.Status;
-        var originalCreatedAt = originalTaskItem.CreatedAt;
-        var originalUpdatedAt = originalTaskItem.UpdatedAt;
 
         var command = new Create.Command
         {
             TaskItem = originalTaskItem
         };
 
+        var beforeCreate = DateTime.UtcNow;
+
         // Act
         await handler.Handle(command, CancellationToken.None);
+
+        var afterCreate = DateTime.UtcNow;
 
         // Assert
         var savedItem = await context.TaskItems.FindAsync(originalId);
@@ -365,8 +388,11 @@ public class CreateHandlerTests
         Assert.Equal(originalTitle, savedItem.Title);
         Assert.Equal(originalDescription, savedItem.Description);
         Assert.Equal(originalStatus, savedItem.Status);
-        Assert.Equal(originalCreatedAt, savedItem.CreatedAt);
-        Assert.Equal(originalUpdatedAt, savedItem.UpdatedAt);
+        
+        // CreatedAt and UpdatedAt are auto-set by handler, so we check they are set to current time
+        Assert.True(savedItem.CreatedAt >= beforeCreate && savedItem.CreatedAt <= afterCreate);
+        Assert.True(savedItem.UpdatedAt >= beforeCreate && savedItem.UpdatedAt <= afterCreate);
+        Assert.Equal(savedItem.CreatedAt, savedItem.UpdatedAt); // They should be the same on create
     }
 
     [Fact]
@@ -375,7 +401,8 @@ public class CreateHandlerTests
         // Arrange
         // In-memory database always saves, so this test documents expected behavior
         using var context = CreateInMemoryContext();
-        var handler = new Create.Handler(context);
+        var logger = CreateLogger();
+        var handler = new Create.Handler(context, logger);
         var command = new Create.Command
         {
             TaskItem = CreateValidTaskItem()

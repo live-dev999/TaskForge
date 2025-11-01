@@ -3,7 +3,6 @@
  *   All rights reserved.
  */
 
-using Application.TaskItems;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

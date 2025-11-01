@@ -3,9 +3,10 @@
  *   All rights reserved.
  */
 
-using Application.TaskItems;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
@@ -53,6 +54,11 @@ public class EditHandlerTests
         return configuration.CreateMapper();
     }
 
+    private ILogger<Edit.Handler> CreateLogger()
+    {
+        return new Mock<ILogger<Edit.Handler>>().Object;
+    }
+
     #endregion
 
     #region Success Tests
@@ -63,7 +69,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -92,7 +99,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         var originalTitle = existingTaskItem.Title;
@@ -129,13 +137,21 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
-        var originalCreatedAt = existingTaskItem.CreatedAt;
-        existingTaskItem.CreatedAt = DateTime.UtcNow.AddDays(-10);
+        var originalCreatedAt = DateTime.UtcNow.AddDays(-10);
+        existingTaskItem.CreatedAt = originalCreatedAt;
+        var originalUpdatedAt = DateTime.UtcNow.AddMinutes(-5);
+        existingTaskItem.UpdatedAt = originalUpdatedAt;
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
+
+        // Reload from database to get actual values after save
+        var existingItemFromDb = await context.TaskItems.FindAsync(existingTaskItem.Id);
+        var savedCreatedAt = existingItemFromDb.CreatedAt;
+        var savedUpdatedAt = existingItemFromDb.UpdatedAt;
 
         var updatedTaskItem = CreateValidTaskItem();
         updatedTaskItem.Id = existingTaskItem.Id;
@@ -154,8 +170,8 @@ public class EditHandlerTests
         var savedItem = await context.TaskItems.FindAsync(existingTaskItem.Id);
         Assert.NotNull(savedItem);
         Assert.Equal("Updated Title", savedItem.Title);
-        Assert.Equal(existingTaskItem.CreatedAt, savedItem.CreatedAt); // CreatedAt should be preserved
-        Assert.True(savedItem.UpdatedAt > existingTaskItem.UpdatedAt); // UpdatedAt should be updated
+        Assert.Equal(savedCreatedAt, savedItem.CreatedAt); // CreatedAt should be preserved
+        Assert.True(savedItem.UpdatedAt > savedUpdatedAt); // UpdatedAt should be updated
     }
 
     #endregion
@@ -168,7 +184,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var nonExistentTaskItem = CreateValidTaskItem();
         nonExistentTaskItem.Id = Guid.NewGuid();
@@ -192,7 +209,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var nonExistentTaskItem = CreateValidTaskItem();
         nonExistentTaskItem.Id = Guid.NewGuid();
@@ -217,7 +235,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -249,7 +268,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var taskItem = CreateValidTaskItem();
         taskItem.Id = Guid.Empty;
@@ -273,7 +293,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -302,7 +323,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -336,7 +358,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -370,7 +393,8 @@ public class EditHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
-        var handler = new Edit.Handler(context, mapper);
+        var logger = CreateLogger();
+        var handler = new Edit.Handler(context, mapper, logger);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);

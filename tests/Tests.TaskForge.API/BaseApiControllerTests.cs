@@ -156,12 +156,8 @@ public class BaseApiControllerTests
     {
         // Arrange
         var controller = CreateController();
-        var result = new Result<string>
-        {
-            IsSuccess = false,
-            Error = null,
-            Value = null
-        };
+        // Result with null error message - using Failure factory method
+        var result = Result<string>.Failure(null);
 
         // Act
         var actionResult = controller.TestHandleResult(result);

@@ -94,13 +94,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/**/*Tests.*.csproj'
-        arguments: |
-          --configuration $(buildConfiguration)
-          --collect:"XPlat Code Coverage"
-          --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings
-          --logger trx
-          --logger "console;verbosity=normal"
-          --results-directory $(Agent.TempDirectory)/TestResults
+        arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults'
         publishTestResults: true
         testRunTitle: 'Unit Tests - $(Build.SourceBranchName)'
 
@@ -109,13 +103,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/**/IntegratonTests.*.csproj'
-        arguments: |
-          --configuration $(buildConfiguration)
-          --collect:"XPlat Code Coverage"
-          --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings
-          --logger trx
-          --logger "console;verbosity=normal"
-          --results-directory $(Agent.TempDirectory)/TestResults
+        arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults'
         publishTestResults: true
         testRunTitle: 'Integration Tests - $(Build.SourceBranchName)'
 

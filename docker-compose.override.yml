@@ -22,8 +22,8 @@ services:
     container_name: taskforge.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
       - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
-      #- ASPNETCORE_URLS=https://+:443;http://+:80
     ports:
       - "5009:80"
       # - "10001:443"
@@ -38,8 +38,8 @@ services:
     container_name: taskforge.eventprocessor
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
       - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
-      #- ASPNETCORE_URLS=https://+:443;http://+:80
     ports:
       - "5010:80"
       # - "10001:443"

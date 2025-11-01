@@ -46,6 +46,29 @@ public static class ApplicationServiceExtensions
         });
         services.AddCors(opt =>
         {
+            // Get allowed origins from configuration
+            // Priority: 1) appsettings.json "Cors:AllowedOrigins" array
+            //           2) Environment variable "CORS_ALLOWED_ORIGINS" (semicolon-separated, e.g., "http://localhost:3000;http://localhost:3001")
+            //           3) Default: "http://localhost:3000"
+            var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            
+            // Fallback to environment variable if not in config (useful for Docker)
+            if (allowedOrigins == null || allowedOrigins.Length == 0)
+            {
+                var corsOriginsEnv = config["CORS_ALLOWED_ORIGINS"];
+                if (!string.IsNullOrEmpty(corsOriginsEnv))
+                {
+                    // Split by semicolon to support multiple origins
+                    allowedOrigins = corsOriginsEnv.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                }
+            }
+            
+            // Default to localhost:3000 if nothing is configured
+            if (allowedOrigins == null || allowedOrigins.Length == 0)
+            {
+                allowedOrigins = new[] { "http://localhost:3000" };
+            }
+            
             opt.AddPolicy(
                 "CorsPolicy",
                 policy =>
@@ -53,7 +76,7 @@ public static class ApplicationServiceExtensions
                     policy
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .WithOrigins("http://localhost:3000");
+                        .WithOrigins(allowedOrigins);
                 }
             );
         });

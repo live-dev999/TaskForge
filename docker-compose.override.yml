@@ -24,6 +24,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     ports:
       - "5009:80"
       # - "10001:443"

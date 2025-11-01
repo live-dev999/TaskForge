@@ -27,6 +27,9 @@ using TaskForge.Application.TaskItems;
 using MediatR;
 using FluentValidation.AspNetCore;
 using FluentValidation;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace TaskForge.API.Extensions;
 
@@ -120,7 +123,7 @@ public static class ApplicationServiceExtensions
                 builder
                     .AddSource(serviceName)
                     .SetResourceBuilder(
-                        Microsoft.OpenTelemetry.Resources.ResourceBuilder.CreateDefault()
+                        ResourceBuilder.CreateDefault()
                             .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
                             .AddAttributes(new Dictionary<string, object>
                             {
@@ -167,19 +170,21 @@ public static class ApplicationServiceExtensions
                         {
                             activity.SetTag("http.status_code", (int)response.StatusCode);
                         };
-                    })
-                    // Instrumentation for runtime metrics
-                    .AddRuntimeInstrumentation();
+                    });
+                    // Note: AddRuntimeInstrumentation is for metrics, not tracing
+                    // To add runtime metrics, use .WithMetrics() builder instead
                 
                 // Add exporters
                 if (enableConsoleExporter)
                 {
+                    // Console exporter extension method from OpenTelemetry.Exporter.Console package
                     builder.AddConsoleExporter();
                 }
                 
                 // Add OTLP exporter if endpoint is configured
                 if (!string.IsNullOrEmpty(otlpEndpoint))
                 {
+                    // OTLP exporter extension method from OpenTelemetry.Exporter.OpenTelemetryProtocol package
                     builder.AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri(otlpEndpoint);

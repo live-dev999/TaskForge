@@ -43,9 +43,6 @@ services:
     ports:
       - "${OTEL_COLLECTOR_OTLP_PORT:-4317}:4317"   # OTLP gRPC receiver
       - "${OTEL_COLLECTOR_OTLP_HTTP_PORT:-4318}:4318"  # OTLP HTTP receiver
-      - "${OTEL_COLLECTOR_JAEGER_PORT:-14250}:14250"  # Jaeger gRPC
-      - "${OTEL_COLLECTOR_JAEGER_HTTP_PORT:-14268}:14268"  # Jaeger HTTP
-      - "${OTEL_COLLECTOR_ZIPKIN_PORT:-9411}:9411"  # Zipkin
       - "${OTEL_COLLECTOR_METRICS_PORT:-8888}:8888"  # Prometheus metrics
       - "${OTEL_COLLECTOR_PPROF_PORT:-1777}:1777"  # pprof
     networks:

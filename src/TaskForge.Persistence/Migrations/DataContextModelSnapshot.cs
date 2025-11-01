@@ -17,7 +17,7 @@ namespace TaskForge.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.0");
 
-            modelBuilder.Entity("TaskForge.Domain.TaskItem", b =>
+            modelBuilder.Entity("TaskForge.TaskItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

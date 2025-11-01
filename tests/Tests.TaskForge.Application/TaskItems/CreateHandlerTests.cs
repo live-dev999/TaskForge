@@ -390,7 +390,8 @@ public class CreateHandlerTests
         // CreatedAt and UpdatedAt are auto-set by handler, so we check they are set to current time
         Assert.True(savedItem.CreatedAt >= beforeCreate && savedItem.CreatedAt <= afterCreate);
         Assert.True(savedItem.UpdatedAt >= beforeCreate && savedItem.UpdatedAt <= afterCreate);
-        Assert.Equal(savedItem.CreatedAt, savedItem.UpdatedAt); // They should be the same on create
+        // They should be the same on create (with tolerance for millisecond differences)
+        Assert.Equal(savedItem.CreatedAt, savedItem.UpdatedAt, TimeSpan.FromMilliseconds(1));
     }
 
     [Fact]

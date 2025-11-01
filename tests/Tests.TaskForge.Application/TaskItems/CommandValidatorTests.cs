@@ -152,7 +152,7 @@ public class CommandValidatorTests
         // Arrange
         var validator = new Edit.CommandValidator();
         var taskItem = CreateValidTaskItem();
-        taskItem.Status = default(TaskItemStatus);
+        taskItem.Status = (TaskItemStatus)999; // Invalid enum value
         var command = new Edit.Command
         {
             TaskItem = taskItem

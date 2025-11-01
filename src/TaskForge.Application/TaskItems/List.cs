@@ -27,6 +27,13 @@ public class List
             CancellationToken cancellationToken
         )
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+            
+            cancellationToken.ThrowIfCancellationRequested();
+            
             _logger.LogInformation("Executing query: List TaskItems");
             
             var items = await _context.TaskItems.ToListAsync(cancellationToken);

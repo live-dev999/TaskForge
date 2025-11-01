@@ -81,7 +81,7 @@ public class TaskItemValidatorTests
     }
 
     [Fact]
-    public void Validate_WhenTitleIsLong_ShouldNotHaveValidationError()
+    public void Validate_WhenTitleIsLong_ShouldHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
@@ -91,7 +91,7 @@ public class TaskItemValidatorTests
         var result = _validator.TestValidate(taskItem);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.Title);
+        result.ShouldHaveValidationErrorFor(x => x.Title);
     }
 
     #endregion

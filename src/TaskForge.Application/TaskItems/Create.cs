@@ -17,7 +17,9 @@ public class Create
     {
         public CommandValidator()
         {
-            RuleFor(x => x.TaskItem).SetValidator(new TaskItemValidator());
+            RuleFor(x => x.TaskItem)
+                .NotNull().WithMessage("TaskItem is required")
+                .SetValidator(new TaskItemValidator());
         }
     }
     public class Handler : IRequestHandler<Command, Result<Unit>>
@@ -45,8 +47,9 @@ public class Create
                 request.TaskItem.Id,
                 request.TaskItem.Title);
             
-            request.TaskItem.CreatedAt = DateTime.UtcNow;
-            request.TaskItem.UpdatedAt = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            request.TaskItem.CreatedAt = now;
+            request.TaskItem.UpdatedAt = now;
             
             _context.Add(request.TaskItem);
 

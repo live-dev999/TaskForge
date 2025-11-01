@@ -18,7 +18,9 @@ public class Edit
     {
         public CommandValidator()
         {
-            RuleFor(x => x.TaskItem).SetValidator(new TaskItemValidator());
+            RuleFor(x => x.TaskItem)
+                .NotNull().WithMessage("TaskItem is required")
+                .SetValidator(new TaskItemValidator());
         }
     }
     public class Handler : IRequestHandler<Command, Result<Unit>>

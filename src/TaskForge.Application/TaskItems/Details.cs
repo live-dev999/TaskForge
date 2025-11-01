@@ -26,6 +26,13 @@ public class Details
 
         public async Task<Result<TaskItem>> Handle(Query request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+            
+            cancellationToken.ThrowIfCancellationRequested();
+            
             _logger.LogInformation("Executing query: Details TaskItem with Id: {TaskItemId}", request.Id);
             
             var taskItem = await _context.TaskItems.FindAsync(new object[] { request.Id }, cancellationToken);

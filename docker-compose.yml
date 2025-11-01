@@ -34,3 +34,34 @@ services:
       args:
         REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
 
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "${OTEL_COLLECTOR_OTLP_PORT:-4317}:4317"   # OTLP gRPC receiver
+      - "${OTEL_COLLECTOR_OTLP_HTTP_PORT:-4318}:4318"  # OTLP HTTP receiver
+      - "${OTEL_COLLECTOR_JAEGER_PORT:-14250}:14250"  # Jaeger gRPC
+      - "${OTEL_COLLECTOR_JAEGER_HTTP_PORT:-14268}:14268"  # Jaeger HTTP
+      - "${OTEL_COLLECTOR_ZIPKIN_PORT:-9411}:9411"  # Zipkin
+      - "${OTEL_COLLECTOR_METRICS_PORT:-8888}:8888"  # Prometheus metrics
+      - "${OTEL_COLLECTOR_PPROF_PORT:-1777}:1777"  # pprof
+    networks:
+      - backend
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"  # Jaeger UI
+      - "${JAEGER_GRPC_PORT:-14250}:14250"  # Jaeger gRPC
+      - "${JAEGER_HTTP_PORT:-14268}:14268"  # Jaeger HTTP
+    networks:
+      - backend
+

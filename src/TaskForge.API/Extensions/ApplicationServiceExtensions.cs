@@ -92,6 +92,99 @@ public static class ApplicationServiceExtensions
                 name: "database",
                 tags: new[] { "ready" });
         
+        // Add OpenTelemetry tracing
+        AddOpenTelemetryTracing(services, config);
+        
         return services;
+    }
+    
+    private static void AddOpenTelemetryTracing(IServiceCollection services, IConfiguration config)
+    {
+        // Read configuration from appsettings.json or environment variables
+        // Environment variables can use double underscore (__) for nested config: OpenTelemetry__ServiceName
+        // Or standard OTEL_ prefixed env vars: OTEL_SERVICE_NAME
+        var serviceName = config["OpenTelemetry:ServiceName"] 
+            ?? config["OTEL_SERVICE_NAME"] 
+            ?? "TaskForge.API";
+        var serviceVersion = config["OpenTelemetry:ServiceVersion"] 
+            ?? config["OTEL_SERVICE_VERSION"] 
+            ?? "1.0.0";
+        var enableConsoleExporter = config.GetValue<bool>("OpenTelemetry:EnableConsoleExporter", 
+            config.GetValue<bool>("OTEL_ENABLE_CONSOLE_EXPORTER", true));
+        var otlpEndpoint = config["OpenTelemetry:Otlp:Endpoint"] 
+            ?? config["OTEL_EXPORTER_OTLP_ENDPOINT"];
+        
+        services.AddOpenTelemetry()
+            .WithTracing(builder =>
+            {
+                builder
+                    .AddSource(serviceName)
+                    .SetResourceBuilder(
+                        Microsoft.OpenTelemetry.Resources.ResourceBuilder.CreateDefault()
+                            .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
+                            .AddAttributes(new Dictionary<string, object>
+                            {
+                                ["deployment.environment"] = config["ASPNETCORE_ENVIRONMENT"] ?? "Development"
+                            }))
+                    // Instrumentation for ASP.NET Core
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.RecordException = true;
+                        options.EnrichWithHttpRequest = (activity, request) =>
+                        {
+                            activity.SetTag("http.request.path", request.Path);
+                            activity.SetTag("http.request.method", request.Method);
+                        };
+                        options.EnrichWithHttpResponse = (activity, response) =>
+                        {
+                            activity.SetTag("http.response.status_code", response.StatusCode);
+                        };
+                        options.EnrichWithException = (activity, exception) =>
+                        {
+                            activity.SetTag("error.type", exception.GetType().Name);
+                            activity.SetTag("error.message", exception.Message);
+                        };
+                    })
+                    // Instrumentation for Entity Framework Core
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                        options.EnrichWithIDbCommand = (activity, command) =>
+                        {
+                            activity.SetTag("db.statement", command.CommandText);
+                        };
+                    })
+                    // Instrumentation for HTTP clients
+                    .AddHttpClientInstrumentation(options =>
+                    {
+                        options.RecordException = true;
+                        options.EnrichWithHttpRequestMessage = (activity, request) =>
+                        {
+                            activity.SetTag("http.url", request.RequestUri?.ToString());
+                            activity.SetTag("http.method", request.Method?.Method);
+                        };
+                        options.EnrichWithHttpResponseMessage = (activity, response) =>
+                        {
+                            activity.SetTag("http.status_code", (int)response.StatusCode);
+                        };
+                    })
+                    // Instrumentation for runtime metrics
+                    .AddRuntimeInstrumentation();
+                
+                // Add exporters
+                if (enableConsoleExporter)
+                {
+                    builder.AddConsoleExporter();
+                }
+                
+                // Add OTLP exporter if endpoint is configured
+                if (!string.IsNullOrEmpty(otlpEndpoint))
+                {
+                    builder.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(otlpEndpoint);
+                    });
+                }
+            });
     }
 }

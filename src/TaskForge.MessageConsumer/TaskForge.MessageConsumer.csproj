@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-TaskForge.MessageConsumer-7aadd484-0b97-4ff9-8c0b-68962de2d2a0</UserSecretsId>
   </PropertyGroup>

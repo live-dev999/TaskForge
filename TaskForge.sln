@@ -49,13 +49,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegratonTests.TaskForge.E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegratonTests.TaskForge.MessageConsumer", "tests\IntegratonTests.TaskForge.MessageConsumer\IntegratonTests.TaskForge.MessageConsumer.csproj", "{9952B359-ED79-40A2-92CB-1E943B36C8AD}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8529CEA8-7C89-4E9A-A326-67507CBE026D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -142,6 +141,13 @@ Global
 		{9952B359-ED79-40A2-92CB-1E943B36C8AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9952B359-ED79-40A2-92CB-1E943B36C8AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9952B359-ED79-40A2-92CB-1E943B36C8AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8529CEA8-7C89-4E9A-A326-67507CBE026D} = {A6A75F9E-2CAB-40A1-AEFB-9E94AFC226BE}

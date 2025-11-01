@@ -5,6 +5,7 @@
     <GridServerReferencesForSolution>
       <Value>10.10.20.50:41141&gt;kWsYQgsdCULxYA+ugfuFOkvCc7UPi6Zm9mqoyOzuTec=</Value>
     </GridServerReferencesForSolution>
+    <HotSpotsLineExclusionList />
     <RdiConfigured>True</RdiConfigured>
     <SolutionConfigured>True</SolutionConfigured>
   </Settings>

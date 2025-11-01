@@ -362,3 +362,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .DS_Store
+src/TaskForge.API/TaskForge.db-shm
+src/TaskForge.API/TaskForge.db-wal
+src/TaskForge.API/TaskForge.db-shm

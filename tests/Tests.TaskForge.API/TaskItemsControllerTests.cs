@@ -328,12 +328,15 @@ public class TaskItemsControllerTests
 
         Edit.Command capturedCommand = null;
         mockMediator
-            .Setup(m => m.Send(It.IsAny<Edit.Command>(), It.IsAny<CancellationToken>()))
-            .Callback<Edit.Command, CancellationToken>((cmd, ct) => 
+            .Setup(m => m.Send(It.IsAny<IRequest<Result<Unit>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IRequest<Result<Unit>> request, CancellationToken ct) =>
             {
-                capturedCommand = cmd;
-            })
-            .ReturnsAsync(result);
+                if (request is Edit.Command cmd)
+                {
+                    capturedCommand = cmd;
+                }
+                return result;
+            });
 
         var controller = CreateController(mockMediator.Object);
 

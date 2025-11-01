@@ -5,9 +5,12 @@ using TaskForge.Application.Core;
 
 namespace TaskForge.API.Controllers
 {
+    /// <summary>
+    /// Controller for retrieving application version information
+    /// </summary>
     [AllowAnonymous]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class VersionController : BaseApiController
     {
         #region Fields
@@ -17,9 +20,13 @@ namespace TaskForge.API.Controllers
 
         #endregion
 
+        #region Constructors
 
-        #region Ctors
-
+        /// <summary>
+        /// Initializes a new instance of the VersionController class
+        /// </summary>
+        /// <param name="environment">Web hosting environment</param>
+        /// <param name="logger">Logger instance</param>
         public VersionController(IWebHostEnvironment environment, ILogger<VersionController> logger)
         {
             _environment = environment;
@@ -28,39 +35,43 @@ namespace TaskForge.API.Controllers
 
         #endregion
 
-
         #region Methods
 
+        /// <summary>
+        /// Gets the application version and environment information
+        /// </summary>
+        /// <returns>Version information including environment name and version number</returns>
         [HttpGet]
-        public async Task<IActionResult> IndexAsync()
+        public IActionResult GetVersion()
         {
-            return HandleResult(
-                await Task.Run(() =>
+            try
+            {
+                var execVersion = GetVersionFromAssembly();
+                _logger.LogInformation("Retrieved application version: {Version}", execVersion);
+                
+                var versionResult = new VersionResult
                 {
-                    try
-                    {
-                        var execVersion = GetVersion();
-                        _logger.LogInformation($"get version - {execVersion}");
-                        var versionResult = new VersionResult
-                        {
-                            Environment = _environment.EnvironmentName,
-                            Version = execVersion?.ToString()
-                        };
+                    Environment = _environment.EnvironmentName,
+                    Version = execVersion?.ToString()
+                };
 
-                        return Result<VersionResult>.Success(versionResult);
-                    }
-                    catch
-                    {
-                        return Result<VersionResult>.Failure("Can't get version");
-                    }
-                })
-            );
+                return HandleResult(Result<VersionResult>.Success(versionResult));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve application version");
+                return HandleResult(Result<VersionResult>.Failure("Unable to retrieve version information"));
+            }
         }
 
-        protected virtual Version GetVersion()
+        /// <summary>
+        /// Gets the version from the executing assembly
+        /// </summary>
+        /// <returns>Assembly version</returns>
+        protected virtual Version GetVersionFromAssembly()
         {
             var execVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            return execVersion ?? throw new InvalidOperationException();
+            return execVersion ?? throw new InvalidOperationException("Assembly version is null");
         }
 
         #endregion

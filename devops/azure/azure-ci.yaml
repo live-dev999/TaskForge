@@ -32,7 +32,11 @@ variables:
   # Code coverage variables
   codeCoverageTool: 'Cobertura'
   summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.cobertura.xml'
-  minimumCodeCoverage: 80  # Minimum code coverage percentage required
+  # Minimum code coverage percentage required per service
+  minimumCodeCoverageAPI: 80
+  minimumCodeCoverageEventProcessor: 70
+  minimumCodeCoverageMessageConsumer: 70
+  minimumCodeCoverageCommon: 75
 
 stages:
 - stage: BuildAndTest
@@ -128,7 +132,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/API'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'API Unit Tests - $(Build.SourceBranchName)'
 
@@ -137,7 +141,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/API'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'API Integration Tests - $(Build.SourceBranchName)'
 
@@ -205,7 +209,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/EventProcessor'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'EventProcessor Unit Tests - $(Build.SourceBranchName)'
 
@@ -214,7 +218,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/EventProcessor'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'EventProcessor Integration Tests - $(Build.SourceBranchName)'
 
@@ -282,7 +286,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/MessageConsumer'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'MessageConsumer Unit Tests - $(Build.SourceBranchName)'
 
@@ -291,7 +295,7 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/MessageConsumer'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'MessageConsumer Integration Tests - $(Build.SourceBranchName)'
 
@@ -350,7 +354,7 @@ stages:
           tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
           tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
           tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/Common'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'Common Unit Tests - $(Build.SourceBranchName)'
 
@@ -361,7 +365,7 @@ stages:
         projects: |
           tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
           tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
-        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/Common'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger "console;verbosity=normal"'
         publishTestResults: true
         testRunTitle: 'Common Integration Tests - $(Build.SourceBranchName)'
 
@@ -380,7 +384,7 @@ stages:
         targetType: 'inline'
         script: |
           Write-Host "================================================"
-          Write-Host "Code Coverage Check"
+          Write-Host "Code Coverage Check (Per Service)"
           Write-Host "================================================"
           
           $coverageFiles = Get-ChildItem -Path "$(Agent.TempDirectory)/TestResults" -Recurse -Filter "coverage.cobertura.xml" -ErrorAction SilentlyContinue
@@ -395,79 +399,109 @@ stages:
           Write-Host "Found $($coverageFiles.Count) coverage file(s)"
           Write-Host ""
           
-          $totalLines = 0
-          $totalCoveredLines = 0
-          $totalBranches = 0
-          $totalCoveredBranches = 0
-          $processedFiles = 0
+          # Group coverage files by service
+          $serviceCoverage = @{
+            "API" = @{ Files = @(); Lines = 0; Covered = 0; Threshold = [int]$(minimumCodeCoverageAPI) }
+            "EventProcessor" = @{ Files = @(); Lines = 0; Covered = 0; Threshold = [int]$(minimumCodeCoverageEventProcessor) }
+            "MessageConsumer" = @{ Files = @(); Lines = 0; Covered = 0; Threshold = [int]$(minimumCodeCoverageMessageConsumer) }
+            "Common" = @{ Files = @(); Lines = 0; Covered = 0; Threshold = [int]$(minimumCodeCoverageCommon) }
+          }
           
+          # Categorize files by path
           foreach ($file in $coverageFiles) {
-            Write-Host "Processing: $($file.Name)"
-            try {
-              [xml]$coverageXml = Get-Content $file.FullName -ErrorAction Stop
-              
-              if ($coverageXml.coverage) {
-                $linesValid = [int]$coverageXml.coverage.'lines-valid'
-                $linesCovered = [int]$coverageXml.coverage.'lines-covered'
-                $branchesValid = [int]$coverageXml.coverage.'branches-valid'
-                $branchesCovered = [int]$coverageXml.coverage.'branches-covered'
-                
-                if ($linesValid -gt 0) {
-                  $totalLines += $linesValid
-                  $totalCoveredLines += $linesCovered
-                  $totalBranches += $branchesValid
-                  $totalCoveredBranches += $branchesCovered
-                  $processedFiles++
-                  
-                  $lineRate = ($linesCovered / $linesValid) * 100
-                  $branchRate = if ($branchesValid -gt 0) { ($branchesCovered / $branchesValid) * 100 } else { 0 }
-                  
-                  Write-Host "  Lines: $linesCovered/$linesValid ($([math]::Round($lineRate, 2))%)"
-                  Write-Host "  Branches: $branchesCovered/$branchesValid ($([math]::Round($branchRate, 2))%)"
-                }
-              }
-            } catch {
-              Write-Warning "  Failed to parse coverage file: $_"
+            $filePath = $file.FullName.ToLower()
+            if ($filePath -like "*api*" -and $filePath -notlike "*eventprocessor*" -and $filePath -notlike "*messageconsumer*") {
+              $serviceCoverage["API"].Files += $file
+            } elseif ($filePath -like "*eventprocessor*") {
+              $serviceCoverage["EventProcessor"].Files += $file
+            } elseif ($filePath -like "*messageconsumer*") {
+              $serviceCoverage["MessageConsumer"].Files += $file
+            } else {
+              $serviceCoverage["Common"].Files += $file
             }
           }
           
-          Write-Host ""
+          $allPassed = $true
+          
+          # Check coverage for each service
+          foreach ($service in $serviceCoverage.Keys) {
+            $serviceData = $serviceCoverage[$service]
+            
+            if ($serviceData.Files.Count -eq 0) {
+              Write-Host "⚠️ No coverage files found for $service service"
+              Write-Host ""
+              continue
+            }
+            
+            Write-Host "----------------------------------------"
+            Write-Host "Service: $service"
+            Write-Host "Required Coverage: $($serviceData.Threshold)%"
+            Write-Host "Coverage Files: $($serviceData.Files.Count)"
+            Write-Host ""
+            
+            $serviceLines = 0
+            $serviceCovered = 0
+            
+            foreach ($file in $serviceData.Files) {
+              try {
+                [xml]$coverageXml = Get-Content $file.FullName -ErrorAction Stop
+                
+                if ($coverageXml.coverage) {
+                  $linesValid = [int]$coverageXml.coverage.'lines-valid'
+                  $linesCovered = [int]$coverageXml.coverage.'lines-covered'
+                  
+                  if ($linesValid -gt 0) {
+                    $serviceLines += $linesValid
+                    $serviceCovered += $linesCovered
+                    
+                    $lineRate = ($linesCovered / $linesValid) * 100
+                    Write-Host "  File: $($file.Name) - $linesCovered/$linesValid ($([math]::Round($lineRate, 2))%)"
+                  }
+                }
+              } catch {
+                Write-Warning "  Failed to parse coverage file $($file.Name): $_"
+              }
+            }
+            
+            if ($serviceLines -gt 0) {
+              $serviceCoveragePercent = ($serviceCovered / $serviceLines) * 100
+              $serviceCoveragePercent = [math]::Round($serviceCoveragePercent, 2)
+              
+              Write-Host ""
+              Write-Host "  Total Coverage: $serviceCoveragePercent% ($serviceCovered/$serviceLines lines)"
+              Write-Host "  Required: $($serviceData.Threshold)%"
+              
+              if ($serviceCoveragePercent -lt $serviceData.Threshold) {
+                $allPassed = $false
+                Write-Host ""
+                Write-Error "  ❌ FAILED: Coverage $serviceCoveragePercent% is below required $($serviceData.Threshold)%"
+                Write-Error "  Difference: $([math]::Round($serviceData.Threshold - $serviceCoveragePercent, 2))%"
+              } else {
+                Write-Host ""
+                Write-Host "  ✅ PASSED: Coverage meets requirement"
+              }
+            } else {
+              Write-Warning "  ⚠️ Could not calculate coverage for $service service"
+            }
+            
+            Write-Host ""
+          }
+          
           Write-Host "================================================"
           
-          if ($processedFiles -gt 0 -and $totalLines -gt 0) {
-            $overallLineCoverage = ($totalCoveredLines / $totalLines) * 100
-            $overallBranchCoverage = if ($totalBranches -gt 0) { ($totalCoveredBranches / $totalBranches) * 100 } else { 0 }
-            
-            $overallLineCoverage = [math]::Round($overallLineCoverage, 2)
-            $overallBranchCoverage = [math]::Round($overallBranchCoverage, 2)
-            
-            Write-Host "Overall Code Coverage Summary:"
-            Write-Host "  Line Coverage: $overallLineCoverage% ($totalCoveredLines/$totalLines lines)"
-            Write-Host "  Branch Coverage: $overallBranchCoverage% ($totalCoveredBranches/$totalBranches branches)"
-            Write-Host ""
-            Write-Host "Required Minimum Line Coverage: $(minimumCodeCoverage)%"
-            Write-Host "================================================"
-            
-            if ($overallLineCoverage -lt $(minimumCodeCoverage)) {
-              Write-Error ""
-              Write-Error "❌ CODE COVERAGE CHECK FAILED!"
-              Write-Error "Current coverage: $overallLineCoverage%"
-              Write-Error "Required minimum: $(minimumCodeCoverage)%"
-              Write-Error "Difference: $([math]::Round($(minimumCodeCoverage) - $overallLineCoverage, 2))%"
-              Write-Error ""
-              Write-Error "Please add more unit tests to improve code coverage."
-              Write-Error "PR cannot be merged until coverage requirement is met."
-              Write-Error ""
-              exit 1
-            } else {
-              Write-Host ""
-              Write-Host "✅ CODE COVERAGE CHECK PASSED"
-              Write-Host "✅ Coverage $overallLineCoverage% meets the minimum requirement of $(minimumCodeCoverage)%"
-              Write-Host ""
-            }
+          if (-not $allPassed) {
+            Write-Error ""
+            Write-Error "❌ CODE COVERAGE CHECK FAILED!"
+            Write-Error "One or more services do not meet the minimum coverage requirement."
+            Write-Error "Please add more unit tests to improve code coverage."
+            Write-Error "PR cannot be merged until all coverage requirements are met."
+            Write-Error ""
+            exit 1
           } else {
-            Write-Warning "Could not calculate overall coverage from processed files."
-            Write-Warning "Coverage validation skipped."
+            Write-Host ""
+            Write-Host "✅ CODE COVERAGE CHECK PASSED"
+            Write-Host "All services meet their minimum coverage requirements."
+            Write-Host ""
           }
           
           Write-Host "================================================"

@@ -48,6 +48,17 @@ app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
+// Map Health Check endpoints
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false // Live endpoint - just checks if service is running
+});
+
 app.MapControllers();
 
 using var scope = app.Services.CreateScope();

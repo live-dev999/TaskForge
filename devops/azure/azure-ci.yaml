@@ -17,8 +17,8 @@ trigger:
 pr:
   branches:
     include:
-    - master
-    - dev
+- master
+- dev
     - feature/*
 
 pool:
@@ -35,11 +35,11 @@ variables:
   minimumCodeCoverage: 80  # Minimum code coverage percentage required
 
 stages:
-- stage: Build
-  displayName: 'Build and Test'
+- stage: BuildAndTest
+  displayName: 'Build and Test Services'
   jobs:
-  - job: BuildAndTest
-    displayName: 'Build Solution and Run Tests'
+  - job: BuildCommonProjects
+    displayName: 'Build Common Projects (Domain, Application, Persistence)'
     steps:
     - task: UseDotNet@2
       displayName: 'Use .NET SDK $(dotNetVersion)'
@@ -52,64 +52,330 @@ stages:
       displayName: 'Restore NuGet packages'
       inputs:
         command: 'restore'
-        projects: '$(solution)'
+        projects: |
+          src/TaskForge.Domain/TaskForge.Domain.csproj
+          src/TaskForge.Application/TaskForge.Application.csproj
+          src/TaskForge.Persistence/TaskForge.Persistence.csproj
+          src/TaskForge.StartupTasks/TaskForge.StartupTasks.csproj
         feedsToUse: 'select'
         verbosityRestore: 'Minimal'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Build solution'
+      displayName: 'Build Common Projects'
       inputs:
         command: 'build'
-        projects: '$(solution)'
+        projects: |
+          src/TaskForge.Domain/TaskForge.Domain.csproj
+          src/TaskForge.Application/TaskForge.Application.csproj
+          src/TaskForge.Persistence/TaskForge.Persistence.csproj
+          src/TaskForge.StartupTasks/TaskForge.StartupTasks.csproj
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
+
+  - job: BuildAndTestAPI
+    displayName: 'Build and Test API'
+    dependsOn: BuildCommonProjects
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotNetVersion)'
+      inputs:
+        packageType: 'sdk'
+        version: '$(dotNetVersion)'
+        installationPath: '$(Agent.ToolsDirectory)/dotnet'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore API and Tests'
+      inputs:
+        command: 'restore'
+        projects: |
+          src/TaskForge.API/TaskForge.API.csproj
+          tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj
+          tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj
+        feedsToUse: 'select'
+        verbosityRestore: 'Minimal'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build API'
+      inputs:
+        command: 'build'
+        projects: 'src/TaskForge.API/TaskForge.API.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build API Test Projects'
+      inputs:
+        command: 'build'
+        projects: |
+          tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj
+          tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj
         arguments: '--configuration $(buildConfiguration) --no-restore'
         verbosity: 'minimal'
       continueOnError: false
 
     - task: PowerShell@2
-      displayName: 'Verify Build Success on PR'
+      displayName: 'Verify API Build Success on PR'
       condition: eq(variables['Build.Reason'], 'PullRequest')
       inputs:
         targetType: 'inline'
         script: |
-          Write-Host "================================================"
-          Write-Host "PR Build Verification"
-          Write-Host "================================================"
-          Write-Host "Build Reason: $(Build.Reason)"
-          Write-Host "Source Branch: $(Build.SourceBranch)"
-          if ("$(System.PullRequest.TargetBranch)" -ne "") {
-            Write-Host "Target Branch: $(System.PullRequest.TargetBranch)"
-          }
-          Write-Host ""
-          Write-Host "✅ Build completed successfully!"
-          Write-Host "✅ All projects compiled without errors"
-          Write-Host ""
-          Write-Host "Next steps:"
-          Write-Host "- Running unit tests..."
-          Write-Host "- Running integration tests..."
-          Write-Host "- Checking code coverage threshold..."
-          Write-Host "================================================"
+          Write-Host "✅ API Build completed successfully!"
 
     - task: DotNetCoreCLI@2
-      displayName: 'Run Unit Tests'
+      displayName: 'Run API Unit Tests'
       inputs:
         command: 'test'
-        projects: 'tests/**/*Tests.*.csproj'
-        arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults'
+        projects: 'tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/API'
         publishTestResults: true
-        testRunTitle: 'Unit Tests - $(Build.SourceBranchName)'
+        testRunTitle: 'API Unit Tests - $(Build.SourceBranchName)'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Run Integration Tests'
+      displayName: 'Run API Integration Tests'
       inputs:
         command: 'test'
-        projects: 'tests/**/IntegratonTests.*.csproj'
-        arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults'
+        projects: 'tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/API'
         publishTestResults: true
-        testRunTitle: 'Integration Tests - $(Build.SourceBranchName)'
+        testRunTitle: 'API Integration Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish API'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        command: 'publish'
+        projects: 'src/TaskForge.API/TaskForge.API.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api --no-build'
+        zipAfterPublish: true
+
+  - job: BuildAndTestEventProcessor
+    displayName: 'Build and Test EventProcessor'
+    dependsOn: BuildCommonProjects
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotNetVersion)'
+      inputs:
+        packageType: 'sdk'
+        version: '$(dotNetVersion)'
+        installationPath: '$(Agent.ToolsDirectory)/dotnet'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore EventProcessor and Tests'
+      inputs:
+        command: 'restore'
+        projects: |
+          src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj
+          tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj
+          tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj
+        feedsToUse: 'select'
+        verbosityRestore: 'Minimal'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build EventProcessor'
+      inputs:
+        command: 'build'
+        projects: 'src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build EventProcessor Test Projects'
+      inputs:
+        command: 'build'
+        projects: |
+          tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj
+          tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
 
     - task: PowerShell@2
+      displayName: 'Verify EventProcessor Build Success on PR'
+      condition: eq(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "✅ EventProcessor Build completed successfully!"
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run EventProcessor Unit Tests'
+      inputs:
+        command: 'test'
+        projects: 'tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/EventProcessor'
+        publishTestResults: true
+        testRunTitle: 'EventProcessor Unit Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run EventProcessor Integration Tests'
+      inputs:
+        command: 'test'
+        projects: 'tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/EventProcessor'
+        publishTestResults: true
+        testRunTitle: 'EventProcessor Integration Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish EventProcessor'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        command: 'publish'
+        projects: 'src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/eventprocessor --no-build'
+        zipAfterPublish: true
+
+  - job: BuildAndTestMessageConsumer
+    displayName: 'Build and Test MessageConsumer'
+    dependsOn: BuildCommonProjects
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotNetVersion)'
+      inputs:
+        packageType: 'sdk'
+        version: '$(dotNetVersion)'
+        installationPath: '$(Agent.ToolsDirectory)/dotnet'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore MessageConsumer and Tests'
+      inputs:
+        command: 'restore'
+        projects: |
+          src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj
+          tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj
+          tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj
+        feedsToUse: 'select'
+        verbosityRestore: 'Minimal'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build MessageConsumer'
+      inputs:
+        command: 'build'
+        projects: 'src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build MessageConsumer Test Projects'
+      inputs:
+        command: 'build'
+        projects: |
+          tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj
+          tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
+
+    - task: PowerShell@2
+      displayName: 'Verify MessageConsumer Build Success on PR'
+      condition: eq(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "✅ MessageConsumer Build completed successfully!"
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run MessageConsumer Unit Tests'
+      inputs:
+        command: 'test'
+        projects: 'tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/MessageConsumer'
+        publishTestResults: true
+        testRunTitle: 'MessageConsumer Unit Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run MessageConsumer Integration Tests'
+      inputs:
+        command: 'test'
+        projects: 'tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/MessageConsumer'
+        publishTestResults: true
+        testRunTitle: 'MessageConsumer Integration Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish MessageConsumer'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+      inputs:
+        command: 'publish'
+        projects: 'src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/messageconsumer --no-build'
+        zipAfterPublish: true
+
+  - job: RunCommonTests
+    displayName: 'Run Common Tests (Application, Domain, Persistence)'
+    dependsOn: BuildCommonProjects
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotNetVersion)'
+      inputs:
+        packageType: 'sdk'
+        version: '$(dotNetVersion)'
+        installationPath: '$(Agent.ToolsDirectory)/dotnet'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore Common Test Projects'
+      inputs:
+        command: 'restore'
+        projects: |
+          tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
+          tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
+          tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
+          tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
+          tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
+        feedsToUse: 'select'
+        verbosityRestore: 'Minimal'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Common Test Projects'
+      inputs:
+        command: 'build'
+        projects: |
+          tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
+          tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
+          tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
+          tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
+          tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+        verbosity: 'minimal'
+      continueOnError: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Common Unit Tests'
+      inputs:
+        command: 'test'
+        projects: |
+          tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
+          tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
+          tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/Common'
+        publishTestResults: true
+        testRunTitle: 'Common Unit Tests - $(Build.SourceBranchName)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Common Integration Tests'
+      inputs:
+        command: 'test'
+        projects: |
+          tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
+          tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
+        arguments: '--configuration $(buildConfiguration) --no-build --nologo --collect:"XPlat Code Coverage" --settings:$(System.DefaultWorkingDirectory)/tests/coverlet.runsettings --logger trx --logger "console;verbosity=normal" --results-directory $(Agent.TempDirectory)/TestResults/Common'
+        publishTestResults: true
+        testRunTitle: 'Common Integration Tests - $(Build.SourceBranchName)'
+
+  - job: CheckCodeCoverage
+    displayName: 'Check Code Coverage Threshold'
+    dependsOn:
+    - BuildAndTestAPI
+    - BuildAndTestEventProcessor
+    - BuildAndTestMessageConsumer
+    - RunCommonTests
+    condition: succeeded()
+    steps:
+    - task: PowerShell@2
       displayName: 'Check Code Coverage Threshold'
-      condition: succeeded()
       inputs:
         targetType: 'inline'
         script: |
@@ -208,52 +474,23 @@ stages:
 
     - task: PublishCodeCoverageResults@1
       displayName: 'Publish Code Coverage'
-      inputs:
+  inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml'
         reportDirectory: '$(Agent.TempDirectory)/TestResults/**/coverage'
         failIfCoverageEmpty: false
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish API'
-      condition: ne(variables['Build.Reason'], 'PullRequest')
-      inputs:
-        command: 'publish'
-        projects: 'src/TaskForge.API/TaskForge.API.csproj'
-        arguments: |
-          --configuration $(buildConfiguration)
-          --output $(Build.ArtifactStagingDirectory)/api
-          --no-build
-        zipAfterPublish: true
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish EventProcessor'
-      condition: ne(variables['Build.Reason'], 'PullRequest')
-      inputs:
-        command: 'publish'
-        projects: 'src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj'
-        arguments: |
-          --configuration $(buildConfiguration)
-          --output $(Build.ArtifactStagingDirectory)/eventprocessor
-          --no-build
-        zipAfterPublish: true
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish MessageConsumer'
-      condition: ne(variables['Build.Reason'], 'PullRequest')
-      inputs:
-        command: 'publish'
-        projects: 'src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj'
-        arguments: |
-          --configuration $(buildConfiguration)
-          --output $(Build.ArtifactStagingDirectory)/messageconsumer
-          --no-build
-        zipAfterPublish: true
-
+  - job: PublishArtifacts
+    displayName: 'Publish Build Artifacts'
+    dependsOn:
+    - BuildAndTestAPI
+    - BuildAndTestEventProcessor
+    - BuildAndTestMessageConsumer
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    steps:
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish Build Artifacts'
-      condition: ne(variables['Build.Reason'], 'PullRequest')
-      inputs:
+      displayName: 'Publish All Artifacts'
+  inputs:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop'
         publishLocation: 'Container'
@@ -267,7 +504,7 @@ stages:
     steps:
     - task: Docker@2
       displayName: 'Build API Docker Image'
-      inputs:
+  inputs:
         command: 'build'
         repository: 'taskforge-api'
         dockerfile: 'src/TaskForge.API/Dockerfile'

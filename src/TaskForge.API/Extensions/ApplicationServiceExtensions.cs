@@ -63,6 +63,12 @@ public static class ApplicationServiceExtensions
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining<Create>();
         
+        // Add Health Checks
+        services.AddHealthChecks()
+            .AddDbContextCheck<Persistence.DataContext>(
+                name: "database",
+                tags: new[] { "ready" });
+        
         return services;
     }
 }

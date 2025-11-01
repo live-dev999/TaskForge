@@ -4,7 +4,6 @@
  */
 
 using TaskForge.Application.Core;
-using Xunit;
 
 namespace Tests.TaskForge.Application;
 

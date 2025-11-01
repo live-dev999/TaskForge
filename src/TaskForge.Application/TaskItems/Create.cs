@@ -2,7 +2,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
-using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Persistence;
 

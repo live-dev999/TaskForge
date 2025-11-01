@@ -12,7 +12,6 @@ using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
-using Xunit;
 
 namespace Tests.TaskForge.Application.TaskItems;
 

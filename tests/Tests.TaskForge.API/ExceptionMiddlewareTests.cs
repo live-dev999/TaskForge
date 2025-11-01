@@ -4,15 +4,12 @@
  */
 
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TaskForge.API.Middleware;
-using TaskForge.Application.Core;
-using Xunit;
 
 namespace Tests.TaskForge.API;
 

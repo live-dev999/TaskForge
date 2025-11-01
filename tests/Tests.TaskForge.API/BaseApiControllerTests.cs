@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TaskForge.API.Controllers;
 using TaskForge.Application.Core;
-using Xunit;
 
 namespace Tests.TaskForge.API;
 

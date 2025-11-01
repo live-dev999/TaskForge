@@ -7,7 +7,6 @@ using FluentValidation.TestHelper;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
-using Xunit;
 
 namespace Tests.TaskForge.Application.TaskItems;
 

@@ -80,66 +80,65 @@ sudo docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" \
 ```
 
 
-### Run database use docker-compose (Cross-Platform)
+Run database use docker-compose:
+Create docker-compose.yaml file in root folder with code:
+```
+version: '3.7'
 
-Docker Compose automatically detects your platform (Mac Intel/AMD, Mac Apple Silicon M1/M2/M3, Windows, Linux) and uses the appropriate SQL Server image.
+services:
+  sql.data:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqldatacontainer
+```
+Create docker-compose.override.yaml in root folder with code:
 
-#### Quick Start (Automatic Platform Detection)
+For Intel / Amd CPU
+```
+version: '3.7'
 
-**For Mac/Linux:**
-```bash
-# Make script executable (first time only)
-chmod +x docker-compose-up.sh
+services:
+  sql.data:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqldatacontainer
+```
+For Apply Silicon CPU(M1/M2/M3)
+```
+version: '3.7'
 
-# Run with automatic platform detection
-./docker-compose-up.sh
+services:
+  sql.data:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: sqldatacontainer
+```
+So, Now we can run docker-compose command for create local docker image
+if you use docker-compose for Intel / Amd CPU (x86/x64)
+```
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+```
+if you use docker-compose for Apply Silicon CPU - M1/M2/M3 (ARM)
+```
+docker-compose -f docker-compose.arm.yml -f docker-compose.override.yml up
 ```
 
-**For Windows PowerShell:**
-```powershell
-.\docker-compose-up.ps1
-```
+### **Client Application**
 
-**For Windows Command Prompt:**
-```cmd
-docker-compose-up.bat
-```
+The React client application is included in the Docker Compose setup. After starting all services:
 
-#### Manual Setup (Optional)
+- **Client**: Available at `http://localhost:3000` (configurable via `CLIENT_PORT` environment variable)
+- **API**: Available at `http://localhost:5009/api`
+- **EventProcessor**: Available at `http://localhost:5010`
+- **Database**: SQL Server at `localhost:5433`
 
-If you prefer to set environment variables manually:
+#### Client Configuration
 
-**For Intel/AMD (x86_64) systems:**
-```bash
-export PLATFORM=linux/amd64
-export SQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest
-docker-compose up
-```
+The client uses environment variables for configuration:
 
-**For Apple Silicon (ARM64) systems:**
-```bash
-export PLATFORM=linux/arm64
-export SQL_IMAGE=mcr.microsoft.com/azure-sql-edge:latest
-docker-compose up
-```
+- `REACT_APP_API_URL` - API base URL (defaults to `/api` in Docker, uses nginx proxy)
+- `CLIENT_PORT` - Client service port (defaults to `3000`)
 
-**For Windows:**
-```cmd
-set PLATFORM=linux/amd64
-set SQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest
-docker-compose up
-```
+In Docker, the client automatically proxies API requests through nginx to the backend service.
 
-#### Platform Detection Details
-
-The docker-compose configuration automatically:
-- Detects your system architecture (ARM64 or AMD64/x86_64)
-- Selects the appropriate SQL Server image:
-  - **AMD64/x86_64**: `mcr.microsoft.com/mssql/server:2019-latest`
-  - **ARM64**: `mcr.microsoft.com/azure-sql-edge:latest`
-- Sets the correct platform for all containers
-
-All services (API, EventProcessor, SQL Server) will use the detected platform automatically.
+For more details, see `src/client-app/README-DOCKER.md`.
 
 
 ### **Deploy local database in your machine (alternative method)**

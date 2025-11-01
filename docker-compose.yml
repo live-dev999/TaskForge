@@ -26,3 +26,11 @@ services:
         - linux/amd64
         - linux/arm64
 
+  taskforge.client:
+    image: ${DOCKER_REGISTRY-}taskforgeclient
+    build:
+      context: ./src/client-app
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
+

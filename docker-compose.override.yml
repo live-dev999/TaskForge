@@ -49,3 +49,15 @@ services:
       - sql.data
     networks:
       - backend
+
+  taskforge.client:
+    container_name: taskforge.client
+    ports:
+      - "${CLIENT_PORT:-3000}:80"
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
+    depends_on:
+      - taskforge.api
+    networks:
+      - frontend
+      - backend

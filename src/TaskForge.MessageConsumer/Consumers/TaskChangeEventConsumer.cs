@@ -51,7 +51,7 @@ public class TaskChangeEventConsumer : IConsumer<TaskChangeEventDto>
         var conversationId = context.ConversationId?.ToString() ?? "none";
         
         _logger.LogInformation(
-            "📥 Starting to consume task change event: MessageId={MessageId}, CorrelationId={CorrelationId}, ConversationId={ConversationId}, SourceAddress={SourceAddress}",
+            "[RECEIVE] Starting to consume task change event: MessageId={MessageId}, CorrelationId={CorrelationId}, ConversationId={ConversationId}, SourceAddress={SourceAddress}",
             messageId,
             correlationId,
             conversationId,
@@ -61,19 +61,19 @@ public class TaskChangeEventConsumer : IConsumer<TaskChangeEventDto>
 
         if (eventDto == null)
         {
-            _logger.LogError("❌ Received null task change event: MessageId={MessageId}", messageId);
+            _logger.LogError("[ERROR] Received null task change event: MessageId={MessageId}", messageId);
             return;
         }
 
         if (eventDto.TaskId == Guid.Empty)
         {
-            _logger.LogWarning("⚠️ Received task change event with empty TaskId: MessageId={MessageId}", messageId);
+            _logger.LogWarning("[WARN] Received task change event with empty TaskId: MessageId={MessageId}", messageId);
         }
 
         try
         {
             _logger.LogInformation(
-                "📋 Processing task change event: MessageId={MessageId}, TaskId={TaskId}, EventType={EventType}, Title={Title}, " +
+                "Processing task change event: MessageId={MessageId}, TaskId={TaskId}, EventType={EventType}, Title={Title}, " +
                 "Status={Status}, EventTimestamp={EventTimestamp}, CreatedAt={CreatedAt}, UpdatedAt={UpdatedAt}",
                 messageId,
                 eventDto.TaskId,
@@ -87,14 +87,14 @@ public class TaskChangeEventConsumer : IConsumer<TaskChangeEventDto>
             // Log description separately if it exists (to avoid cluttering main log)
             if (!string.IsNullOrEmpty(eventDto.Description))
             {
-                _logger.LogDebug("📝 Task description: MessageId={MessageId}, Description={Description}", messageId, eventDto.Description);
+                _logger.LogDebug("Task description: MessageId={MessageId}, Description={Description}", messageId, eventDto.Description);
             }
 
             // Simulate processing time (for demonstration)
             await Task.Delay(10, context.CancellationToken);
 
             _logger.LogInformation(
-                "✅ Successfully processed task change event: MessageId={MessageId}, TaskId={TaskId}, EventType={EventType}",
+                "[OK] Successfully processed task change event: MessageId={MessageId}, TaskId={TaskId}, EventType={EventType}",
                 messageId,
                 eventDto.TaskId,
                 eventDto.EventType);
@@ -102,7 +102,7 @@ public class TaskChangeEventConsumer : IConsumer<TaskChangeEventDto>
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "❌ Error processing task change event: MessageId={MessageId}, TaskId={TaskId}, EventType={EventType}, Error={ErrorMessage}",
+                "[ERROR] Error processing task change event: MessageId={MessageId}, TaskId={TaskId}, EventType={EventType}, Error={ErrorMessage}",
                 messageId,
                 eventDto?.TaskId ?? Guid.Empty,
                 eventDto?.EventType ?? "unknown",

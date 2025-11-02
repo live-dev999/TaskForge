@@ -40,9 +40,9 @@ public class Worker : BackgroundService
     {
         // MassTransit bus is managed automatically as a hosted service
         // We just need to keep the worker alive
-        _logger.LogInformation("🚀 MessageConsumer Worker started. MassTransit bus will consume messages automatically.");
-        _logger.LogInformation("📋 Listening for task change events from RabbitMQ queue: 'task-change-events'");
-        _logger.LogInformation("💡 Worker is running and ready to process messages...");
+        _logger.LogInformation("[START] MessageConsumer Worker started. MassTransit bus will consume messages automatically.");
+        _logger.LogInformation("Listening for task change events from RabbitMQ queue: 'task-change-events'");
+        _logger.LogInformation("Worker is running and ready to process messages...");
         
         var heartbeatCounter = 0;
         while (!stoppingToken.IsCancellationRequested)
@@ -52,10 +52,10 @@ public class Worker : BackgroundService
             heartbeatCounter++;
             if (heartbeatCounter % 5 == 0) // Every 5 minutes
             {
-                _logger.LogInformation("💓 MessageConsumer Worker heartbeat: Still running and processing messages... (Running for {Minutes} minutes)", heartbeatCounter);
+                _logger.LogInformation("[HEARTBEAT] MessageConsumer Worker heartbeat: Still running and processing messages... (Running for {Minutes} minutes)", heartbeatCounter);
             }
         }
         
-        _logger.LogInformation("🛑 MessageConsumer Worker is stopping. Shutting down gracefully...");
+        _logger.LogInformation("[STOP] MessageConsumer Worker is stopping. Shutting down gracefully...");
     }
 }

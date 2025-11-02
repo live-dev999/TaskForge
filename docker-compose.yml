@@ -62,3 +62,35 @@ services:
     networks:
       - backend
 
+  taskforge.messageconsumer:
+    image: ${DOCKER_REGISTRY-}taskforgemessageconsumer
+    platform: ${PLATFORM:-linux/amd64}
+    build:
+      context: .
+      dockerfile: src/TaskForge.MessageConsumer/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"  # AMQP port
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rabbitmq_data:
+

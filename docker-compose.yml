@@ -1,17 +1,96 @@
+version: '3.8'
+
 services:
   sql.data:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: ${SQL_IMAGE:-mcr.microsoft.com/mssql/server:2019-latest}
+    platform: ${PLATFORM:-linux/amd64}
     container_name: sqldatacontainer
 
   taskforge.api:
     image: ${DOCKER_REGISTRY-}taskforgeapi
+    platform: ${PLATFORM:-linux/amd64}
     build:
       context: .
       dockerfile: src/TaskForge.API/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
 
   taskforge.eventprocessor:
     image: ${DOCKER_REGISTRY-}taskforgeeventprocessor
+    platform: ${PLATFORM:-linux/amd64}
     build:
       context: .
       dockerfile: src/TaskForge.EventProcessor/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+  taskforge.client:
+    image: ${DOCKER_REGISTRY-}taskforgeclient
+    build:
+      context: ./src/client-app
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "${OTEL_COLLECTOR_OTLP_PORT:-4317}:4317"   # OTLP gRPC receiver
+      - "${OTEL_COLLECTOR_OTLP_HTTP_PORT:-4318}:4318"  # OTLP HTTP receiver
+      - "${OTEL_COLLECTOR_METRICS_PORT:-8888}:8888"  # Prometheus metrics
+      - "${OTEL_COLLECTOR_PPROF_PORT:-1777}:1777"  # pprof
+    networks:
+      - backend
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"  # Jaeger UI
+      - "${JAEGER_GRPC_PORT:-14250}:14250"  # Jaeger gRPC
+      - "${JAEGER_HTTP_PORT:-14268}:14268"  # Jaeger HTTP
+    networks:
+      - backend
+
+  taskforge.messageconsumer:
+    image: ${DOCKER_REGISTRY-}taskforgemessageconsumer
+    platform: ${PLATFORM:-linux/amd64}
+    build:
+      context: .
+      dockerfile: src/TaskForge.MessageConsumer/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"  # AMQP port
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rabbitmq_data:
 

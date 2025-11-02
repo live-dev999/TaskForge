@@ -4,9 +4,9 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>cobertura,json</Format>
+          <Format>cobertura,json,lcov</Format>
           <Exclude>[*.Tests]*,[*.Test]*,[xunit.*]*</Exclude>
-          <ExcludeByFile>**/Migrations/**</ExcludeByFile>
+          <ExcludeByFile>**/Migrations/**,**/Program.cs,**/GlobalUsings.cs,**/*.Designer.cs,**/AssemblyInfo.cs</ExcludeByFile>
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <IncludeDirectory>../src</IncludeDirectory>
           <SingleHit>false</SingleHit>

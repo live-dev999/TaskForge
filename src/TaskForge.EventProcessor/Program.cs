@@ -21,12 +21,57 @@
  *   SOFTWARE.
  */
 
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add OpenTelemetry tracing
+var serviceName = builder.Configuration["OpenTelemetry:ServiceName"] 
+    ?? builder.Configuration["OTEL_SERVICE_NAME"] 
+    ?? "TaskForge.EventProcessor";
+var serviceVersion = builder.Configuration["OpenTelemetry:ServiceVersion"] 
+    ?? builder.Configuration["OTEL_SERVICE_VERSION"] 
+    ?? "1.0.0";
+var enableConsoleExporter = builder.Configuration.GetValue<bool>("OpenTelemetry:EnableConsoleExporter", 
+    builder.Configuration.GetValue<bool>("OTEL_ENABLE_CONSOLE_EXPORTER", true));
+var otlpEndpoint = builder.Configuration["OpenTelemetry:Otlp:Endpoint"] 
+    ?? builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracingBuilder =>
+    {
+        tracingBuilder
+            .AddSource(serviceName)
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
+                    .AddAttributes(new Dictionary<string, object>
+                    {
+                        ["deployment.environment"] = builder.Configuration["ASPNETCORE_ENVIRONMENT"] ?? "Development"
+                    }))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+
+        if (enableConsoleExporter)
+        {
+            tracingBuilder.AddConsoleExporter();
+        }
+
+        if (!string.IsNullOrEmpty(otlpEndpoint))
+        {
+            tracingBuilder.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(otlpEndpoint);
+            });
+        }
+    });
 
 var app = builder.Build();
 

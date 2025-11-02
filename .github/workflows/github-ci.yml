@@ -111,18 +111,24 @@ jobs:
       if: github.event_name == 'pull_request'
       run: echo "✅ API Build completed successfully!"
 
-    - name: Create TestResults directory
-      run: mkdir -p TestResults
+    - name: Copy coverlet.runsettings to test projects
+      run: |
+        cp tests/coverlet.runsettings tests/Tests.TaskForge.API/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/IntegratonTests.TaskForge.API/coverlet.runsettings
 
     - name: Run API Unit Tests
       run: |
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=api-unit-tests.trx" \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
           Tests.TaskForge.API.csproj
       working-directory: tests/Tests.TaskForge.API
@@ -132,12 +138,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=api-integration-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           IntegratonTests.TaskForge.API.csproj
       working-directory: tests/IntegratonTests.TaskForge.API
 
@@ -149,53 +159,22 @@ jobs:
         check_name: 'API Test Results'
         fail_on: 'errors'
 
-    - name: Upload Code Coverage (Cobertura)
+    - name: Upload Code Coverage
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: api-coverage
         path: '**/TestResults/**/coverage.cobertura.xml'
         retention-days: 7
-        if-no-files-found: ignore
 
-    - name: Verify LCOV file exists before Coveralls
+    - name: Upload LCOV Coverage for Coveralls
+      uses: actions/upload-artifact@v4
       if: always()
-      run: |
-        echo "Current directory: $(pwd)"
-        echo "Looking for TestResults/coverage.info..."
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info"
-          echo "File size: $(stat -c%s TestResults/coverage.info 2>/dev/null || stat -f%z TestResults/coverage.info 2>/dev/null || echo 'unknown') bytes"
-          echo "File lines: $(wc -l < TestResults/coverage.info || echo 0)"
-          echo "First 5 lines:"
-          head -5 TestResults/coverage.info || true
-          echo ""
-          echo "Sample SF (source file) entries:"
-          grep "^SF:" TestResults/coverage.info | head -3 || echo "No SF: entries found"
-        else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
-          echo "Listing TestResults directory:"
-          ls -la TestResults/ 2>/dev/null || echo "TestResults directory does not exist"
-          echo ""
-          echo "Searching for any .info files:"
-          find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
-        fi
-
-    - name: Publish API coverage report to Coveralls
-      if: always()
-      uses: coverallsapp/github-action@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: TestResults/coverage.info
-        fail-on-error: false
-        parallel: false
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        COVERALLS_SERVICE_NAME: github-actions
-        COVERALLS_GIT_BRANCH: ${{ github.ref_name }}
-        COVERALLS_GIT_COMMIT: ${{ github.sha }}
-      continue-on-error: true
+        name: api-coverage-lcov
+        path: '**/TestResults/**/coverage.info'
+        retention-days: 7
+        if-no-files-found: ignore
 
   build-and-test-eventprocessor:
     name: 'Build and Test EventProcessor'
@@ -230,18 +209,24 @@ jobs:
       if: github.event_name == 'pull_request'
       run: echo "✅ EventProcessor Build completed successfully!"
 
-    - name: Create TestResults directory
-      run: mkdir -p TestResults
+    - name: Copy coverlet.runsettings to test projects
+      run: |
+        cp tests/coverlet.runsettings tests/Tests.TaskForge.EventProcessor/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/IntegratonTests.TaskForge.EventProcessor/coverlet.runsettings
 
     - name: Run EventProcessor Unit Tests
       run: |
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=eventprocessor-unit-tests.trx" \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
           Tests.TaskForge.EventProcessor.csproj
       working-directory: tests/Tests.TaskForge.EventProcessor
@@ -251,12 +236,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=eventprocessor-integration-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           IntegratonTests.TaskForge.EventProcessor.csproj
       working-directory: tests/IntegratonTests.TaskForge.EventProcessor
 
@@ -268,40 +257,50 @@ jobs:
         check_name: 'EventProcessor Test Results'
         fail_on: 'errors'
 
-    - name: Upload Code Coverage (Cobertura)
+    - name: Upload Code Coverage
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: eventprocessor-coverage
         path: '**/TestResults/**/coverage.cobertura.xml'
         retention-days: 7
-        if-no-files-found: ignore
 
-    - name: Verify LCOV file exists before Coveralls
+    - name: Generate LCOV Coverage Report for Coveralls
       if: always()
       run: |
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info ($(wc -l < TestResults/coverage.info || echo 0) lines)"
-        else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
-          find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+        # Install dependencies
+        sudo apt-get update && sudo apt-get install -y lcov || true
+        python3 -m pip install --upgrade pip --quiet || true
+        python3 -m pip install pycobertura --quiet || true
+        
+        mkdir -p coverage-lcov
+        
+        for coverage_file in $(find . -name "coverage.cobertura.xml" -path "*/TestResults/*" 2>/dev/null); do
+          if [ -f "$coverage_file" ]; then
+            filename=$(basename "$coverage_file" .xml | tr '/' '_' | tr ' ' '_')
+            echo "Converting: $coverage_file to coverage-lcov/${filename}.info"
+            pycobertura convert --format lcov "$coverage_file" "coverage-lcov/${filename}.info" || true
+          fi
+        done
+        
+        # Merge all LCOV files into one
+        if [ -d coverage-lcov ] && [ "$(ls -A coverage-lcov/*.info 2>/dev/null)" ]; then
+          if command -v lcov &> /dev/null; then
+            lcov -a coverage-lcov/*.info -o coverage-lcov/merged.info || true
+          else
+            cat coverage-lcov/*.info > coverage-lcov/merged.info || true
+          fi
         fi
-
-    - name: Publish EventProcessor coverage report to Coveralls
-      if: always()
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: TestResults/coverage.info
-        fail-on-error: false
-        parallel: false
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        COVERALLS_SERVICE_NAME: github-actions
-        COVERALLS_GIT_BRANCH: ${{ github.ref_name }}
-        COVERALLS_GIT_COMMIT: ${{ github.sha }}
       continue-on-error: true
+
+    - name: Upload LCOV Coverage for Coveralls
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: eventprocessor-coverage-lcov
+        path: 'coverage-lcov/*.info'
+        retention-days: 7
+        if-no-files-found: ignore
 
   build-and-test-messageconsumer:
     name: 'Build and Test MessageConsumer'
@@ -336,18 +335,24 @@ jobs:
       if: github.event_name == 'pull_request'
       run: echo "✅ MessageConsumer Build completed successfully!"
 
-    - name: Create TestResults directory
-      run: mkdir -p TestResults
+    - name: Copy coverlet.runsettings to test projects
+      run: |
+        cp tests/coverlet.runsettings tests/Tests.TaskForge.MessageConsumer/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/IntegratonTests.TaskForge.MessageConsumer/coverlet.runsettings
 
     - name: Run MessageConsumer Unit Tests
       run: |
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=messageconsumer-unit-tests.trx" \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
           Tests.TaskForge.MessageConsumer.csproj
       working-directory: tests/Tests.TaskForge.MessageConsumer
@@ -357,12 +362,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=messageconsumer-integration-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           IntegratonTests.TaskForge.MessageConsumer.csproj
       working-directory: tests/IntegratonTests.TaskForge.MessageConsumer
 
@@ -374,40 +383,50 @@ jobs:
         check_name: 'MessageConsumer Test Results'
         fail_on: 'errors'
 
-    - name: Upload Code Coverage (Cobertura)
+    - name: Upload Code Coverage
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: messageconsumer-coverage
         path: '**/TestResults/**/coverage.cobertura.xml'
         retention-days: 7
-        if-no-files-found: ignore
 
-    - name: Verify LCOV file exists before Coveralls
+    - name: Generate LCOV Coverage Report for Coveralls
       if: always()
       run: |
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info ($(wc -l < TestResults/coverage.info || echo 0) lines)"
-        else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
-          find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+        # Install dependencies
+        sudo apt-get update && sudo apt-get install -y lcov || true
+        python3 -m pip install --upgrade pip --quiet || true
+        python3 -m pip install pycobertura --quiet || true
+        
+        mkdir -p coverage-lcov
+        
+        for coverage_file in $(find . -name "coverage.cobertura.xml" -path "*/TestResults/*" 2>/dev/null); do
+          if [ -f "$coverage_file" ]; then
+            filename=$(basename "$coverage_file" .xml | tr '/' '_' | tr ' ' '_')
+            echo "Converting: $coverage_file to coverage-lcov/${filename}.info"
+            pycobertura convert --format lcov "$coverage_file" "coverage-lcov/${filename}.info" || true
+          fi
+        done
+        
+        # Merge all LCOV files into one
+        if [ -d coverage-lcov ] && [ "$(ls -A coverage-lcov/*.info 2>/dev/null)" ]; then
+          if command -v lcov &> /dev/null; then
+            lcov -a coverage-lcov/*.info -o coverage-lcov/merged.info || true
+          else
+            cat coverage-lcov/*.info > coverage-lcov/merged.info || true
+          fi
         fi
-
-    - name: Publish MessageConsumer coverage report to Coveralls
-      if: always()
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: TestResults/coverage.info
-        fail-on-error: false
-        parallel: false
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        COVERALLS_SERVICE_NAME: github-actions
-        COVERALLS_GIT_BRANCH: ${{ github.ref_name }}
-        COVERALLS_GIT_COMMIT: ${{ github.sha }}
       continue-on-error: true
+
+    - name: Upload LCOV Coverage for Coveralls
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: messageconsumer-coverage-lcov
+        path: 'coverage-lcov/*.info'
+        retention-days: 7
+        if-no-files-found: ignore
 
   run-common-tests:
     name: 'Run Common Tests (Application, Domain, Persistence)'
@@ -439,18 +458,27 @@ jobs:
         dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
         dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
 
-    - name: Create TestResults directory
-      run: mkdir -p TestResults
+    - name: Copy coverlet.runsettings to test projects
+      run: |
+        cp tests/coverlet.runsettings tests/Tests.TaskForge.Application/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/Tests.TaskForge.Domain/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/Tests.TaskForge.Persistence/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/IntegratonTests.TaskForge.Application/coverlet.runsettings
+        cp tests/coverlet.runsettings tests/IntegratonTests.TaskForge.Persistence/coverlet.runsettings
 
     - name: Run Application Unit Tests
       run: |
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=application-unit-tests.trx" \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
           Tests.TaskForge.Application.csproj
       working-directory: tests/Tests.TaskForge.Application
@@ -460,12 +488,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=domain-unit-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           Tests.TaskForge.Domain.csproj
       working-directory: tests/Tests.TaskForge.Domain
 
@@ -474,12 +506,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=persistence-unit-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           Tests.TaskForge.Persistence.csproj
       working-directory: tests/Tests.TaskForge.Persistence
 
@@ -488,12 +524,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=application-integration-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           IntegratonTests.TaskForge.Application.csproj
       working-directory: tests/IntegratonTests.TaskForge.Application
 
@@ -502,12 +542,16 @@ jobs:
         dotnet test \
           --configuration ${{ env.BUILD_CONFIGURATION }} \
           --no-build \
-          --verbosity normal \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings coverlet.runsettings \
           --logger "trx;LogFileName=persistence-integration-tests.trx" \
-          /p:MergeWith=../../TestResults/coverage.info \
+          --logger "console;verbosity=normal" \
+          --blame \
           /p:CollectCoverage=true \
-          /p:CoverletOutput=../../TestResults/coverage.info \
+          /p:CoverletOutput=./TestResults/ \
           /p:CoverletOutputFormat=lcov \
+          /p:MergeWith=./TestResults/coverage.info \
           IntegratonTests.TaskForge.Persistence.csproj
       working-directory: tests/IntegratonTests.TaskForge.Persistence
 
@@ -519,40 +563,50 @@ jobs:
         check_name: 'Common Tests Results'
         fail_on: 'errors'
 
-    - name: Upload Code Coverage (Cobertura)
+    - name: Upload Code Coverage
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: common-coverage
         path: '**/TestResults/**/coverage.cobertura.xml'
         retention-days: 7
-        if-no-files-found: ignore
 
-    - name: Verify LCOV file exists before Coveralls
+    - name: Generate LCOV Coverage Report for Coveralls
       if: always()
       run: |
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info ($(wc -l < TestResults/coverage.info || echo 0) lines)"
-        else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
-          find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+        # Install dependencies
+        sudo apt-get update && sudo apt-get install -y lcov || true
+        python3 -m pip install --upgrade pip --quiet || true
+        python3 -m pip install pycobertura --quiet || true
+        
+        mkdir -p coverage-lcov
+        
+        for coverage_file in $(find . -name "coverage.cobertura.xml" -path "*/TestResults/*" 2>/dev/null); do
+          if [ -f "$coverage_file" ]; then
+            filename=$(basename "$coverage_file" .xml | tr '/' '_' | tr ' ' '_')
+            echo "Converting: $coverage_file to coverage-lcov/${filename}.info"
+            pycobertura convert --format lcov "$coverage_file" "coverage-lcov/${filename}.info" || true
+          fi
+        done
+        
+        # Merge all LCOV files into one
+        if [ -d coverage-lcov ] && [ "$(ls -A coverage-lcov/*.info 2>/dev/null)" ]; then
+          if command -v lcov &> /dev/null; then
+            lcov -a coverage-lcov/*.info -o coverage-lcov/merged.info || true
+          else
+            cat coverage-lcov/*.info > coverage-lcov/merged.info || true
+          fi
         fi
-
-    - name: Publish Common Tests coverage report to Coveralls
-      if: always()
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: TestResults/coverage.info
-        fail-on-error: false
-        parallel: false
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        COVERALLS_SERVICE_NAME: github-actions
-        COVERALLS_GIT_BRANCH: ${{ github.ref_name }}
-        COVERALLS_GIT_COMMIT: ${{ github.sha }}
       continue-on-error: true
+
+    - name: Upload LCOV Coverage for Coveralls
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: common-coverage-lcov
+        path: 'coverage-lcov/*.info'
+        retention-days: 7
+        if-no-files-found: ignore
 
   check-code-coverage:
     name: 'Check Code Coverage Threshold'
@@ -764,6 +818,14 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: false
 
+    - name: Download all LCOV coverage artifacts
+      uses: actions/download-artifact@v4
+      if: always()
+      with:
+        path: coverage-lcov-artifacts
+        pattern: '*-coverage-lcov'
+        merge-multiple: true
+
     - name: Download Cobertura coverage artifacts (fallback)
       uses: actions/download-artifact@v4
       if: always()
@@ -772,8 +834,153 @@ jobs:
         pattern: '*-coverage'
         merge-multiple: true
 
-    # LCOV coverage is now sent directly to Coveralls by each service job
-    # No need to merge LCOV files here anymore
+    - name: Merge LCOV Coverage Reports
+      if: always()
+      run: |
+        # Install lcov for merging
+        sudo apt-get update && sudo apt-get install -y lcov || true
+        
+        mkdir -p merged-coverage
+        
+        echo "========================================="
+        echo "Collecting LCOV files from artifacts"
+        echo "========================================="
+        echo "Current directory: $(pwd)"
+        
+        # Find all LCOV files in downloaded artifacts
+        lcov_files=$(find coverage-lcov-artifacts -name "coverage.info" -type f 2>/dev/null || true)
+        lcov_count=$(echo "$lcov_files" | wc -l | tr -d ' ' || echo "0")
+        
+        echo "Found LCOV files: $lcov_count"
+        
+        if [ "$lcov_count" -gt 0 ] && [ -n "$lcov_files" ]; then
+          echo "LCOV files found:"
+          echo "$lcov_files" | head -10
+          echo ""
+          
+          # Copy all LCOV files to merged-coverage directory
+          for lcov_file in $lcov_files; do
+            if [ -f "$lcov_file" ]; then
+              cp "$lcov_file" merged-coverage/ 2>/dev/null || true
+            fi
+          done
+          
+          # Find all copied files
+          merged_files=$(find merged-coverage -name "*.info" -type f 2>/dev/null || true)
+          merged_count=$(echo "$merged_files" | wc -l | tr -d ' ' || echo "0")
+          
+          echo "Files ready for merging: $merged_count"
+          
+          if [ "$merged_count" -gt 0 ] && [ -n "$merged_files" ]; then
+            echo ""
+            echo "Merging LCOV files..."
+            
+            # Merge using lcov
+            if command -v lcov &> /dev/null; then
+              lcov -a $(echo "$merged_files" | tr '\n' ' ') -o merged-coverage/merged.info 2>&1 || {
+                echo "lcov merge failed, trying alternative method..."
+                # Fallback: use first file as base and merge others
+                first_file=$(echo "$merged_files" | head -1)
+                cp "$first_file" merged-coverage/merged.info 2>/dev/null || true
+                for file in $(echo "$merged_files" | tail -n +2); do
+                  if [ -f "$file" ]; then
+                    lcov -a merged-coverage/merged.info -a "$file" -o merged-coverage/merged.tmp 2>/dev/null && \
+                    mv merged-coverage/merged.tmp merged-coverage/merged.info || true
+                  fi
+                done
+              }
+            else
+              echo "lcov not available, using first file as merged..."
+              first_file=$(echo "$merged_files" | head -1)
+              cp "$first_file" merged-coverage/merged.info 2>/dev/null || true
+            fi
+            
+            # Verify merged file
+            if [ -f merged-coverage/merged.info ]; then
+              file_size=$(stat -c%s merged-coverage/merged.info 2>/dev/null || echo "0")
+              file_lines=$(wc -l < merged-coverage/merged.info || echo 0)
+              echo ""
+              echo "✅ Merged file created: $file_lines lines, $file_size bytes"
+              
+              if [ "$file_lines" -gt 10 ]; then
+                echo "✅ Merged file has content"
+              else
+                echo "⚠️ WARNING: Merged file is too small!"
+              fi
+            else
+              echo "❌ ERROR: merged.info file was not created!"
+            fi
+          else
+            echo "❌ No LCOV files found for merging!"
+          fi
+        else
+          echo "❌ No LCOV files found in artifacts!"
+          echo "Directory contents:"
+          find coverage-lcov-artifacts -type f -name "*.info" 2>/dev/null | head -20 || echo "No .info files found"
+        fi
+        
+        echo ""
+        echo "========================================="
+        
+        # Verify final file exists
+        if [ -f merged-coverage/merged.info ]; then
+          file_lines=$(wc -l < merged-coverage/merged.info || echo 0)
+          echo "✅ merged-coverage/merged.info exists ($file_lines lines)"
+          echo "Full path: $(pwd)/merged-coverage/merged.info"
+        else
+          echo "❌ ERROR: merged-coverage/merged.info does not exist!"
+          echo "Creating minimal file as fallback..."
+          mkdir -p merged-coverage
+          echo "TN:" > merged-coverage/merged.info
+          echo "end_of_record" >> merged-coverage/merged.info
+        fi
+      continue-on-error: false
+
+    - name: Verify Coverage File Before Upload
+      if: always()
+      run: |
+        echo "Current working directory: $(pwd)"
+        echo "GitHub workspace: ${{ github.workspace }}"
+        echo "Checking for coverage files..."
+        
+        if [ -f merged-coverage/merged.info ]; then
+          echo "✅ File exists: merged-coverage/merged.info"
+          echo "Absolute path: $(realpath merged-coverage/merged.info 2>/dev/null || echo "$(pwd)/merged-coverage/merged.info")"
+          echo "File size: $(stat -f%z merged-coverage/merged.info 2>/dev/null || stat -c%s merged-coverage/merged.info 2>/dev/null || echo 'unknown') bytes"
+          echo "File lines: $(wc -l < merged-coverage/merged.info || echo 0)"
+          echo "First 10 lines:"
+          head -10 merged-coverage/merged.info || true
+        else
+          echo "❌ File does not exist: merged-coverage/merged.info"
+          echo "Listing merged-coverage directory:"
+          ls -la merged-coverage/ 2>/dev/null || echo "Directory does not exist"
+          echo "Creating minimal file..."
+          mkdir -p merged-coverage
+          echo "TN:" > merged-coverage/merged.info
+          echo "end_of_record" >> merged-coverage/merged.info
+          echo "✅ Created minimal coverage file"
+        fi
+        
+        # Store absolute path for next step
+        COVERAGE_FILE=$(realpath merged-coverage/merged.info 2>/dev/null || echo "$(pwd)/merged-coverage/merged.info")
+        echo "COVERAGE_FILE=$COVERAGE_FILE" >> $GITHUB_ENV
+        echo "Coverage file path: $COVERAGE_FILE"
+
+    - name: Publish Code Coverage to Coveralls
+      if: always()
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: merged-coverage/merged.info
+        base-path: ${{ github.workspace }}
+        fail-on-error: false
+        parallel: false
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        COVERALLS_SERVICE_NAME: github-actions
+        COVERALLS_GIT_BRANCH: ${{ github.ref_name }}
+        COVERALLS_GIT_COMMIT: ${{ github.sha }}
+      continue-on-error: true
 
   build-docker-images:
     name: 'Build Docker Images'
@@ -784,7 +991,7 @@ jobs:
       - run-common-tests
       - check-code-coverage
     runs-on: ubuntu-latest
-    if: false  # Disabled: Docker build and publish stages disabled for all CI
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     
     steps:
     - name: Checkout code

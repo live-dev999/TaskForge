@@ -3,6 +3,8 @@
  *   All rights reserved.
  */
 
+using System.Reflection;
+using System.Linq;
 using FluentAssertions;
 using NetArchTest.Rules;
 using Tests.TaskForge.Architecture.Core;

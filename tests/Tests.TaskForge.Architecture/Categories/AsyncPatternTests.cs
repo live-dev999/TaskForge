@@ -3,6 +3,8 @@
  *   All rights reserved.
  */
 
+using System.Reflection;
+using System.Linq;
 using FluentAssertions;
 using Tests.TaskForge.Architecture.Core;
 using Tests.TaskForge.Architecture.Helpers;

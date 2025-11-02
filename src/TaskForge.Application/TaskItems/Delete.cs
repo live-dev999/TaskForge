@@ -18,12 +18,14 @@ public class Delete
         private readonly DataContext _context;
         private readonly ILogger<Handler> _logger;
         private readonly IEventService _eventService;
+        private readonly IMessageProducer _messageProducer;
 
-        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService)
+        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
         {
             _context = context;
             _logger = logger;
             _eventService = eventService;
+            _messageProducer = messageProducer;
         }
 
         public async Task<Result<Unit>> Handle(
@@ -63,7 +65,7 @@ public class Delete
             
             _logger.LogInformation("Command Delete TaskItem completed successfully for Id: {TaskItemId}", request.Id);
             
-            // Send event to EventProcessor (fire and forget - don't block on failure)
+            // Send events (synchronous HTTP and asynchronous RabbitMQ) - fire and forget - don't block on failure
             _ = Task.Run(async () =>
             {
                 try
@@ -79,11 +81,16 @@ public class Delete
                         CreatedAt = deletedTaskData.CreatedAt,
                         UpdatedAt = deletedTaskData.UpdatedAt
                     };
+                    
+                    // Send to EventProcessor (synchronous HTTP)
                     await _eventService.SendEventAsync(eventDto, cancellationToken);
+                    
+                    // Publish to RabbitMQ (asynchronous)
+                    await _messageProducer.PublishEventAsync(eventDto, cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error in background task for sending event: TaskId={TaskId}", request.Id);
+                    _logger.LogError(ex, "Error in background task for sending events: TaskId={TaskId}", request.Id);
                 }
             }, cancellationToken);
             

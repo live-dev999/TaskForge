@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TaskForge.MessageConsumer\TaskForge.MessageConsumer.csproj" />
+    <ProjectReference Include="..\..\src\TaskForge.Application\TaskForge.Application.csproj" />
   </ItemGroup>
 
 </Project>

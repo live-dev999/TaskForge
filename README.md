@@ -120,6 +120,26 @@ if you use docker-compose for Apply Silicon CPU - M1/M2/M3 (ARM)
 docker-compose -f docker-compose.arm.yml -f docker-compose.override.yml up
 ```
 
+### **Client Application**
+
+The React client application is included in the Docker Compose setup. After starting all services:
+
+- **Client**: Available at `http://localhost:3000` (configurable via `CLIENT_PORT` environment variable)
+- **API**: Available at `http://localhost:5009/api`
+- **EventProcessor**: Available at `http://localhost:5010`
+- **Database**: SQL Server at `localhost:5433`
+
+#### Client Configuration
+
+The client uses environment variables for configuration:
+
+- `REACT_APP_API_URL` - API base URL (defaults to `/api` in Docker, uses nginx proxy)
+- `CLIENT_PORT` - Client service port (defaults to `3000`)
+
+In Docker, the client automatically proxies API requests through nginx to the backend service.
+
+For more details, see `src/client-app/README-DOCKER.md`.
+
 
 ### **Deploy local database in your machine (alternative method)**
 Go to link [for download Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Install Microsoft SQL Server using the installer or any other method available.

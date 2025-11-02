@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="NetArchTest.Rules" Version="1.3.2" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Reflection" />
+    <Using Include="NetArchTest.Rules" />
+    <Using Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TaskForge.API\TaskForge.API.csproj" />
+    <ProjectReference Include="..\..\src\TaskForge.Application\TaskForge.Application.csproj" />
+    <ProjectReference Include="..\..\src\TaskForge.Domain\TaskForge.Domain.csproj" />
+    <ProjectReference Include="..\..\src\TaskForge.Persistence\TaskForge.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\TaskForge.EventProcessor\TaskForge.EventProcessor.csproj" />
+    <ProjectReference Include="..\..\src\TaskForge.MessageConsumer\TaskForge.MessageConsumer.csproj" />
+  </ItemGroup>
+
+</Project>
+

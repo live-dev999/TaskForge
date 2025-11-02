@@ -37,6 +37,8 @@
     <ProjectReference Include="..\..\src\TaskForge.Persistence\TaskForge.Persistence.csproj" />
     <ProjectReference Include="..\..\src\TaskForge.EventProcessor\TaskForge.EventProcessor.csproj" />
     <ProjectReference Include="..\..\src\TaskForge.MessageConsumer\TaskForge.MessageConsumer.csproj" />
+    <ProjectReference Include="..\Tests.TaskForge.API\Tests.TaskForge.API.csproj" />
+    <ProjectReference Include="..\Tests.TaskForge.Application\Tests.TaskForge.Application.csproj" />
   </ItemGroup>
 
 </Project>

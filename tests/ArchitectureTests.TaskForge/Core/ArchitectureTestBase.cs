@@ -25,7 +25,7 @@ using System.Reflection;
 using NetArchTest.Rules;
 using FluentAssertions;
 
-namespace Tests.TaskForge.Architecture.Core;
+namespace ArchitectureTests.TaskForge.Core;
 
 /// <summary>
 /// Base class for all architecture tests.

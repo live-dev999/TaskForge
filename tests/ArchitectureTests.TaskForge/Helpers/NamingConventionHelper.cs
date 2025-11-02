@@ -6,7 +6,7 @@
 using System.Reflection;
 using NetArchTest.Rules;
 
-namespace Tests.TaskForge.Architecture.Helpers;
+namespace ArchitectureTests.TaskForge.Helpers;
 
 /// <summary>
 /// Helper methods for checking naming conventions.

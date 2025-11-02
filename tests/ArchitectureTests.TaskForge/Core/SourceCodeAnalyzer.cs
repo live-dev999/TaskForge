@@ -6,7 +6,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace Tests.TaskForge.Architecture.Core;
+namespace ArchitectureTests.TaskForge.Core;
 
 /// <summary>
 /// Analyzes source code files for architectural patterns and violations.

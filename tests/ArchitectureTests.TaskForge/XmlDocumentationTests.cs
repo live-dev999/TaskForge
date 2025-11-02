@@ -27,16 +27,16 @@ using System.Xml.XPath;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Tests for XML documentation consistency.
 /// </summary>
 public class XmlDocumentationTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
-    private static readonly Assembly DomainAssembly = typeof(TaskForge.Domain.TaskItem).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(global::TaskForge.Domain.TaskItem).Assembly;
 
     private static XDocument? GetXmlDocumentation(Assembly assembly)
     {

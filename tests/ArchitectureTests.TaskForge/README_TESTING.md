@@ -33,38 +33,38 @@ dotnet --version
 ### 2. Восстановление зависимостей
 
 ```bash
-dotnet restore tests/Tests.TaskForge.Architecture/Tests.TaskForge.Architecture.csproj
+dotnet restore tests/ArchitectureTests.TaskForge/ArchitectureTests.TaskForge.csproj
 ```
 
 ### 3. Сборка проекта
 
 ```bash
-dotnet build tests/Tests.TaskForge.Architecture/Tests.TaskForge.Architecture.csproj
+dotnet build tests/ArchitectureTests.TaskForge/ArchitectureTests.TaskForge.csproj
 ```
 
 ### 4. Запуск всех тестов
 
 ```bash
-dotnet test tests/Tests.TaskForge.Architecture/Tests.TaskForge.Architecture.csproj --verbosity normal
+dotnet test tests/ArchitectureTests.TaskForge/ArchitectureTests.TaskForge.csproj --verbosity normal
 ```
 
 ### 5. Запуск конкретных категорий тестов
 
 ```bash
 # Тесты зависимостей слоев
-dotnet test tests/Tests.TaskForge.Architecture --filter "FullyQualifiedName~LayerDependencyTests"
+dotnet test tests/ArchitectureTests.TaskForge --filter "FullyQualifiedName~LayerDependencyTests"
 
 # Тесты async паттернов
-dotnet test tests/Tests.TaskForge.Architecture --filter "FullyQualifiedName~AsyncPatternTests"
+dotnet test tests/ArchitectureTests.TaskForge --filter "FullyQualifiedName~AsyncPatternTests"
 
 # Тесты безопасности
-dotnet test tests/Tests.TaskForge.Architecture --filter "FullyQualifiedName~SecurityTests"
+dotnet test tests/ArchitectureTests.TaskForge --filter "FullyQualifiedName~SecurityTests"
 ```
 
 ### 6. Запуск с подробным выводом
 
 ```bash
-dotnet test tests/Tests.TaskForge.Architecture/Tests.TaskForge.Architecture.csproj --verbosity detailed
+dotnet test tests/ArchitectureTests.TaskForge/ArchitectureTests.TaskForge.csproj --verbosity detailed
 ```
 
 ## 🔍 Поиск и исправление ошибок

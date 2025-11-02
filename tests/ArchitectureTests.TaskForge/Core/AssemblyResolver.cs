@@ -5,7 +5,7 @@
 
 using System.Reflection;
 
-namespace Tests.TaskForge.Architecture.Core;
+namespace ArchitectureTests.TaskForge.Core;
 
 /// <summary>
 /// Resolves and manages assemblies for architecture tests.
@@ -99,12 +99,12 @@ public class AssemblyResolver
         if (assemblyName.StartsWith(projectPrefix + "."))
         {
             var withoutPrefix = assemblyName.Substring(projectPrefix.Length + 1);
-            var parts = withoutPrefix.Split('.');
-            return parts.Length > 0 ? parts.First() : withoutPrefix;
+            var prefixParts = withoutPrefix.Split('.');
+            return prefixParts.Length > 0 ? prefixParts.First() : withoutPrefix;
         }
         
-        var parts = assemblyName.Split('.');
-        return parts.Length > 0 ? parts.First() : assemblyName;
+        var nameParts = assemblyName.Split('.');
+        return nameParts.Length > 0 ? nameParts.First() : assemblyName;
     }
 }
 

@@ -26,7 +26,7 @@ using FluentAssertions;
 using NetArchTest.Rules;
 using TaskForge.API.Controllers;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Tests for architectural consistency across the solution.
@@ -318,7 +318,7 @@ public class ConsistencyTests
     [Fact]
     public void Result_T_Should_Be_Immutable()
     {
-        var resultType = typeof(TaskForge.Application.Core.Result<>);
+        var resultType = typeof(global::TaskForge.Application.Core.Result<>);
 
         var properties = resultType.GetProperties();
 

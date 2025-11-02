@@ -26,19 +26,19 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using NetArchTest.Rules;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Tests for naming conventions consistency.
 /// </summary>
 public class NamingConventionTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
-    private static readonly Assembly DomainAssembly = typeof(TaskForge.Domain.TaskItem).Assembly;
-    private static readonly Assembly PersistenceAssembly = typeof(TaskForge.Persistence.DataContext).Assembly;
-    private static readonly Assembly EventProcessorAssembly = typeof(TaskForge.EventProcessor.Controllers.EventsController).Assembly;
-    private static readonly Assembly MessageConsumerAssembly = typeof(TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(global::TaskForge.Domain.TaskItem).Assembly;
+    private static readonly Assembly PersistenceAssembly = typeof(global::TaskForge.Persistence.DataContext).Assembly;
+    private static readonly Assembly EventProcessorAssembly = typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly;
+    private static readonly Assembly MessageConsumerAssembly = typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
 
     [Fact]
     public void All_Private_Fields_Should_Start_With_Underscore()

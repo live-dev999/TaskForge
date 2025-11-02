@@ -7,9 +7,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Linq;
 using FluentAssertions;
-using Tests.TaskForge.Architecture.Core;
+using ArchitectureTests.TaskForge.Core;
 
-namespace Tests.TaskForge.Architecture.Categories;
+namespace ArchitectureTests.TaskForge.Categories;
 
 /// <summary>
 /// Tests for security-related architectural rules.
@@ -20,9 +20,9 @@ public class SecurityTests : ArchitectureTestBase
     {
         return new Dictionary<string, Assembly>
         {
-            { "API", typeof(TaskForge.API.Controllers.TaskItemsController).Assembly },
-            { "Application", typeof(TaskForge.Application.Core.Result<>).Assembly },
-            { "Persistence", typeof(TaskForge.Persistence.DataContext).Assembly }
+            { "API", typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly },
+            { "Application", typeof(global::TaskForge.Application.Core.Result<>).Assembly },
+            { "Persistence", typeof(global::TaskForge.Persistence.DataContext).Assembly }
         };
     }
 

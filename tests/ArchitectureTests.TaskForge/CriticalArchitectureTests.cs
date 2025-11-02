@@ -25,20 +25,22 @@ using System.Reflection;
 using FluentAssertions;
 using NetArchTest.Rules;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Critical architecture tests that enforce the most important architectural rules.
 /// </summary>
 public class CriticalArchitectureTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
-    private static readonly Assembly DomainAssembly = typeof(TaskForge.Domain.TaskItem).Assembly;
-    private static readonly Assembly PersistenceAssembly = typeof(TaskForge.Persistence.DataContext).Assembly;
-    private static readonly Assembly EventProcessorAssembly = typeof(TaskForge.EventProcessor.Controllers.EventsController).Assembly;
-    private static readonly Assembly MessageConsumerAssembly = typeof(TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(global::TaskForge.Domain.TaskItem).Assembly;
+    private static readonly Assembly PersistenceAssembly = typeof(global::TaskForge.Persistence.DataContext).Assembly;
+    private static readonly Assembly EventProcessorAssembly = typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly;
+    private static readonly Assembly MessageConsumerAssembly = typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
 
     #region Dependency Injection Best Practices
 
@@ -58,7 +60,7 @@ public class CriticalArchitectureTests
                 .GetTypes()
                 .Where(t => t.Namespace?.StartsWith("TaskForge") == true &&
                            !t.IsAbstract &&
-                           !t.IsStatic);
+                           !(t.IsAbstract && t.IsSealed && !t.IsInterface));
 
             foreach (var classType in classes)
             {
@@ -317,7 +319,7 @@ public class CriticalArchitectureTests
                 .That()
                 .AreClasses()
                 .GetTypes()
-                .Where(t => !t.IsStatic &&
+                .Where(t => !(t.IsAbstract && t.IsSealed && !t.IsInterface) &&
                            t.Namespace?.StartsWith("TaskForge") == true);
 
             foreach (var classType in classes)
@@ -401,9 +403,9 @@ public class CriticalArchitectureTests
         var hasEnums = Types
             .InAssembly(DomainAssembly)
             .That()
-            .AreEnums()
+            .AreNotNested()
             .GetTypes()
-            .Any();
+            .Any(t => t.IsEnum);
 
         hasEnums.Should().BeTrue(
             "Domain should use enums instead of magic strings for status values");
@@ -680,11 +682,11 @@ public class CriticalArchitectureTests
                 .ToList();
 
             references.Should().NotContain(a => 
-                a?.Contains("Moq") == true ||
-                a?.Contains("xunit") == true ||
-                a?.Contains("NUnit") == true ||
-                a?.Contains("MSTest") == true ||
-                a?.Contains("Tests") == true,
+                (a != null && a.Contains("Moq")) ||
+                (a != null && a.Contains("xunit")) ||
+                (a != null && a.Contains("NUnit")) ||
+                (a != null && a.Contains("MSTest")) ||
+                (a != null && a.Contains("Tests")),
                 $"Production assembly {assembly.GetName().Name} should not reference test frameworks");
         }
     }

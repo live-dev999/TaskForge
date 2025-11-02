@@ -3,7 +3,7 @@
  *   All rights reserved.
  */
 
-namespace Tests.TaskForge.Architecture.Core;
+namespace ArchitectureTests.TaskForge.Core;
 
 /// <summary>
 /// Analyzes dependency graphs for architectural violations.

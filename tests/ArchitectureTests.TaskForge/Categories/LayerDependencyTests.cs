@@ -7,9 +7,9 @@ using System.Reflection;
 using System.Linq;
 using FluentAssertions;
 using NetArchTest.Rules;
-using Tests.TaskForge.Architecture.Core;
+using ArchitectureTests.TaskForge.Core;
 
-namespace Tests.TaskForge.Architecture.Categories;
+namespace ArchitectureTests.TaskForge.Categories;
 
 /// <summary>
 /// Tests for layer dependency rules (Clean Architecture).
@@ -20,12 +20,12 @@ public class LayerDependencyTests : ArchitectureTestBase
     {
         return new Dictionary<string, Assembly>
         {
-            { "API", typeof(TaskForge.API.Controllers.TaskItemsController).Assembly },
-            { "Application", typeof(TaskForge.Application.Core.Result<>).Assembly },
-            { "Domain", typeof(TaskForge.Domain.TaskItem).Assembly },
-            { "Persistence", typeof(TaskForge.Persistence.DataContext).Assembly },
-            { "EventProcessor", typeof(TaskForge.EventProcessor.Controllers.EventsController).Assembly },
-            { "MessageConsumer", typeof(TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly }
+            { "API", typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly },
+            { "Application", typeof(global::TaskForge.Application.Core.Result<>).Assembly },
+            { "Domain", typeof(global::TaskForge.Domain.TaskItem).Assembly },
+            { "Persistence", typeof(global::TaskForge.Persistence.DataContext).Assembly },
+            { "EventProcessor", typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly },
+            { "MessageConsumer", typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly }
         };
     }
 
@@ -43,8 +43,8 @@ public class LayerDependencyTests : ArchitectureTestBase
         // NetArchTest requires building the chain properly
         var result = Types
             .InAssembly(domainAssembly)
-            .ShouldNot()
-            .HaveDependencyOnAny(forbiddenDependencies)
+            .Should()
+            .NotHaveDependencyOnAny(forbiddenDependencies)
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(
@@ -64,8 +64,8 @@ public class LayerDependencyTests : ArchitectureTestBase
         
         var result = Types
             .InAssembly(applicationAssembly)
-            .ShouldNot()
-            .HaveDependencyOnAny(forbiddenDependencies)
+            .Should()
+            .NotHaveDependencyOnAny(forbiddenDependencies)
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(

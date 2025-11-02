@@ -6,10 +6,10 @@
 using System.Reflection;
 using System.Linq;
 using FluentAssertions;
-using Tests.TaskForge.Architecture.Core;
-using Tests.TaskForge.Architecture.Helpers;
+using ArchitectureTests.TaskForge.Core;
+using ArchitectureTests.TaskForge.Helpers;
 
-namespace Tests.TaskForge.Architecture.Categories;
+namespace ArchitectureTests.TaskForge.Categories;
 
 /// <summary>
 /// Tests for async/await patterns and ConfigureAwait usage.
@@ -20,8 +20,8 @@ public class AsyncPatternTests : ArchitectureTestBase
     {
         return new Dictionary<string, Assembly>
         {
-            { "Application", typeof(TaskForge.Application.Core.Result<>).Assembly },
-            { "Persistence", typeof(TaskForge.Persistence.DataContext).Assembly }
+            { "Application", typeof(global::TaskForge.Application.Core.Result<>).Assembly },
+            { "Persistence", typeof(global::TaskForge.Persistence.DataContext).Assembly }
         };
     }
 

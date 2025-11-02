@@ -4,9 +4,9 @@
  */
 
 using System.Text.RegularExpressions;
-using Tests.TaskForge.Architecture.Core;
+using ArchitectureTests.TaskForge.Core;
 
-namespace Tests.TaskForge.Architecture.Helpers;
+namespace ArchitectureTests.TaskForge.Helpers;
 
 /// <summary>
 /// Helper methods for checking async/await patterns.

@@ -4,10 +4,10 @@
  */
 
 using FluentAssertions;
-using Tests.TaskForge.Architecture.Core;
-using Tests.TaskForge.Architecture.Helpers;
+using ArchitectureTests.TaskForge.Core;
+using ArchitectureTests.TaskForge.Helpers;
 
-namespace Tests.TaskForge.Architecture.Examples;
+namespace ArchitectureTests.TaskForge.Examples;
 
 /// <summary>
 /// Example of how to use the refactored architecture tests in another project.
@@ -21,10 +21,10 @@ public class ExampleProjectTests : ArchitectureTestBase
         // Replace these with your actual project types
         return new Dictionary<string, Assembly>
         {
-            { "API", typeof(TaskForge.API.Controllers.TaskItemsController).Assembly },
-            { "Application", typeof(TaskForge.Application.Core.Result<>).Assembly },
-            { "Domain", typeof(TaskForge.Domain.TaskItem).Assembly },
-            { "Persistence", typeof(TaskForge.Persistence.DataContext).Assembly }
+            { "API", typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly },
+            { "Application", typeof(global::TaskForge.Application.Core.Result<>).Assembly },
+            { "Domain", typeof(global::TaskForge.Domain.TaskItem).Assembly },
+            { "Persistence", typeof(global::TaskForge.Persistence.DataContext).Assembly }
         };
     }
 
@@ -48,8 +48,8 @@ public class ExampleProjectTests : ArchitectureTestBase
         // Use NetArchTest for layer validation
         var result = NetArchTest.Rules.Types
             .InAssembly(domainAssembly)
-            .ShouldNot()
-            .HaveDependencyOn("YourProject.Application")
+            .Should()
+            .NotHaveDependencyOn("YourProject.Application")
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue();

@@ -27,7 +27,7 @@ using FluentAssertions;
 using NetArchTest.Rules;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// High priority architecture tests for critical architectural rules.
@@ -35,12 +35,12 @@ namespace Tests.TaskForge.Architecture;
 /// </summary>
 public class HighPriorityArchitectureTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
-    private static readonly Assembly DomainAssembly = typeof(TaskForge.Domain.TaskItem).Assembly;
-    private static readonly Assembly PersistenceAssembly = typeof(TaskForge.Persistence.DataContext).Assembly;
-    private static readonly Assembly EventProcessorAssembly = typeof(TaskForge.EventProcessor.Controllers.EventsController).Assembly;
-    private static readonly Assembly MessageConsumerAssembly = typeof(TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(global::TaskForge.Domain.TaskItem).Assembly;
+    private static readonly Assembly PersistenceAssembly = typeof(global::TaskForge.Persistence.DataContext).Assembly;
+    private static readonly Assembly EventProcessorAssembly = typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly;
+    private static readonly Assembly MessageConsumerAssembly = typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
 
     #region Critical Test 1: DbContext in Controllers
 

@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.TaskForge.EventProces
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.TaskForge.MessageConsumer", "tests\Tests.TaskForge.MessageConsumer\Tests.TaskForge.MessageConsumer.csproj", "{1DD54D18-5819-4977-8966-5ACAB7F8BB1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.TaskForge.Architecture", "tests\Tests.TaskForge.Architecture\Tests.TaskForge.Architecture.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchitectureTests.TaskForge", "tests\ArchitectureTests.TaskForge\ArchitectureTests.TaskForge.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.TaskForge.Core", "tests\Tests.TaskForge.Core\Tests.TaskForge.Core.csproj", "{B2C3D4E5-F6A7-8901-BCDE-F123456789AB}"
 EndProject

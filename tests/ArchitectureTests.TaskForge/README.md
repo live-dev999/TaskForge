@@ -50,19 +50,19 @@
 
 ```bash
 # Запустить все архитектурные тесты
-dotnet test tests/Tests.TaskForge.Architecture
+dotnet test tests/ArchitectureTests.TaskForge
 
 # Запустить конкретный файл тестов
-dotnet test tests/Tests.TaskForge.Architecture --filter "FullyQualifiedName~ArchitectureTests"
+dotnet test tests/ArchitectureTests.TaskForge --filter "FullyQualifiedName~ArchitectureTests"
 
 # Запустить с подробным выводом
-dotnet test tests/Tests.TaskForge.Architecture --verbosity normal
+dotnet test tests/ArchitectureTests.TaskForge --verbosity normal
 ```
 
 ## Добавление в solution
 
 ```bash
-dotnet sln add tests/Tests.TaskForge.Architecture/Tests.TaskForge.Architecture.csproj
+dotnet sln add tests/ArchitectureTests.TaskForge/ArchitectureTests.TaskForge.csproj
 ```
 
 ## Что проверяется

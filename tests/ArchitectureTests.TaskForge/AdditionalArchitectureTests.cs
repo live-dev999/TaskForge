@@ -25,19 +25,19 @@ using System.Reflection;
 using FluentAssertions;
 using NetArchTest.Rules;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Additional important architecture tests that enforce best practices.
 /// </summary>
 public class AdditionalArchitectureTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
-    private static readonly Assembly DomainAssembly = typeof(TaskForge.Domain.TaskItem).Assembly;
-    private static readonly Assembly PersistenceAssembly = typeof(TaskForge.Persistence.DataContext).Assembly;
-    private static readonly Assembly EventProcessorAssembly = typeof(TaskForge.EventProcessor.Controllers.EventsController).Assembly;
-    private static readonly Assembly MessageConsumerAssembly = typeof(TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(global::TaskForge.Domain.TaskItem).Assembly;
+    private static readonly Assembly PersistenceAssembly = typeof(global::TaskForge.Persistence.DataContext).Assembly;
+    private static readonly Assembly EventProcessorAssembly = typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly;
+    private static readonly Assembly MessageConsumerAssembly = typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
 
     #region Async/Await Best Practices
 
@@ -280,7 +280,7 @@ public class AdditionalArchitectureTests
                 .That()
                 .AreClasses()
                 .GetTypes()
-                .Where(t => !t.IsStatic && 
+                .Where(t => !(t.IsAbstract && t.IsSealed && !t.IsInterface) &&
                            t.Namespace?.StartsWith("TaskForge") == true &&
                            !t.IsNestedPrivate);
 
@@ -392,9 +392,9 @@ public class AdditionalArchitectureTests
         var hasEnums = Types
             .InAssembly(DomainAssembly)
             .That()
-            .AreEnums()
+            .AreNotNested()
             .GetTypes()
-            .Any();
+            .Any(t => t.IsEnum);
 
         hasEnums.Should().BeTrue(
             "Domain should use enums instead of magic numbers for status values");
@@ -407,7 +407,7 @@ public class AdditionalArchitectureTests
     [Fact]
     public void Result_T_Should_Be_Sealed_Or_Immutable()
     {
-        var resultType = typeof(TaskForge.Application.Core.Result<>);
+        var resultType = typeof(global::TaskForge.Application.Core.Result<>);
 
         // Check that Result<T> cannot be inherited (via sealed or private constructor)
         var constructors = resultType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
@@ -660,7 +660,7 @@ public class AdditionalArchitectureTests
                 .Select(a => a.Name)
                 .ToList();
 
-            references.Should().NotContain(a => a?.Contains("Tests") == true || a?.Contains("Moq") == true,
+            references.Should().NotContain(a => (a != null && a.Contains("Tests")) || (a != null && a.Contains("Moq")),
                 $"Production assembly {assembly.GetName().Name} should not reference test assemblies");
         }
     }
@@ -680,7 +680,7 @@ public class AdditionalArchitectureTests
                 .Select(a => a.Name)
                 .ToList();
 
-            references.Should().Contain(a => a?.StartsWith("TaskForge") == true,
+            references.Should().Contain(a => a != null && a.StartsWith("TaskForge"),
                 $"Test assembly {testAssembly.GetName().Name} should reference production code");
         }
     }

@@ -26,19 +26,19 @@ using NetArchTest.Rules;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Architecture tests to ensure architectural consistency and conventions.
 /// </summary>
 public class ArchitectureTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
-    private static readonly Assembly DomainAssembly = typeof(TaskForge.Domain.TaskItem).Assembly;
-    private static readonly Assembly PersistenceAssembly = typeof(TaskForge.Persistence.DataContext).Assembly;
-    private static readonly Assembly EventProcessorAssembly = typeof(TaskForge.EventProcessor.Controllers.EventsController).Assembly;
-    private static readonly Assembly MessageConsumerAssembly = typeof(TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(global::TaskForge.Domain.TaskItem).Assembly;
+    private static readonly Assembly PersistenceAssembly = typeof(global::TaskForge.Persistence.DataContext).Assembly;
+    private static readonly Assembly EventProcessorAssembly = typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly;
+    private static readonly Assembly MessageConsumerAssembly = typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
 
     #region Layer Dependency Tests
 
@@ -47,20 +47,16 @@ public class ArchitectureTests
     {
         var result = Types
             .InAssembly(DomainAssembly)
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.Application")
+            .Should()
+            .NotHaveDependencyOn("TaskForge.Application")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.API")
+            .NotHaveDependencyOn("TaskForge.API")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.Persistence")
+            .NotHaveDependencyOn("TaskForge.Persistence")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.EventProcessor")
+            .NotHaveDependencyOn("TaskForge.EventProcessor")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.MessageConsumer")
+            .NotHaveDependencyOn("TaskForge.MessageConsumer")
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(
@@ -72,14 +68,12 @@ public class ArchitectureTests
     {
         var result = Types
             .InAssembly(ApplicationAssembly)
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.API")
+            .Should()
+            .NotHaveDependencyOn("TaskForge.API")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.EventProcessor")
+            .NotHaveDependencyOn("TaskForge.EventProcessor")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.MessageConsumer")
+            .NotHaveDependencyOn("TaskForge.MessageConsumer")
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(
@@ -91,8 +85,8 @@ public class ArchitectureTests
     {
         var result = Types
             .InAssembly(ApiAssembly)
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.Persistence")
+            .Should()
+            .NotHaveDependencyOn("TaskForge.Persistence")
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(
@@ -107,11 +101,9 @@ public class ArchitectureTests
             .Should()
             .HaveDependencyOn("TaskForge.Domain")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.Application")
+            .NotHaveDependencyOn("TaskForge.Application")
             .And()
-            .ShouldNot()
-            .HaveDependencyOn("TaskForge.API")
+            .NotHaveDependencyOn("TaskForge.API")
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(
@@ -317,7 +309,7 @@ public class ArchitectureTests
             .That()
             .HaveName("Worker")
             .Should()
-            .Inherit("Microsoft.Extensions.Hosting", "BackgroundService")
+            .Inherit(typeof(Microsoft.Extensions.Hosting.BackgroundService))
             .GetResult();
 
         result.IsSuccessful.Should().BeTrue(
@@ -561,9 +553,9 @@ public class ArchitectureTests
     [Fact]
     public void Event_Models_Should_Have_Consistent_Properties()
     {
-        var eventDto = typeof(TaskForge.Application.Core.TaskChangeEventDto);
-        var eventModel = typeof(TaskForge.EventProcessor.Models.TaskChangeEvent);
-        var eventConsumerModel = typeof(TaskForge.MessageConsumer.Models.TaskChangeEvent);
+        var eventDto = typeof(global::TaskForge.Application.Core.TaskChangeEventDto);
+        var eventModel = typeof(global::TaskForge.EventProcessor.Models.TaskChangeEvent);
+        var eventConsumerModel = typeof(global::TaskForge.MessageConsumer.Models.TaskChangeEvent);
 
         var dtoProperties = eventDto.GetProperties().Select(p => p.Name).OrderBy(n => n).ToList();
         var modelProperties = eventModel.GetProperties().Select(p => p.Name).OrderBy(n => n).ToList();
@@ -621,7 +613,7 @@ public class ArchitectureTests
     [Fact]
     public void Result_Class_Should_Be_Immutable()
     {
-        var resultType = typeof(TaskForge.Application.Core.Result<>);
+        var resultType = typeof(global::TaskForge.Application.Core.Result<>);
 
         var properties = resultType.GetProperties();
 

@@ -25,15 +25,15 @@ using System.Reflection;
 using FluentAssertions;
 using NetArchTest.Rules;
 
-namespace Tests.TaskForge.Architecture;
+namespace ArchitectureTests.TaskForge;
 
 /// <summary>
 /// Tests for service lifetime and dependency injection registration patterns.
 /// </summary>
 public class ServiceLifetimeTests
 {
-    private static readonly Assembly ApiAssembly = typeof(TaskForge.API.Controllers.TaskItemsController).Assembly;
-    private static readonly Assembly ApplicationAssembly = typeof(TaskForge.Application.Core.Result<>).Assembly;
+    private static readonly Assembly ApiAssembly = typeof(global::TaskForge.API.Controllers.TaskItemsController).Assembly;
+    private static readonly Assembly ApplicationAssembly = typeof(global::TaskForge.Application.Core.Result<>).Assembly;
 
     [Fact]
     public void DbContext_Should_Be_Registered_As_Scoped()

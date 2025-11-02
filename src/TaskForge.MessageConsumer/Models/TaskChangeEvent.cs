@@ -21,6 +21,8 @@
  *   SOFTWARE.
  */
 
+#nullable disable
+
 namespace TaskForge.MessageConsumer.Models;
 
 /// <summary>

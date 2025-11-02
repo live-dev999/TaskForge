@@ -21,6 +21,8 @@
  *   SOFTWARE.
  */
 
+#nullable disable
+
 namespace TaskForge.Application.Core;
 
 /// <summary>
@@ -41,17 +43,17 @@ public class TaskChangeEventDto
     /// <summary>
     /// Gets or sets the title of the task.
     /// </summary>
-    public string? Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the description of the task.
     /// </summary>
-    public string? Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the status of the task.
     /// </summary>
-    public string? Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the timestamp when the event occurred.

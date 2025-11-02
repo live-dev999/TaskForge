@@ -30,6 +30,7 @@ using FluentValidation;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using MassTransit;
 
 namespace TaskForge.API.Extensions;
 
@@ -103,6 +104,10 @@ public static class ApplicationServiceExtensions
         // Configure MassTransit with RabbitMQ
         services.AddMassTransit(x =>
         {
+            // Configure message endpoint naming convention
+            // This ensures consistent endpoint names across services
+            x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("TaskForge", false));
+
             // Configure RabbitMQ
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -111,10 +116,18 @@ public static class ApplicationServiceExtensions
                 var userName = config["RabbitMQ:UserName"] ?? "guest";
                 var password = config["RabbitMQ:Password"] ?? "guest";
 
-                cfg.Host(host, port, "/", h =>
+                cfg.Host(host, (ushort)port, "/", h =>
                 {
                     h.Username(userName);
                     h.Password(password);
+                    // Configure connection timeout - MassTransit has built-in retry for connections
+                    h.RequestedConnectionTimeout(TimeSpan.FromSeconds(30));
+                });
+
+                // Configure publish endpoint for TaskChangeEventDto
+                cfg.Message<TaskForge.Application.Core.TaskChangeEventDto>(e =>
+                {
+                    e.SetEntityName("task-change-events");
                 });
 
                 cfg.ConfigureEndpoints(context);

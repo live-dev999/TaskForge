@@ -65,25 +65,28 @@ public class MessageProducer : IMessageProducer
         try
         {
             _logger.LogInformation(
-                "Publishing task change event: TaskId={TaskId}, EventType={EventType}",
+                "Publishing task change event to RabbitMQ: TaskId={TaskId}, EventType={EventType}",
                 eventDto.TaskId,
                 eventDto.EventType);
 
             // MassTransit will automatically serialize TaskChangeEventDto and publish it
+            // The message will be routed to "task-change-events" exchange/queue based on configuration
             await _publishEndpoint.Publish(eventDto, cancellationToken);
 
             _logger.LogInformation(
-                "Successfully published task change event: TaskId={TaskId}, EventType={EventType}",
+                "Successfully published task change event to RabbitMQ: TaskId={TaskId}, EventType={EventType}",
                 eventDto.TaskId,
                 eventDto.EventType);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "Error publishing task change event: TaskId={TaskId}, EventType={EventType}",
+                "Error publishing task change event to RabbitMQ: TaskId={TaskId}, EventType={EventType}, Error={ErrorMessage}",
                 eventDto.TaskId,
-                eventDto.EventType);
-            throw;
+                eventDto.EventType,
+                ex.Message);
+            // Don't throw - allow the operation to continue even if RabbitMQ is unavailable
+            // This ensures the main operation (create/edit/delete) succeeds even if messaging fails
         }
     }
 }

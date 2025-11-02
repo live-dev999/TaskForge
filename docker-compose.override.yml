@@ -17,6 +17,12 @@ services:
       - "5433:1433"
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'your@Password' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   taskforge.api:
     container_name: taskforge.api
@@ -48,12 +54,22 @@ services:
     #volumes:
     #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
     depends_on:
-      - sql.data
-      - otel-collector
-      - rabbitmq
-      - taskforge.eventprocessor
+      sql.data:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+      taskforge.eventprocessor:
+        condition: service_started
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   taskforge.eventprocessor:
     container_name: taskforge.eventprocessor
@@ -75,10 +91,18 @@ services:
     #volumes:
     #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
     depends_on:
-      - sql.data
-      - otel-collector
+      sql.data:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
   taskforge.messageconsumer:
     container_name: taskforge.messageconsumer
@@ -95,8 +119,10 @@ services:
       - OpenTelemetry__EnableConsoleExporter=${OTEL_ENABLE_CONSOLE_EXPORTER:-true}
       - OpenTelemetry__Otlp__Endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
     depends_on:
-      - rabbitmq
-      - otel-collector
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     networks:
       - backend
 
@@ -107,7 +133,8 @@ services:
     environment:
       - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
     depends_on:
-      - taskforge.api
+      taskforge.api:
+        condition: service_healthy
     networks:
       - frontend
       - backend

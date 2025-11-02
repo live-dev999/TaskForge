@@ -26,6 +26,8 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
+#nullable disable
+
 namespace TaskForge.Application.Core;
 
 /// <summary>
@@ -35,7 +37,7 @@ public class EventService : IEventService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<EventService> _logger;
-    private readonly string? _eventProcessorBaseUrl;
+    private readonly string _eventProcessorBaseUrl;
 
     public EventService(
         HttpClient httpClient,

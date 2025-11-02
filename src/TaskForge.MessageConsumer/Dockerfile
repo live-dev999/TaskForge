@@ -12,13 +12,21 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем ТОЛЬКО .csproj файлы для restore
+# Копируем ТОЛЬКО .csproj файлы для restore (включая зависимости)
 COPY ["src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj", "src/TaskForge.MessageConsumer/"]
+COPY ["src/TaskForge.Application/TaskForge.Application.csproj", "src/TaskForge.Application/"]
+COPY ["src/TaskForge.Domain/TaskForge.Domain.csproj", "src/TaskForge.Domain/"]
+COPY ["src/TaskForge.Persistence/TaskForge.Persistence.csproj", "src/TaskForge.Persistence/"]
+COPY ["src/TaskForge.StartupTasks/TaskForge.StartupTasks.csproj", "src/TaskForge.StartupTasks/"]
 
 RUN dotnet restore "./src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj"
 
-# Копируем исходный код
+# Копируем исходный код (включая зависимости)
 COPY ["src/TaskForge.MessageConsumer/", "src/TaskForge.MessageConsumer/"]
+COPY ["src/TaskForge.Application/", "src/TaskForge.Application/"]
+COPY ["src/TaskForge.Domain/", "src/TaskForge.Domain/"]
+COPY ["src/TaskForge.Persistence/", "src/TaskForge.Persistence/"]
+COPY ["src/TaskForge.StartupTasks/", "src/TaskForge.StartupTasks/"]
 
 WORKDIR "/src/src/TaskForge.MessageConsumer"
 RUN dotnet build "./TaskForge.MessageConsumer.csproj" -c $BUILD_CONFIGURATION -o /app/build

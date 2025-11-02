@@ -784,7 +784,7 @@ jobs:
       - run-common-tests
       - check-code-coverage
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: false  # Disabled: Docker build and publish stages disabled for all CI
     
     steps:
     - name: Checkout code

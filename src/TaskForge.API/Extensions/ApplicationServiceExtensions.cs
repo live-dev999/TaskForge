@@ -95,6 +95,11 @@ public static class ApplicationServiceExtensions
                 name: "database",
                 tags: new[] { "ready" });
         
+        // Add HttpClient for EventService
+        services.AddHttpClient<TaskForge.Application.Core.EventService>();
+        services.AddScoped<TaskForge.Application.Core.IEventService>(sp =>
+            sp.GetRequiredService<TaskForge.Application.Core.EventService>());
+        
         // Add OpenTelemetry tracing
         AddOpenTelemetryTracing(services, config);
         

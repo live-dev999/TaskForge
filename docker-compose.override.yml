@@ -39,6 +39,9 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=${RABBITMQ_USER:-guest}
       - RabbitMQ__Password=${RABBITMQ_PASSWORD:-guest}
+      # EventProcessor configuration (for synchronous event processing)
+      - EventProcessor__BaseUrl=${EVENT_PROCESSOR_BASE_URL:-http://taskforge.eventprocessor:80}
+      - EVENT_PROCESSOR_BASE_URL=${EVENT_PROCESSOR_BASE_URL:-http://taskforge.eventprocessor:80}
     ports:
       - "5009:80"
       # - "10001:443"
@@ -48,6 +51,7 @@ services:
       - sql.data
       - otel-collector
       - rabbitmq
+      - taskforge.eventprocessor
     networks:
       - backend
 

@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
+using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
@@ -26,11 +27,13 @@ public class Create
     {
         private readonly DataContext _context;
         private readonly ILogger<Handler> _logger;
+        private readonly IEventService _eventService;
 
-        public Handler(DataContext context, ILogger<Handler> logger)
+        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService)
         {
             _context = context;
             _logger = logger;
+            _eventService = eventService;
         }
 
         public async Task<Result<Unit>> Handle(
@@ -61,7 +64,37 @@ public class Create
             }
             
             _logger.LogInformation("Command Create TaskItem completed successfully for Id: {TaskItemId}", request.TaskItem.Id);
+            
+            // Send event to EventProcessor (fire and forget - don't block on failure)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var eventDto = MapToEventDto(request.TaskItem, "Created");
+                    await _eventService.SendEventAsync(eventDto, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error in background task for sending event: TaskId={TaskId}", request.TaskItem.Id);
+                }
+            }, cancellationToken);
+            
             return Result<Unit>.Success(Unit.Value);
+        }
+
+        private static TaskChangeEventDto MapToEventDto(TaskItem taskItem, string eventType)
+        {
+            return new TaskChangeEventDto
+            {
+                TaskId = taskItem.Id,
+                EventType = eventType,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                Status = taskItem.Status.ToString(),
+                EventTimestamp = DateTime.UtcNow,
+                CreatedAt = taskItem.CreatedAt,
+                UpdatedAt = taskItem.UpdatedAt
+            };
         }
     }
 }

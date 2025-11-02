@@ -57,13 +57,70 @@ if (-not $dockerComposeV2) {
 }
 
 Write-Host ""
+
+# Parse arguments for rebuild flag
+$BuildFlag = $false
+$NoCacheFlag = $false
+$RemainingArgs = @()
+
+foreach ($arg in $DockerComposeArgs) {
+    switch ($arg) {
+        "--rebuild" { 
+            $BuildFlag = $true
+            Write-Host "🔄 Rebuild flag detected - images will be rebuilt" -ForegroundColor Yellow
+        }
+        "-b" { 
+            $BuildFlag = $true
+            Write-Host "🔄 Rebuild flag detected - images will be rebuilt" -ForegroundColor Yellow
+        }
+        "--rebuild-no-cache" { 
+            $BuildFlag = $true
+            $NoCacheFlag = $true
+            Write-Host "🔄 Full rebuild flag detected (no cache) - images will be rebuilt from scratch" -ForegroundColor Yellow
+        }
+        "--no-cache" { 
+            $BuildFlag = $true
+            $NoCacheFlag = $true
+            Write-Host "🔄 Full rebuild flag detected (no cache) - images will be rebuilt from scratch" -ForegroundColor Yellow
+        }
+        "-B" { 
+            $BuildFlag = $true
+            $NoCacheFlag = $true
+            Write-Host "🔄 Full rebuild flag detected (no cache) - images will be rebuilt from scratch" -ForegroundColor Yellow
+        }
+        default { 
+            $RemainingArgs += $arg
+        }
+    }
+}
+
+Write-Host ""
 Write-Host "Starting containers..." -ForegroundColor Cyan
 Write-Host ""
 
+# Build images if rebuild flag is set
+if ($BuildFlag) {
+    Write-Host "Building images..." -ForegroundColor Cyan
+    if ($dockerComposeV2) {
+        if ($NoCacheFlag) {
+            docker compose build --no-cache
+        } else {
+            docker compose build
+        }
+    } else {
+        if ($NoCacheFlag) {
+            docker-compose build --no-cache
+        } else {
+            docker-compose build
+        }
+    }
+    Write-Host ""
+}
+
 # Run docker-compose
 if ($dockerComposeV2) {
-    docker compose up @DockerComposeArgs
+    docker compose up @RemainingArgs
 } else {
-    docker-compose up @DockerComposeArgs
+    docker-compose up @RemainingArgs
 }
 

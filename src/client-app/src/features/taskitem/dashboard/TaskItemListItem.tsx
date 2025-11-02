@@ -50,6 +50,12 @@ export default function TaskItemListItem({ taskItem }: Props) {
                     color='teal'
                     floated='right'
                     content='View' />
+                <Button
+                    name={taskItem.id}
+                    loading={loading && target === taskItem.id}
+                    onClick={(e) => handleTaskItemDelete(e, taskItem.id)}
+                    floated='right' content='Delete' color='red' />
+                <Label basic content={taskItem.status} />
             </Segment>
         {/* <Item key={taskItem.id}>
             <Item.Content>

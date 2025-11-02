@@ -19,7 +19,16 @@ GitHub Build Status (master)/(dev)
 
 | dev   |      master      |
 |----------|:-------------:|
-|  |  |
+|  [![Build Status](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml/badge.svg?branch=dev)](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml?query=branch%3Adev) | [![Build Status](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml/badge.svg?branch=master)](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml?query=branch%3Amaster) |
+
+[View Latest Build Run](https://github.com/live-dev999/TaskForge/actions)
+
+
+Coverage(Coveralls) 
+
+| dev   |      master      |
+|----------|:-------------:|
+|  [![Coverage Status](https://coveralls.io/repos/github/live-dev999/TaskForge/badge.svg?branch=master)](https://coveralls.io/github/live-dev999/TaskForge?branch=dev) | [![Coverage Status](https://coveralls.io/repos/github/live-dev999/TaskForge/badge.svg?branch=master)](https://coveralls.io/github/live-dev999/TaskForge?branch=master) |
 
 
 ## **Preinstalled software**

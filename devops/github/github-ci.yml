@@ -1,33 +1,626 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: TaskForge
+name: Build and Test
 
 on:
   push:
     branches:
-    - master
-    - dev
+      - master
+      - dev
+      - feature/*
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - 'design/**'
   pull_request:
     branches:
-    - master
-    - dev
+      - master
+      - dev
+      - feature/*
+
+env:
+  SOLUTION: '**/TaskForge.sln'
+  BUILD_CONFIGURATION: 'Release'
+  DOTNET_VERSION: '8.0.411'
+  # Code coverage thresholds
+  MIN_COVERAGE_API: 80
+  MIN_COVERAGE_EVENTPROCESSOR: 0
+  MIN_COVERAGE_MESSAGECONSUMER: 0
+  MIN_COVERAGE_COMMON: 75
 
 jobs:
-  build:
-
+  build-common-projects:
+    name: 'Build Common Projects (Domain, Application, Persistence)'
     runs-on: ubuntu-latest
-
+    
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK ${{ env.DOTNET_VERSION }}
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
-    - name: Restore dependencies
-      run: dotnet restore TaskForge.sln
-      
-    - name: Build
-      run: dotnet build --no-restore TaskForge.sln
-    - name: Test
-      run: dotnet test --no-build --verbosity normal TaskForge.sln
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore NuGet packages
+      run: dotnet restore --verbosity minimal
+      working-directory: src/TaskForge.Domain
+
+    - name: Restore Application packages
+      run: dotnet restore --verbosity minimal
+      working-directory: src/TaskForge.Application
+
+    - name: Restore Persistence packages
+      run: dotnet restore --verbosity minimal
+      working-directory: src/TaskForge.Persistence
+
+    - name: Restore StartupTasks packages
+      run: dotnet restore --verbosity minimal
+      working-directory: src/TaskForge.StartupTasks
+
+    - name: Build Common Projects
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.Domain
+
+    - name: Build Application
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.Application
+
+    - name: Build Persistence
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.Persistence
+
+    - name: Build StartupTasks
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.StartupTasks
+
+  build-and-test-api:
+    name: 'Build and Test API'
+    needs: build-common-projects
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK ${{ env.DOTNET_VERSION }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore API and Tests
+      run: |
+        dotnet restore --verbosity minimal src/TaskForge.API/TaskForge.API.csproj
+        dotnet restore --verbosity minimal tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj
+        dotnet restore --verbosity minimal tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj
+
+    - name: Build API
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.API
+
+    - name: Build API Test Projects
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj
+
+    - name: Verify API Build Success on PR
+      if: github.event_name == 'pull_request'
+      run: echo "✅ API Build completed successfully!"
+
+    - name: Run API Unit Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/Tests.TaskForge.API/Tests.TaskForge.API.csproj
+
+    - name: Run API Integration Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/IntegratonTests.TaskForge.API/IntegratonTests.TaskForge.API.csproj
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: '**/TestResults/**/*.trx'
+
+    - name: Upload Code Coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: api-coverage
+        path: '**/TestResults/**/coverage.cobertura.xml'
+        retention-days: 7
+
+  build-and-test-eventprocessor:
+    name: 'Build and Test EventProcessor'
+    needs: build-common-projects
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK ${{ env.DOTNET_VERSION }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore EventProcessor and Tests
+      run: |
+        dotnet restore --verbosity minimal src/TaskForge.EventProcessor/TaskForge.EventProcessor.csproj
+        dotnet restore --verbosity minimal tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj
+        dotnet restore --verbosity minimal tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj
+
+    - name: Build EventProcessor
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.EventProcessor
+
+    - name: Build EventProcessor Test Projects
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj
+
+    - name: Verify EventProcessor Build Success on PR
+      if: github.event_name == 'pull_request'
+      run: echo "✅ EventProcessor Build completed successfully!"
+
+    - name: Run EventProcessor Unit Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/Tests.TaskForge.EventProcessor/Tests.TaskForge.EventProcessor.csproj
+
+    - name: Run EventProcessor Integration Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/IntegratonTests.TaskForge.EventProcessor/IntegratonTests.TaskForge.EventProcessor.csproj
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: '**/TestResults/**/*.trx'
+
+    - name: Upload Code Coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: eventprocessor-coverage
+        path: '**/TestResults/**/coverage.cobertura.xml'
+        retention-days: 7
+
+  build-and-test-messageconsumer:
+    name: 'Build and Test MessageConsumer'
+    needs: build-common-projects
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK ${{ env.DOTNET_VERSION }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore MessageConsumer and Tests
+      run: |
+        dotnet restore --verbosity minimal src/TaskForge.MessageConsumer/TaskForge.MessageConsumer.csproj
+        dotnet restore --verbosity minimal tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj
+        dotnet restore --verbosity minimal tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj
+
+    - name: Build MessageConsumer
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal
+      working-directory: src/TaskForge.MessageConsumer
+
+    - name: Build MessageConsumer Test Projects
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj
+
+    - name: Verify MessageConsumer Build Success on PR
+      if: github.event_name == 'pull_request'
+      run: echo "✅ MessageConsumer Build completed successfully!"
+
+    - name: Run MessageConsumer Unit Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/Tests.TaskForge.MessageConsumer/Tests.TaskForge.MessageConsumer.csproj
+
+    - name: Run MessageConsumer Integration Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/IntegratonTests.TaskForge.MessageConsumer/IntegratonTests.TaskForge.MessageConsumer.csproj
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: '**/TestResults/**/*.trx'
+
+    - name: Upload Code Coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: messageconsumer-coverage
+        path: '**/TestResults/**/coverage.cobertura.xml'
+        retention-days: 7
+
+  run-common-tests:
+    name: 'Run Common Tests (Application, Domain, Persistence)'
+    needs: build-common-projects
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK ${{ env.DOTNET_VERSION }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore Common Test Projects
+      run: |
+        dotnet restore --verbosity minimal tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
+        dotnet restore --verbosity minimal tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
+        dotnet restore --verbosity minimal tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
+        dotnet restore --verbosity minimal tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
+        dotnet restore --verbosity minimal tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
+
+    - name: Build Common Test Projects
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --verbosity minimal tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
+
+    - name: Run Common Unit Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/Tests.TaskForge.Application/Tests.TaskForge.Application.csproj \
+          tests/Tests.TaskForge.Domain/Tests.TaskForge.Domain.csproj \
+          tests/Tests.TaskForge.Persistence/Tests.TaskForge.Persistence.csproj
+
+    - name: Run Common Integration Tests
+      run: |
+        dotnet test \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --no-build \
+          --nologo \
+          --collect:"XPlat Code Coverage" \
+          --settings tests/coverlet.runsettings \
+          --logger "console;verbosity=normal" \
+          --blame \
+          tests/IntegratonTests.TaskForge.Application/IntegratonTests.TaskForge.Application.csproj \
+          tests/IntegratonTests.TaskForge.Persistence/IntegratonTests.TaskForge.Persistence.csproj
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: '**/TestResults/**/*.trx'
+
+    - name: Upload Code Coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: common-coverage
+        path: '**/TestResults/**/coverage.cobertura.xml'
+        retention-days: 7
+
+  check-code-coverage:
+    name: 'Check Code Coverage Threshold'
+    needs:
+      - build-and-test-api
+      - build-and-test-eventprocessor
+      - build-and-test-messageconsumer
+      - run-common-tests
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all coverage artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: coverage-artifacts
+
+    - name: Install dependencies for coverage check
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bc xmlstarlet
+
+    - name: Check Code Coverage Threshold
+      shell: bash
+      run: |
+        echo "================================================"
+        echo "Code Coverage Check (Per Service)"
+        echo "================================================"
+        
+        # Find all coverage files
+        coverage_files=$(find coverage-artifacts -name "coverage.cobertura.xml" -type f 2>/dev/null || true)
+        
+        if [ -z "$coverage_files" ]; then
+          echo "⚠️ No coverage files found. Tests may not have generated coverage data."
+          echo "This could happen if tests failed or coverage collection is disabled."
+          echo "Continuing without coverage validation..."
+          exit 0
+        fi
+        
+        echo "Found coverage files"
+        echo ""
+        
+        # Initialize coverage totals
+        api_lines=0
+        api_covered=0
+        eventprocessor_lines=0
+        eventprocessor_covered=0
+        messageconsumer_lines=0
+        messageconsumer_covered=0
+        common_lines=0
+        common_covered=0
+        
+        # Process each coverage file
+        while IFS= read -r file; do
+          if [ -z "$file" ] || [ ! -f "$file" ]; then
+            continue
+          fi
+          
+          file_lower=$(echo "$file" | tr '[:upper:]' '[:lower:]')
+          
+          # Extract coverage data using xmlstarlet
+          lines_valid=$(xmlstarlet sel -t -v "//coverage/@lines-valid" "$file" 2>/dev/null || echo "0")
+          lines_covered=$(xmlstarlet sel -t -v "//coverage/@lines-covered" "$file" 2>/dev/null || echo "0")
+          
+          if [ -z "$lines_valid" ] || [ "$lines_valid" = "0" ]; then
+            # Fallback: use grep
+            lines_valid=$(grep -oP 'lines-valid="\K[0-9]+' "$file" 2>/dev/null | head -1 || echo "0")
+            lines_covered=$(grep -oP 'lines-covered="\K[0-9]+' "$file" 2>/dev/null | head -1 || echo "0")
+          fi
+          
+          if [ "$lines_valid" -gt 0 ] 2>/dev/null; then
+            if [[ "$file_lower" == *"api"* ]] && [[ "$file_lower" != *"eventprocessor"* ]] && [[ "$file_lower" != *"messageconsumer"* ]]; then
+              api_lines=$((api_lines + lines_valid))
+              api_covered=$((api_covered + lines_covered))
+              echo "API: $(basename "$file") - $lines_covered/$lines_valid"
+            elif [[ "$file_lower" == *"eventprocessor"* ]]; then
+              eventprocessor_lines=$((eventprocessor_lines + lines_valid))
+              eventprocessor_covered=$((eventprocessor_covered + lines_covered))
+              echo "EventProcessor: $(basename "$file") - $lines_covered/$lines_valid"
+            elif [[ "$file_lower" == *"messageconsumer"* ]]; then
+              messageconsumer_lines=$((messageconsumer_lines + lines_valid))
+              messageconsumer_covered=$((messageconsumer_covered + lines_covered))
+              echo "MessageConsumer: $(basename "$file") - $lines_covered/$lines_valid"
+            else
+              common_lines=$((common_lines + lines_valid))
+              common_covered=$((common_covered + lines_covered))
+              echo "Common: $(basename "$file") - $lines_covered/$lines_valid"
+            fi
+          fi
+        done <<< "$coverage_files"
+        
+        # Calculate percentages and check thresholds
+        all_passed=true
+        
+        # Check API coverage
+        if [ "$api_lines" -gt 0 ]; then
+          api_percent=$(awk "BEGIN {printf \"%.2f\", ($api_covered/$api_lines)*100}")
+          echo ""
+          echo "----------------------------------------"
+          echo "Service: API"
+          echo "Total Coverage: ${api_percent}% ($api_covered/$api_lines lines)"
+          echo "Required: ${{ env.MIN_COVERAGE_API }}%"
+          
+          if (( $(echo "$api_percent < ${{ env.MIN_COVERAGE_API }}" | bc -l) )); then
+            all_passed=false
+            echo ""
+            echo "❌ FAILED: Coverage ${api_percent}% is below required ${{ env.MIN_COVERAGE_API }}%"
+          else
+            echo ""
+            echo "✅ PASSED: Coverage meets requirement"
+          fi
+        fi
+        
+        # Check EventProcessor coverage (skip if threshold is 0)
+        if [ "${{ env.MIN_COVERAGE_EVENTPROCESSOR }}" -gt 0 ]; then
+          if [ "$eventprocessor_lines" -gt 0 ]; then
+            eventprocessor_percent=$(awk "BEGIN {printf \"%.2f\", ($eventprocessor_covered/$eventprocessor_lines)*100}")
+            echo ""
+            echo "----------------------------------------"
+            echo "Service: EventProcessor"
+            echo "Total Coverage: ${eventprocessor_percent}% ($eventprocessor_covered/$eventprocessor_lines lines)"
+            echo "Required: ${{ env.MIN_COVERAGE_EVENTPROCESSOR }}%"
+            
+            if (( $(echo "$eventprocessor_percent < ${{ env.MIN_COVERAGE_EVENTPROCESSOR }}" | bc -l) )); then
+              all_passed=false
+              echo ""
+              echo "❌ FAILED: Coverage ${eventprocessor_percent}% is below required ${{ env.MIN_COVERAGE_EVENTPROCESSOR }}%"
+            else
+              echo ""
+              echo "✅ PASSED: Coverage meets requirement"
+            fi
+          fi
+        else
+          echo ""
+          echo "ℹ️ No coverage requirement for EventProcessor service (threshold: 0%)"
+        fi
+        
+        # Check MessageConsumer coverage (skip if threshold is 0)
+        if [ "${{ env.MIN_COVERAGE_MESSAGECONSUMER }}" -gt 0 ]; then
+          if [ "$messageconsumer_lines" -gt 0 ]; then
+            messageconsumer_percent=$(awk "BEGIN {printf \"%.2f\", ($messageconsumer_covered/$messageconsumer_lines)*100}")
+            echo ""
+            echo "----------------------------------------"
+            echo "Service: MessageConsumer"
+            echo "Total Coverage: ${messageconsumer_percent}% ($messageconsumer_covered/$messageconsumer_lines lines)"
+            echo "Required: ${{ env.MIN_COVERAGE_MESSAGECONSUMER }}%"
+            
+            if (( $(echo "$messageconsumer_percent < ${{ env.MIN_COVERAGE_MESSAGECONSUMER }}" | bc -l) )); then
+              all_passed=false
+              echo ""
+              echo "❌ FAILED: Coverage ${messageconsumer_percent}% is below required ${{ env.MIN_COVERAGE_MESSAGECONSUMER }}%"
+            else
+              echo ""
+              echo "✅ PASSED: Coverage meets requirement"
+            fi
+          fi
+        else
+          echo ""
+          echo "ℹ️ No coverage requirement for MessageConsumer service (threshold: 0%)"
+        fi
+        
+        # Check Common coverage
+        if [ "$common_lines" -gt 0 ]; then
+          common_percent=$(awk "BEGIN {printf \"%.2f\", ($common_covered/$common_lines)*100}")
+          echo ""
+          echo "----------------------------------------"
+          echo "Service: Common"
+          echo "Total Coverage: ${common_percent}% ($common_covered/$common_lines lines)"
+          echo "Required: ${{ env.MIN_COVERAGE_COMMON }}%"
+          
+          if (( $(echo "$common_percent < ${{ env.MIN_COVERAGE_COMMON }}" | bc -l) )); then
+            all_passed=false
+            echo ""
+            echo "❌ FAILED: Coverage ${common_percent}% is below required ${{ env.MIN_COVERAGE_COMMON }}%"
+          else
+            echo ""
+            echo "✅ PASSED: Coverage meets requirement"
+          fi
+        fi
+        
+        echo ""
+        echo "================================================"
+        
+        if [ "$all_passed" = false ]; then
+          echo ""
+          echo "❌ CODE COVERAGE CHECK FAILED!"
+          echo "One or more services do not meet the minimum coverage requirement."
+          echo "Please add more unit tests to improve code coverage."
+          echo ""
+          exit 1
+        else
+          echo ""
+          echo "✅ CODE COVERAGE CHECK PASSED"
+          echo "All services meet their minimum coverage requirements."
+          echo ""
+        fi
+        
+        echo "================================================"
+
+    - name: Publish Code Coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        files: coverage-artifacts/**/coverage.cobertura.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  build-docker-images:
+    name: 'Build Docker Images'
+    needs:
+      - build-and-test-api
+      - build-and-test-eventprocessor
+      - build-and-test-messageconsumer
+      - run-common-tests
+      - check-code-coverage
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build API Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: src/TaskForge.API/Dockerfile
+        push: false
+        tags: taskforge-api:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build EventProcessor Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: src/TaskForge.EventProcessor/Dockerfile
+        push: false
+        tags: taskforge-eventprocessor:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build MessageConsumer Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: src/TaskForge.MessageConsumer/Dockerfile
+        push: false
+        tags: taskforge-messageconsumer:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build Client Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./src/client-app
+        file: ./src/client-app/Dockerfile
+        push: false
+        tags: taskforge-client:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

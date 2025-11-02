@@ -8,10 +8,10 @@
  *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *   copies of the Software, and to permit persons to whom the Software is
  *   furnished to do so, subject to the following conditions:
- 
+ *
  *   The above copyright notice and this permission notice shall be included in all
  *   copies or substantial portions of the Software.
- 
+ *
  *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,32 +21,34 @@
  *   SOFTWARE.
  */
 
-namespace TaskForge.MessageConsumer;
+using TaskForge.MessageConsumer.Models;
+
+namespace TaskForge.MessageConsumer.Services;
 
 /// <summary>
-/// Worker service that hosts MassTransit bus for consuming messages.
-/// MassTransit automatically manages the bus lifecycle and message consumption.
+/// Interface for consuming task change events from RabbitMQ message queue.
 /// </summary>
-public class Worker : BackgroundService
+public interface IMessageConsumerService
 {
-    private readonly ILogger<Worker> _logger;
+    /// <summary>
+    /// Starts consuming messages from the RabbitMQ queue.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to stop consuming.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task StartConsumingAsync(CancellationToken cancellationToken);
 
-    public Worker(ILogger<Worker> logger)
-    {
-        _logger = logger;
-    }
+    /// <summary>
+    /// Processes a received task change event message.
+    /// </summary>
+    /// <param name="eventData">The task change event data to process.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task ProcessMessageAsync(TaskChangeEvent eventData);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        // MassTransit bus is managed automatically as a hosted service
-        // We just need to keep the worker alive
-        _logger.LogInformation("MessageConsumer Worker started. MassTransit bus will consume messages automatically.");
-        
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-        }
-        
-        _logger.LogInformation("MessageConsumer Worker is stopping.");
-    }
+    /// <summary>
+    /// Stops consuming messages from the RabbitMQ queue.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task StopConsumingAsync(CancellationToken cancellationToken);
 }
+

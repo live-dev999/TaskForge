@@ -100,6 +100,30 @@ public static class ApplicationServiceExtensions
         services.AddScoped<TaskForge.Application.Core.IEventService>(sp =>
             sp.GetRequiredService<TaskForge.Application.Core.EventService>());
         
+        // Configure MassTransit with RabbitMQ
+        services.AddMassTransit(x =>
+        {
+            // Configure RabbitMQ
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                var host = config["RabbitMQ:HostName"] ?? "localhost";
+                var port = config.GetValue<int>("RabbitMQ:Port", 5672);
+                var userName = config["RabbitMQ:UserName"] ?? "guest";
+                var password = config["RabbitMQ:Password"] ?? "guest";
+
+                cfg.Host(host, port, "/", h =>
+                {
+                    h.Username(userName);
+                    h.Password(password);
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        // Register MessageProducer
+        services.AddScoped<TaskForge.Application.Core.IMessageProducer, TaskForge.Application.Core.MessageProducer>();
+        
         // Add OpenTelemetry tracing
         AddOpenTelemetryTracing(services, config);
         

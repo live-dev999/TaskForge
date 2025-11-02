@@ -8,10 +8,10 @@
  *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *   copies of the Software, and to permit persons to whom the Software is
  *   furnished to do so, subject to the following conditions:
- 
+ *
  *   The above copyright notice and this permission notice shall be included in all
  *   copies or substantial portions of the Software.
- 
+ *
  *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,32 +21,19 @@
  *   SOFTWARE.
  */
 
-namespace TaskForge.MessageConsumer;
+namespace TaskForge.Application.Core;
 
 /// <summary>
-/// Worker service that hosts MassTransit bus for consuming messages.
-/// MassTransit automatically manages the bus lifecycle and message consumption.
+/// Interface for publishing task change events to RabbitMQ message queue.
 /// </summary>
-public class Worker : BackgroundService
+public interface IMessageProducer
 {
-    private readonly ILogger<Worker> _logger;
-
-    public Worker(ILogger<Worker> logger)
-    {
-        _logger = logger;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        // MassTransit bus is managed automatically as a hosted service
-        // We just need to keep the worker alive
-        _logger.LogInformation("MessageConsumer Worker started. MassTransit bus will consume messages automatically.");
-        
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-        }
-        
-        _logger.LogInformation("MessageConsumer Worker is stopping.");
-    }
+    /// <summary>
+    /// Publishes a task change event to the RabbitMQ message queue.
+    /// </summary>
+    /// <param name="eventDto">The task change event data to publish.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task PublishEventAsync(TaskChangeEventDto eventDto, CancellationToken cancellationToken = default);
 }
+

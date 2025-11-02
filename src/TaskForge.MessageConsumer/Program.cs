@@ -1,7 +1,7 @@
 /*
  *   Copyright (c) 2025 Dzianis Prokharchyk
  *   All rights reserved.
-
+ *
  *   Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to deal
  *   in the Software without restriction, including without limitation the rights
@@ -21,9 +21,44 @@
  *   SOFTWARE.
  */
 
+using MassTransit;
 using TaskForge.MessageConsumer;
+using TaskForge.MessageConsumer.Consumers;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+// Configure MassTransit with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    // Add consumer
+    x.AddConsumer<TaskChangeEventConsumer>();
+
+    // Configure RabbitMQ
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var configuration = context.GetRequiredService<IConfiguration>();
+        var host = configuration["RabbitMQ:HostName"] ?? "localhost";
+        var port = configuration.GetValue<int>("RabbitMQ:Port", 5672);
+        var userName = configuration["RabbitMQ:UserName"] ?? "guest";
+        var password = configuration["RabbitMQ:Password"] ?? "guest";
+
+        cfg.Host(host, port, "/", h =>
+        {
+            h.Username(userName);
+            h.Password(password);
+        });
+
+        // Configure endpoint for TaskChangeEventDto
+        cfg.ReceiveEndpoint("task-change-events", e =>
+        {
+            e.ConfigureConsumer<TaskChangeEventConsumer>(context);
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+// Add hosted service
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();

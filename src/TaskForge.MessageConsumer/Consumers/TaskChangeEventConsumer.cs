@@ -23,7 +23,7 @@
 
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using TaskForge.Application.Core;
+using TaskForge.Domain;
 
 namespace TaskForge.MessageConsumer.Consumers;
 

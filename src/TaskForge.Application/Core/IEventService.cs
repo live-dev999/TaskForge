@@ -21,6 +21,8 @@
  *   SOFTWARE.
  */
 
+using TaskForge.Domain;
+
 namespace TaskForge.Application.Core;
 
 /// <summary>

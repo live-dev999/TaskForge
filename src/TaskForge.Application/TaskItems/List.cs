@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
-using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
 
@@ -13,10 +12,10 @@ public class List
 
     public class Handler : IRequestHandler<Query, Result<List<TaskItem>>>
     {
-        private readonly DataContext _context;
+        private readonly IDataContext _context;
         private readonly ILogger<Handler> _logger;
 
-        public Handler(DataContext context, ILogger<Handler> logger)
+        public Handler(IDataContext context, ILogger<Handler> logger)
         {
             _context = context;
             _logger = logger;

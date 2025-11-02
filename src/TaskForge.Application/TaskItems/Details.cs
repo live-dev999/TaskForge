@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
-using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
 
@@ -15,10 +14,10 @@ public class Details
 
     public class Handler : IRequestHandler<Query, Result<TaskItem>>
     {
-        private readonly DataContext _context;
+        private readonly IDataContext _context;
         private readonly ILogger<Handler> _logger;
 
-        public Handler(DataContext context, ILogger<Handler> logger)
+        public Handler(IDataContext context, ILogger<Handler> logger)
         {
             _context = context;
             _logger = logger;
@@ -35,7 +34,7 @@ public class Details
             
             _logger.LogInformation("Executing query: Details TaskItem with Id: {TaskItemId}", request.Id);
             
-            var taskItem = await _context.TaskItems.FindAsync(new object[] { request.Id }, cancellationToken);
+            var taskItem = await _context.FindAsync<TaskItem>(new object[] { request.Id }, cancellationToken);
             
             if (taskItem == null)
             {

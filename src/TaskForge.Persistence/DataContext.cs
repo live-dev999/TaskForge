@@ -22,11 +22,12 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using TaskForge.Application.Core;
 using TaskForge.Domain;
 
 namespace TaskForge.Persistence;
 
-public class DataContext : DbContext
+public class DataContext : DbContext, IDataContext
 {
     public DataContext(DbContextOptions options) : base(options)
     {

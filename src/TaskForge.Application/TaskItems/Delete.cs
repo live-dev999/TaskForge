@@ -1,8 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
-using TaskForge.Domain.Enum;
-using TaskForge.Persistence;
+using TaskForge.Domain;
 
 namespace TaskForge.Application.TaskItems;
 
@@ -15,12 +14,12 @@ public class Delete
 
     public class Handler : IRequestHandler<Command, Result<Unit>>
     {
-        private readonly DataContext _context;
+        private readonly IDataContext _context;
         private readonly ILogger<Handler> _logger;
         private readonly IEventService _eventService;
         private readonly IMessageProducer _messageProducer;
 
-        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
+        public Handler(IDataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
         {
             _context = context;
             _logger = logger;
@@ -35,7 +34,7 @@ public class Delete
         {
             _logger.LogInformation("Executing command: Delete TaskItem with Id: {TaskItemId}", request.Id);
             
-            var taskItem = await _context.TaskItems.FindAsync(new object[] { request.Id }, cancellationToken);
+            var taskItem = await _context.FindAsync<TaskItem>(new object[] { request.Id }, cancellationToken);
 
             if (taskItem == null)
             {

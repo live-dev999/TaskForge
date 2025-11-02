@@ -24,6 +24,8 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
+using TaskForge.Domain;
+
 namespace TaskForge.Application.Core;
 
 /// <summary>

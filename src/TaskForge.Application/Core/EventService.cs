@@ -28,6 +28,8 @@ using Microsoft.Extensions.Logging;
 
 #nullable disable
 
+using TaskForge.Domain;
+
 namespace TaskForge.Application.Core;
 
 /// <summary>

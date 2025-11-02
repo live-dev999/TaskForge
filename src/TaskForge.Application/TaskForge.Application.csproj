@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaskForge.Domain\TaskForge.Domain.csproj" />
-    <ProjectReference Include="..\TaskForge.Persistence\TaskForge.Persistence.csproj" />
     <ProjectReference Include="..\TaskForge.StartupTasks\TaskForge.StartupTasks.csproj" />
   </ItemGroup>
 

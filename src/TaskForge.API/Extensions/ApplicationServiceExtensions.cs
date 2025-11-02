@@ -48,6 +48,9 @@ public static class ApplicationServiceExtensions
         {
             opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
         });
+        // Register IDataContext to use DataContext implementation
+        services.AddScoped<TaskForge.Application.Core.IDataContext>(sp =>
+            sp.GetRequiredService<Persistence.DataContext>());
         services.AddCors(opt =>
         {
             // Get allowed origins from configuration

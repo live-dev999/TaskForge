@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
-using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
 
@@ -26,13 +25,13 @@ public class Edit
     }
     public class Handler : IRequestHandler<Command, Result<Unit>>
     {
-        private readonly DataContext _context;
+        private readonly IDataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger<Handler> _logger;
         private readonly IEventService _eventService;
         private readonly IMessageProducer _messageProducer;
 
-        public Handler(DataContext context, IMapper mapper, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
+        public Handler(IDataContext context, IMapper mapper, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
         {
             _mapper = mapper;
             _context = context;
@@ -48,7 +47,7 @@ public class Edit
                     request.TaskItem.Id,
                     request.TaskItem.Title);
                 
-                var taskItem = await _context.TaskItems.FindAsync(new object[] { request.TaskItem.Id }, cancellationToken);
+                var taskItem = await _context.FindAsync<TaskItem>(new object[] { request.TaskItem.Id }, cancellationToken);
 
             if (taskItem == null)
             {

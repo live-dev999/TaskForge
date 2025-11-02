@@ -3,8 +3,6 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
-using TaskForge.Domain.Enum;
-using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
 
@@ -25,12 +23,12 @@ public class Create
     }
     public class Handler : IRequestHandler<Command, Result<Unit>>
     {
-        private readonly DataContext _context;
+        private readonly IDataContext _context;
         private readonly ILogger<Handler> _logger;
         private readonly IEventService _eventService;
         private readonly IMessageProducer _messageProducer;
 
-        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
+        public Handler(IDataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
         {
             _context = context;
             _logger = logger;

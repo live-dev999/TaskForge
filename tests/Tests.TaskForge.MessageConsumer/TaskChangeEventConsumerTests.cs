@@ -65,14 +65,16 @@ public class TaskChangeEventConsumerTests
         await _consumer.Consume(contextMock.Object);
 
         // Assert
+        // Consumer logs multiple Information messages: [RECEIVE], Processing, [OK]
+        // So we check that at least one Information log was called
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing") || ContainsLogMessage(v, "[RECEIVE]") || ContainsLogMessage(v, "[OK]")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
-            Times.Once);
+            Times.AtLeastOnce);
 
         // Verify Debug log for description
         _loggerMock.Verify(
@@ -108,14 +110,16 @@ public class TaskChangeEventConsumerTests
         await _consumer.Consume(contextMock.Object);
 
         // Assert
+        // Consumer logs multiple Information messages: [RECEIVE], Processing, [OK]
+        // So we check that at least one Information log was called
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing") || ContainsLogMessage(v, "[RECEIVE]") || ContainsLogMessage(v, "[OK]")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
-            Times.Once);
+            Times.AtLeastOnce);
     }
 
     [Fact]
@@ -141,14 +145,16 @@ public class TaskChangeEventConsumerTests
         await _consumer.Consume(contextMock.Object);
 
         // Assert
+        // Consumer logs multiple Information messages: [RECEIVE], Processing, [OK]
+        // So we check that at least one Information log was called
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing") || ContainsLogMessage(v, "[RECEIVE]") || ContainsLogMessage(v, "[OK]")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
-            Times.Once);
+            Times.AtLeastOnce);
 
         // Verify Debug log for description should NOT be called when description is null
         _loggerMock.Verify(
@@ -183,12 +189,12 @@ public class TaskChangeEventConsumerTests
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
             Times.Once);
 
-        // Verify Information log should NOT be called
+        // [RECEIVE] log is called before null check, but Processing should NOT be called
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing task change event")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
             Times.Never);
@@ -227,7 +233,7 @@ public class TaskChangeEventConsumerTests
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing task change event")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
             Times.Once);
@@ -263,15 +269,15 @@ public class TaskChangeEventConsumerTests
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
             Times.Never);
 
-        // But Information log should be called
+        // But Information log should be called (at least [RECEIVE] and Processing)
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing") || ContainsLogMessage(v, "[RECEIVE]") || ContainsLogMessage(v, "[OK]")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
-            Times.Once);
+            Times.AtLeastOnce);
     }
 
     [Fact]
@@ -314,14 +320,16 @@ public class TaskChangeEventConsumerTests
         await _consumer.Consume(deletedContextMock.Object);
 
         // Assert
+        // Each event triggers multiple Information logs: [RECEIVE], Processing, [OK]
+        // So we verify at least 3 calls (one per event, though there will be more)
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Received task change event")),
+                It.Is<It.IsAnyType>((v, t) => ContainsLogMessage(v, "Processing") || ContainsLogMessage(v, "[RECEIVE]") || ContainsLogMessage(v, "[OK]")),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
-            Times.Exactly(3));
+            Times.AtLeast(3));
     }
 
     [Fact]

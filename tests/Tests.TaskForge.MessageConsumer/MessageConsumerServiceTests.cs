@@ -42,7 +42,7 @@ public class MessageConsumerServiceTests
         _loggerMock = new Mock<ILogger<MessageConsumerService>>();
         _configurationMock = new Mock<IConfiguration>();
         // Initialize with real implementation (without RabbitMQ logic yet)
-        _messageConsumerService = new MessageConsumerService(_loggerMock.Object, _configurationMock.Object);
+        _messageConsumerService = new MessageConsumerService(_loggerMock.Object);
     }
 
     [Fact]
@@ -60,26 +60,19 @@ public class MessageConsumerServiceTests
     }
 
     [Fact]
-    public async Task StartConsumingAsync_WhenRabbitMQUnavailable_ShouldRetry()
+    public async Task StartConsumingAsync_ShouldCompleteWithoutError()
     {
         // Arrange
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
         // Act
-        // Simulate RabbitMQ connection failure
-        await _messageConsumerService.StartConsumingAsync(cancellationToken);
+        // StartConsumingAsync is a placeholder - actual consumption is handled by MassTransit
+        Func<Task> act = async () => await _messageConsumerService.StartConsumingAsync(cancellationToken);
 
         // Assert
-        // TODO: Verify retry logic was executed
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Warning,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => true),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)!),
-            Times.AtLeastOnce);
+        // Should complete without throwing - MassTransit handles actual consumption
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]

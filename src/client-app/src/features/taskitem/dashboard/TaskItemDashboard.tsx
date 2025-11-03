@@ -20,11 +20,11 @@ export default observer(function TaskItemDashboard() {
             <Grid.Column width='10'>
                 <TaskItemList />
             </Grid.Column>
-            <Grid.Column width='6'>
+            {/* <Grid.Column width='6'>
                 <h2>
                     TaskItem Filters
                 </h2>
-            </Grid.Column>
+            </Grid.Column> */}
 
         </Grid>
     )

@@ -1,12 +1,19 @@
 import { Link } from "react-router-dom";
-import { Container } from "semantic-ui-react";
+import { Button, Container, Header, Segment, Image } from "semantic-ui-react";
 
-export default function HomePage(){
-    return(
-        <Container>
-            <h1>Home page</h1>
-
-            <h3>go to <Link to='/taskItems'>TaskItems</Link></h3>
-        </Container>
+export default function HomePage() {
+    return (
+      <Segment inverted vertical textAlign='center' className="masthead">
+            <Container text>
+                <Header as='h1' inverted>
+                    <Image size='massive' src='/assets/logo.jpeg' alt='logo' style={{ marginButtom: 12 }} />
+                </Header>
+                <Header as='h2' inverted content='Welcom to TASK FORGE' />
+                <Button as={Link} to='/taskitems' size='huge' inverted>
+                    Let's start!
+                </Button>
+            </Container>
+        </Segment>
+    
     )
 }

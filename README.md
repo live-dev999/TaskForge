@@ -41,27 +41,21 @@ Coverage (Coveralls) (dev)/(master)
 ### Windows:
 - [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) or [Microsoft VS Code](https://visualstudio.microsoft.com/downloads/)
 - [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- Database (choose one):
+- Database:
   - [PostgreSQL 15+](https://www.postgresql.org/download/) or Docker image
-  - [Microsoft SQL Server 2019](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 
 ### Mac
 - [Visual Studio 2022 for Mac](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio-mac/?sku=communitymac&rel=17) or [Microsoft VS Code](https://visualstudio.microsoft.com/downloads/)
 - [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- Database (choose one):
-    - [PostgreSQL 15+](https://www.postgresql.org/download/) or Docker image
-    or 
-    - (MSSQL/Azure SQL Edge)
-        - Intel CPU
-            - [Microsoft SQL Server or Docker image with (minimal version version 2019 and up)](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 
-        - or Apple Silicon CPU
-            - [Azure SQL Edge](https://learn.microsoft.com/en-us/azure/azure-sql-edge/disconnected-deployment)
+- Database:
+  - [PostgreSQL 15+](https://www.postgresql.org/download/) or Docker image
+  - PostgreSQL supports both Intel and Apple Silicon CPUs
 
 ### Linux
 - [Microsoft VS Code](https://visualstudio.microsoft.com/downloads/)
-- [.Net Core 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 - [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
- [Microsoft SQL Server or Docker image with (minimal version version 2019 and up)](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 
+- Database:
+  - [PostgreSQL 15+](https://www.postgresql.org/download/) or Docker image 
 
 
 
@@ -75,16 +69,11 @@ Coverage (Coveralls) (dev)/(master)
 
 ## **Deploy databases**
 Possible Database deployment scenarios:
-+ use Azure SQL databse in Microsoft Azure Cloud
++ use PostgreSQL in cloud (AWS RDS, Azure Database for PostgreSQL, Google Cloud SQL, etc.)
 + use docker or docker-compose
-+ deploy local database
++ deploy local PostgreSQL database
 
-
-### Use Azure SQL databse in Microsoft Azure Cloud (main method)
-To work with the database in Microsoft Azure, you need to remember to set a firewall rule for your IP address. [Firewall configuration is done through the Microsoft Azure panel.](https://learn.microsoft.com/en-us/azure/azure-sql/database/firewall-configure?view=azuresql)
-
-
-### Use Docker or Docker compose(alternative method)
+### Use Docker or Docker compose (recommended method)
 Run database use docker:
 
 ```
@@ -164,6 +153,30 @@ In Docker, the client automatically proxies API requests through nginx to the ba
 
 For more details, see `src/client-app/README-DOCKER.md`.
 
+### **Deploy local PostgreSQL database (alternative method)**
+
+Install PostgreSQL locally on your machine:
+
+**Windows:**
+- Download and install from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+- Or use package manager: `choco install postgresql` (with Chocolatey)
+
+**Mac:**
+- Download and install from [PostgreSQL Downloads](https://www.postgresql.org/download/macosx/)
+- Or use Homebrew: `brew install postgresql@16`
+
+**Linux:**
+- Ubuntu/Debian: `sudo apt-get install postgresql-16`
+- CentOS/RHEL: `sudo yum install postgresql-server`
+- Or download from [PostgreSQL Downloads](https://www.postgresql.org/download/linux/)
+
+After installation, create the database:
+```sql
+CREATE DATABASE TaskForge;
+CREATE USER postgres WITH PASSWORD 'postgres';
+GRANT ALL PRIVILEGES ON DATABASE TaskForge TO postgres;
+```
+
 ## 📚 Документация
 
 Вся документация проекта находится в папке [`docs/`](/docs/):
@@ -171,24 +184,28 @@ For more details, see `src/client-app/README-DOCKER.md`.
 - **[Сопроводительное письмо (Cover Letter)](/docs/COVER_LETTER.md)** - подробное описание реализованных улучшений и технических решений
 - **[Описание задания (Task Description)](/docs/TASK-EN.MD)** - оригинальное задание на английском языке
 - **[Описание задания (Task Description RU)](/docs/TASK-RU.MD)** - оригинальное задание на русском языке
+- **[Docker Guide (EN)](/docs/DOCKER-GUIDE-EN.MD)** - полное руководство по Docker и устранению неполадок на английском
+- **[Docker Guide (RU)](/docs/DOCKER-GUIDE-RU.MD)** - полное руководство по Docker и устранению неполадок на русском
 - **[Docker Compose Guide](/docs/DOCKER-COMPOSE-GUIDE.md)** - руководство по использованию Docker Compose
 - **[Development Sequence](/docs/DEVELOPMENT_SEQUENCE.md)** - последовательность разработки проекта
 - **[Architecture Tests Summary](/docs/ARCHITECTURE_TESTS_SUMMARY.md)** - сводка архитектурных тестов
-- **[Troubleshooting Docker](/docs/TROUBLESHOOTING_DOCKER.md)** - решение проблем с Docker
 - **[Database Comparison](/docs/DATABASE_COMPARISON.md)** - сравнение баз данных
 - **[Docker Platforms Explanation](/docs/DOCKER_PLATFORMS_EXPLANATION.md)** - объяснение Docker платформ
 - **[Index Analysis](/docs/INDEX_ANALYSIS.md)** - анализ индексов базы данных
 - **[Interview Answers](/docs/INTERVIEW_ANSWERS.md)** - ответы на вопросы интервью
 - **[Test Coverage Summary](/docs/TEST_COVERAGE_SUMMARY.md)** - сводка покрытия тестами
 
+### Просмотр диаграмм Mermaid
 
-### **Deploy local database in your machine (alternative method)**
-Go to link [for download Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Install Microsoft SQL Server using the installer or any other method available.
+В проекте используются диаграммы C4 Model в формате `.mermaid`, расположенные в папке [`docs/diagrams/`](/docs/diagrams/).
 
+Для просмотра диаграмм `.mermaid` в Visual Studio Code рекомендуется использовать одно из следующих расширений:
 
-### **Deploy local database in your machine (alternative method)**
-Go to link [for download Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). IInstall Microsoft SQL Server using the installer or any other method available.
+- **[Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid)** - позволяет просматривать диаграммы Mermaid прямо в предпросмотре Markdown файлов
+- **[Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=vstirbu.vscode-mermaid-preview)** - предварительный просмотр файлов `.mermaid` с поддержкой экспорта в SVG/PNG
+- **[Mermaid Editor](https://marketplace.visualstudio.com/items?itemName=TomoyukiAota.vscode-mermaid-editor)** - редактор диаграмм Mermaid с поддержкой live preview
 
+После установки расширения откройте файл `.mermaid` и используйте предпросмотр (`Ctrl+Shift+V` / `Cmd+Shift+V`) для просмотра диаграммы.
 
 ## Commit Formats
 #### Types

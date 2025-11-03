@@ -1,0 +1,11 @@
+graph TB
+    USER[Пользователь] --> API[Task Management Service<br/>Система управления задачами]
+    API --> DB[(База данных<br/>PostgreSQL)]
+    API --> MQ[Очередь сообщений<br/>Kafka/RabbitMQ]
+    MQ --> EP[Event Processor<br/>Слушатель событий]
+    
+    style USER fill:#e1f5fe
+    style API fill:#f3e5f5
+    style DB fill:#fff3e0
+    style MQ fill:#e8f5e8
+    style EP fill:#ffebee

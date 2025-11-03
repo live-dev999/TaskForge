@@ -30,8 +30,8 @@
 
 ## Технические требования:
 - **Язык программирования:** .NET 8 / ASP.NET Core
-- **База данных:** PostgreSQL или MS SQL Server с EF Core
-- **Message broker:** Kafka или RabbitMQ (для асинхронной части)
+- **База данных:** PostgreSQL с EF Core (в оригинальном требовании допускался выбор между PostgreSQL или MS SQL Server)
+- **Message broker:** RabbitMQ (в оригинальном требовании допускался выбор между Kafka или RabbitMQ)
 - **Документация API** в формате OpenAPI/Swagger
 - Код должен быть **покрыт unit-тестами**
 - **Архитектура:** чистая архитектура с соблюдением принципов SOLID

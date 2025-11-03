@@ -1,0 +1,36 @@
+graph TB
+    subgraph "API Gateway"
+        RATE_LIMIT[Rate Limiter<br/>Redis-backed]
+        AUTH_MW[Auth Middleware<br/>JWT Validation]
+        CIRCUIT_BREAKER[Circuit Breaker<br/>Polly]
+        COMPRESSION[Compression<br/>GZIP/Brotli]
+    end
+    
+    subgraph "Task Service"
+        CQRS_HANDLERS[CQRS Handlers<br/>MediatR]
+        DOMAIN_SERVICES[Domain Services<br/>Business Logic]
+        INTEGRATION_EVENTS[Integration Events<br/>Async Comm]
+        CACHE_SERVICE[Cache Service<br/>Distributed]
+    end
+    
+    subgraph "Event Processing"
+        DEAD_LETTER[Dead Letter Handler<br/>Failed Messages]
+        RETRY_MECHANISM[Retry Mechanism<br/>Exponential Backoff]
+        EVENT_ARCHIVER[Event Archiver<br/>Cold Storage]
+        METRICS_COLLECTOR[Metrics Collector<br/>Prometheus]
+    end
+    
+    subgraph "Monitoring & Observability"
+        HEALTH_CHECKS[Health Checks<br/>Liveness/Readiness]
+        DISTRIBUTED_TRACING[Distributed Tracing<br/>OpenTelemetry]
+        METRICS_EXPORTER[Metrics Exporter<br/>Prometheus]
+        LOG_AGGREGATION[Log Aggregation<br/>Serilog + ELK]
+    end
+    
+    RATE_LIMIT --> CACHE_SERVICE
+    CQRS_HANDLERS --> DOMAIN_SERVICES
+    DOMAIN_SERVICES --> INTEGRATION_EVENTS
+    INTEGRATION_EVENTS --> DEAD_LETTER
+    DEAD_LETTER --> RETRY_MECHANISM
+    HEALTH_CHECKS --> DB_MAIN
+    HEALTH_CHECKS --> CACHE

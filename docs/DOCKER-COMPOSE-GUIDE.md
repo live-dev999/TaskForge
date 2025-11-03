@@ -27,9 +27,7 @@ docker-compose-up.bat
 
 The setup automatically:
 1. **Detects your platform** (ARM64 or AMD64/x86_64)
-2. **Selects the correct SQL Server image**:
-   - AMD64/x86_64: `mcr.microsoft.com/mssql/server:2019-latest`
-   - ARM64: `mcr.microsoft.com/azure-sql-edge:latest`
+2. **Selects the correct PostgreSQL image**: `postgres:16-alpine` (supports both ARM64 and AMD64)
 3. **Sets platform flags** for all containers
 
 ## Manual Configuration (Optional)
@@ -39,37 +37,39 @@ If you prefer to set environment variables manually:
 ### Linux/Mac (Bash)
 ```bash
 export PLATFORM=linux/amd64  # or linux/arm64
-export SQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest  # or azure-sql-edge:latest
+export POSTGRES_IMAGE=postgres:16-alpine
 docker-compose up
 ```
 
 ### Windows PowerShell
 ```powershell
 $env:PLATFORM="linux/amd64"
-$env:SQL_IMAGE="mcr.microsoft.com/mssql/server:2019-latest"
+$env:POSTGRES_IMAGE="postgres:16-alpine"
 docker-compose up
 ```
 
 ### Windows CMD
 ```cmd
 set PLATFORM=linux/amd64
-set SQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest
+set POSTGRES_IMAGE=postgres:16-alpine
 docker-compose up
 ```
 
 ## Platform Detection Details
 
+PostgreSQL supports both ARM64 and AMD64 platforms, so the same image (`postgres:16-alpine`) works on all architectures:
+
 ### Mac
-- **Apple Silicon (M1/M2/M3)**: Detected as `arm64` → uses `azure-sql-edge`
-- **Intel**: Detected as `x86_64` → uses `mssql/server:2019-latest`
+- **Apple Silicon (M1/M2/M3)**: Detected as `arm64` → uses `postgres:16-alpine`
+- **Intel**: Detected as `x86_64` → uses `postgres:16-alpine`
 
 ### Windows
-- **ARM64**: Detected via `PROCESSOR_ARCHITECTURE` → uses `azure-sql-edge`
-- **AMD64/x86_64**: Uses `mssql/server:2019-latest`
+- **ARM64**: Detected via `PROCESSOR_ARCHITECTURE` → uses `postgres:16-alpine`
+- **AMD64/x86_64**: Uses `postgres:16-alpine`
 
 ### Linux
-- **ARM64/aarch64**: Uses `azure-sql-edge`
-- **x86_64/amd64**: Uses `mssql/server:2019-latest`
+- **ARM64/aarch64**: Uses `postgres:16-alpine`
+- **x86_64/amd64**: Uses `postgres:16-alpine`
 
 ## Docker Compose Files
 
@@ -79,12 +79,13 @@ docker-compose up
 
 ## Troubleshooting
 
-### SQL Server fails to start on ARM64
-- Ensure you're using `azure-sql-edge:latest` for ARM64
-- Check Docker logs: `docker logs sql.data`
+### PostgreSQL fails to start
+- Check Docker logs: `docker logs postgres.data`
+- Verify PostgreSQL is healthy: `docker-compose ps postgres.data`
+- Ensure port 5432 is not already in use
 
 ### Platform detection incorrect
-- Manually set `PLATFORM` and `SQL_IMAGE` environment variables
+- Manually set `PLATFORM` and `POSTGRES_IMAGE` environment variables
 - Check your architecture: 
   - Mac/Linux: `uname -m`
   - Windows: `echo %PROCESSOR_ARCHITECTURE%`
@@ -95,9 +96,15 @@ docker-compose up
 
 ## Services
 
-- **sql.data**: SQL Server database (port 5433)
+- **postgres.data**: PostgreSQL database (port 5432)
+- **pgadmin**: Database administration UI (port 5050)
 - **taskforge.api**: API service (port 5009)
 - **taskforge.eventprocessor**: Event processor service (port 5010)
+- **taskforge.messageconsumer**: Message consumer service (port 5011)
+- **taskforge.client**: React frontend (port 3000)
+- **rabbitmq**: Message broker (ports 5672, 15672)
+- **jaeger**: Distributed tracing UI (port 16686)
+- **otel-collector**: OpenTelemetry collector (ports 4317, 4318)
 
 ## Useful Commands
 

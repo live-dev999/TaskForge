@@ -30,8 +30,8 @@ Develop an API service for user task management with support for both synchronou
 
 ## Technical Requirements:
 - **Programming Language:** .NET 8 / ASP.NET Core
-- **Database:** PostgreSQL or MS SQL Server with EF Core
-- **Message Broker:** Kafka or RabbitMQ (for asynchronous part)
+- **Database:** PostgreSQL with EF Core (original requirement allowed PostgreSQL or MS SQL Server)
+- **Message Broker:** RabbitMQ (original requirement allowed Kafka or RabbitMQ)
 - **API Documentation:** OpenAPI/Swagger format
 - Code must be **covered with unit tests**
 - **Architecture:** Clean architecture with SOLID principles compliance

@@ -1,0 +1,31 @@
+graph TB
+    subgraph "Task Management System v2.0"
+        WEB_API[API Gateway<br/>+ Rate Limiting]
+        AUTH_SVC[Auth Service<br/>JWT + Refresh Tokens]
+        TASK_SVC[Task Service<br/>Core Business Logic]
+        NOTIFY_SVC[Notification Service<br/>Email/Webhook]
+        ANALYTICS_SVC[Analytics Service<br/>Metrics & Reports]
+    end
+    
+    WEB_API --> AUTH_SVC
+    WEB_API --> TASK_SVC
+    TASK_SVC --> NOTIFY_SVC
+    TASK_SVC --> ANALYTICS_SVC
+    
+    TASK_SVC --> DB_MAIN[(Main DB<br/>Writes)]
+    TASK_SVC --> DB_REPLICA[(Read Replica<br/>Reads)]
+    TASK_SVC --> CACHE[(Redis<br/>Cache)]
+    
+    TASK_SVC --> MQ_EVENTS[Event Bus<br/>Kafka Topics]
+    MQ_EVENTS --> EVENT_PROC[Event Processor<br/>+ Retry Policy]
+    MQ_EVENTS --> AUDIT_SVC[Audit Service<br/>Compliance]
+    MQ_EVENTS --> NOTIFY_SVC
+    
+    EVENT_PROC --> LOGS[(Structured Logs<br/>ELK Stack)]
+    ANALYTICS_SVC --> METRICS[(Metrics DB<br/>Prometheus)]
+    
+    style WEB_API fill:#e3f2fd
+    style AUTH_SVC fill:#ffebee
+    style TASK_SVC fill:#f3e5f5
+    style NOTIFY_SVC fill:#e8f5e8
+    style ANALYTICS_SVC fill:#fff3e0

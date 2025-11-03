@@ -155,6 +155,46 @@ In Docker, the client automatically proxies API requests through nginx to the ba
 
 For more details, see `src/client-app/README-DOCKER.md`.
 
+### **PostgreSQL for API Debugging**
+
+To debug the API locally (without running all Docker services), you can start only PostgreSQL:
+
+**Windows (PowerShell):**
+```powershell
+.\docker-compose.debug.ps1
+```
+
+**Mac/Linux (Bash):**
+```bash
+chmod +x docker-compose.debug.sh
+./docker-compose.debug.sh
+```
+
+Or manually:
+```bash
+docker-compose -f docker-compose.debug.yml up -d
+```
+
+This will start PostgreSQL container on `localhost:5432` with:
+- **Database**: `TaskForge`
+- **Username**: `postgres`
+- **Password**: `postgres`
+
+Connection string (already configured in `appsettings.json`):
+```
+Host=localhost;Port=5432;Database=TaskForge;Username=postgres;Password=postgres
+```
+
+To stop the container:
+```bash
+docker-compose -f docker-compose.debug.yml down
+```
+
+To remove the data volume (fresh start):
+```bash
+docker-compose -f docker-compose.debug.yml down -v
+```
+
 ### **Deploy local PostgreSQL database (alternative method)**
 
 Install PostgreSQL locally on your machine:

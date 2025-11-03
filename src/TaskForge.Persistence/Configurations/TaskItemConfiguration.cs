@@ -68,13 +68,13 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
         builder.Property(t => t.CreatedAt)
             .HasColumnName("CreatedAt")
             .IsRequired()
-            .HasColumnType("timestamp");
+            .HasColumnType("timestamp with time zone"); // Используем timestamptz для поддержки UTC
 
         // Конфигурация UpdatedAt
         builder.Property(t => t.UpdatedAt)
             .HasColumnName("UpdatedAt")
             .IsRequired()
-            .HasColumnType("timestamp");
+            .HasColumnType("timestamp with time zone"); // Используем timestamptz для поддержки UTC
 
         // Индексы для оптимизации запросов
         builder.HasIndex(t => t.Status)

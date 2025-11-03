@@ -25,8 +25,8 @@ using Microsoft.EntityFrameworkCore;
 using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using MediatR;
-using FluentValidation.AspNetCore;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -90,8 +90,11 @@ public static class ApplicationServiceExtensions
 
         services.AddMediatR(typeof(List.Handler));
         services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-        services.AddFluentValidationAutoValidation();
+        
+        // Configure FluentValidation
         services.AddValidatorsFromAssemblyContaining<Create>();
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
         
         // Add Health Checks
         services.AddHealthChecks()

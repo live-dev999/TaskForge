@@ -63,18 +63,78 @@ app.MapControllers();
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
+var logger = services.GetRequiredService<ILogger<Program>>();
+
 try
 {
     var context = services.GetRequiredService<DataContext>();
-    await context.Database.MigrateAsync();
-    await Seed.SeedData(context);
+    
+    // Check if we should drop and recreate the database on migration conflict
+    var dropOnConflict = builder.Configuration.GetValue<bool>("Database:DropOnMigrationConflict", false);
+    
+    try
+    {
+        await context.Database.MigrateAsync();
+    }
+    catch (Exception ex) when (IsTableAlreadyExistsError(ex))
+    {
+        // Table already exists - this happens when old table exists but migration history is missing
+        if (dropOnConflict || app.Environment.IsDevelopment())
+        {
+            logger.LogWarning("Table 'TaskItems' already exists. Dropping it to apply new migration...");
+            await context.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS \"TaskItems\" CASCADE;");
+            
+            // Remove old migration history entries if they exist
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM \"__EFMigrationsHistory\" WHERE \"MigrationId\" != '20251103134328_InitialCreate';");
+            
+            // Retry migration
+            await context.Database.MigrateAsync();
+            logger.LogInformation("Database table recreated successfully.");
+        }
+        else
+        {
+            logger.LogError("Migration failed: Table 'TaskItems' already exists. " +
+                          "Set 'Database:DropOnMigrationConflict' to 'true' in appsettings.json " +
+                          "or manually drop the table using: DROP TABLE IF EXISTS \"TaskItems\" CASCADE;");
+            throw;
+        }
+    }
+    
+    // Seed database
+    try
+    {
+        await Seed.SeedData(context, logger);
+    }
+    catch (Exception seedEx)
+    {
+        logger.LogError(seedEx, "An error occurred during database seeding: {ErrorMessage}", seedEx.Message);
+        // Don't throw - allow application to continue even if seed fails
+    }
 }
 catch (Exception ex)
 {
-    var logger = services.GetRequiredService<ILogger<Program>>();
     logger.LogError(ex, "An error occured during migration");
 }
 app.Run();
+
+// Helper method to check if exception is a "table already exists" error
+static bool IsTableAlreadyExistsError(Exception ex)
+{
+    // Check if it's a PostgresException with the specific error code
+    if (ex is Npgsql.PostgresException pgEx && pgEx.SqlState == "42P07")
+        return true;
+    
+    // Check inner exceptions recursively
+    Exception current = ex.InnerException;
+    while (current != null)
+    {
+        if (current is Npgsql.PostgresException innerPgEx && innerPgEx.SqlState == "42P07")
+            return true;
+        current = current.InnerException;
+    }
+    
+    return false;
+}
 
 // Make Program class accessible for integration tests
 public partial class Program { }

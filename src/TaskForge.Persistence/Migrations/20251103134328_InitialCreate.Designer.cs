@@ -12,7 +12,7 @@ using TaskForge.Persistence;
 namespace TaskForge.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251103022306_InitialCreate")]
+    [Migration("20251103134328_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,7 +33,7 @@ namespace TaskForge.Persistence.Migrations
                         .HasColumnName("Id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("CreatedAt");
 
                     b.Property<string>("Description")
@@ -52,7 +52,7 @@ namespace TaskForge.Persistence.Migrations
                         .HasColumnName("Title");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedAt");
 
                     b.HasKey("Id");

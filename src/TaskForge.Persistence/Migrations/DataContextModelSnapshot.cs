@@ -30,7 +30,7 @@ namespace TaskForge.Persistence.Migrations
                         .HasColumnName("Id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("CreatedAt");
 
                     b.Property<string>("Description")
@@ -49,7 +49,7 @@ namespace TaskForge.Persistence.Migrations
                         .HasColumnName("Title");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedAt");
 
                     b.HasKey("Id");

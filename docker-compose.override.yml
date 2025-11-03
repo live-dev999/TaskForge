@@ -5,31 +5,34 @@ networks:
   backend:
 
 services:
-  sql.data:
-    container_name: sql.data
-    image: ${SQL_IMAGE:-mcr.microsoft.com/mssql/server:2019-latest}
+  postgres.data:
+    container_name: postgres.data
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
     platform: ${PLATFORM:-linux/amd64}
     environment:
-      - SA_PASSWORD=your@Password
-      - ACCEPT_EULA=Y
-      - MSSQL_PID=Developer
+      - POSTGRES_DB=TaskForge
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - "5433:1433"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'your@Password' -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 40s
+      retries: 5
+      start_period: 30s
 
   taskforge.api:
     container_name: taskforge.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
+      - ConnectionString=Host=postgres.data;Port=5432;Database=TaskForge;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres.data;Port=5432;Database=TaskForge;Username=postgres;Password=postgres
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
       # OpenTelemetry configuration (supports both formats)
       - OpenTelemetry__ServiceName=${OTEL_SERVICE_NAME:-TaskForge.API}
@@ -54,7 +57,7 @@ services:
     #volumes:
     #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
     depends_on:
-      sql.data:
+      postgres.data:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -76,7 +79,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionString=Server=sql.data;Initial Catalog=TaskForge;Persist Security Info=False;User ID=sa;Password=your@Password;Connection Timeout=30;
+      - ConnectionString=Host=postgres.data;Port=5432;Database=TaskForge;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres.data;Port=5432;Database=TaskForge;Username=postgres;Password=postgres
       # OpenTelemetry configuration for EventProcessor
       - OpenTelemetry__ServiceName=${OTEL_SERVICE_NAME_EVENTPROCESSOR:-TaskForge.EventProcessor}
       - OpenTelemetry__ServiceVersion=${OTEL_SERVICE_VERSION:-1.0.0}
@@ -91,7 +95,7 @@ services:
     #volumes:
     #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
     depends_on:
-      sql.data:
+      postgres.data:
         condition: service_healthy
       otel-collector:
         condition: service_started
@@ -138,3 +142,34 @@ services:
     networks:
       - frontend
       - backend
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    platform: ${PLATFORM:-linux/amd64}
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@pgadmin.org}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+      - PGADMIN_CONFIG_CHECK_EMAIL_DELIVERABILITY=False
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin-init/servers.json:ro
+      - ./docker/pgadmin/setup.py:/pgadmin-init/setup.py:ro
+    entrypoint: >
+      /bin/bash -c "
+      python3 /pgadmin-init/setup.py &
+      exec /entrypoint.sh
+      "
+    networks:
+      - backend
+    depends_on:
+      postgres.data:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  pgadmin_data:

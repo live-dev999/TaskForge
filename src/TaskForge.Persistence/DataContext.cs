@@ -23,6 +23,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using TaskForge.Domain;
+using TaskForge.Persistence.Configurations;
 
 namespace TaskForge.Persistence;
 
@@ -33,4 +34,12 @@ public class DataContext : DbContext
     }
 
     public DbSet<TaskItem> TaskItems { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Применяем конфигурации из папки Configurations
+        modelBuilder.ApplyConfiguration(new TaskItemConfiguration());
+    }
 }

@@ -46,7 +46,10 @@ public static class ApplicationServiceExtensions
         services.AddSwaggerGen();
         services.AddDbContext<Persistence.DataContext>(opt =>
         {
-            opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            var connectionString = config.GetConnectionString("DefaultConnection") 
+                ?? config["ConnectionString"] 
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            opt.UseNpgsql(connectionString);
         });
         services.AddCors(opt =>
         {

@@ -61,7 +61,7 @@ Coverage(Coveralls)
 
  ## **Getting Started**
 ### Steps: 
-1. Install [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) database or deploy database using docker
+1. Install [PostgreSQL 15+](https://www.postgresql.org/download/) database or deploy database using docker
 2. Set environment in appSettings.json and appSettings.Development.json
 3. Migrate EF CORE or deploy a database backup
 4. Build and run project (use dotnet commands or use IDEs([Visual Studio 2022 / Visual Studio for Mac](https://visualstudio.microsoft.com/downloads/) or [Microsoft VS Code](https://visualstudio.microsoft.com/downloads/))
@@ -82,52 +82,32 @@ To work with the database in Microsoft Azure, you need to remember to set a fire
 Run database use docker:
 
 ```
-sudo docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" \
-   -p 1433:1433 --name sql1 --hostname sql1 \
+sudo docker run -e "POSTGRES_DB=TaskForge" -e "POSTGRES_USER=postgres" -e "POSTGRES_PASSWORD=postgres" \
+   -p 5432:5432 --name postgres-taskforge \
    -d \
-   mcr.microsoft.com/mssql/server:2019-latest
+   postgres:16-alpine
 ```
 
 
 Run database use docker-compose:
-Create docker-compose.yaml file in root folder with code:
-```
-version: '3.7'
+The project already includes `docker-compose.yml` and `docker-compose.override.yml` files configured for PostgreSQL.
 
-services:
-  sql.data:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqldatacontainer
+For Intel / Amd CPU (x86/x64):
 ```
-Create docker-compose.override.yaml in root folder with code:
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```
 
-For Intel / Amd CPU
+For Apple Silicon CPU (M1/M2/M3) - ARM:
 ```
-version: '3.7'
+docker-compose -f docker-compose.yml -f docker-compose.override.arm.yml up -d
+```
 
-services:
-  sql.data:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqldatacontainer
-```
-For Apply Silicon CPU(M1/M2/M3)
-```
-version: '3.7'
-
-services:
-  sql.data:
-    image: mcr.microsoft.com/azure-sql-edge
-    container_name: sqldatacontainer
-```
-So, Now we can run docker-compose command for create local docker image
-if you use docker-compose for Intel / Amd CPU (x86/x64)
-```
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up
-```
-if you use docker-compose for Apply Silicon CPU - M1/M2/M3 (ARM)
-```
-docker-compose -f docker-compose.arm.yml -f docker-compose.override.yml up
-```
+After starting, the following services will be available:
+- **PostgreSQL**: `localhost:5432`
+- **pgAdmin**: `http://localhost:5050` (default credentials: `admin@pgadmin.org` / `admin`)
+- **API**: `http://localhost:5009`
+- **EventProcessor**: `http://localhost:5010`
+- **Client**: `http://localhost:3000`
 
 ### **Client Application**
 
@@ -136,7 +116,36 @@ The React client application is included in the Docker Compose setup. After star
 - **Client**: Available at `http://localhost:3000` (configurable via `CLIENT_PORT` environment variable)
 - **API**: Available at `http://localhost:5009/api`
 - **EventProcessor**: Available at `http://localhost:5010`
-- **Database**: SQL Server at `localhost:5433`
+- **Database**: PostgreSQL at `localhost:5432`
+- **pgAdmin**: Available at `http://localhost:5050` (configurable via `PGADMIN_PORT` environment variable)
+  - Default email: `admin@pgadmin.org` (standard pgAdmin default)
+  - Default password: `admin` (configurable via `PGADMIN_PASSWORD` env var)
+
+#### **Connecting to PostgreSQL via pgAdmin**
+
+pgAdmin is pre-configured with the TaskForge database connection. Simply:
+
+1. Open pgAdmin at `http://localhost:5050`
+2. Login with credentials:
+   - Email: `admin@pgadmin.org` (or your custom email via `PGADMIN_EMAIL` env var)
+   - Password: `admin` (or your custom password via `PGADMIN_PASSWORD` env var)
+3. You should see **"TaskForge DB"** server already configured under "Servers"
+4. Click on "TaskForge DB" to expand and access the database
+
+If the server is not visible, you can add it manually:
+1. Right-click on "Servers" → "Create" → "Server"
+2. In the "General" tab:
+   - Name: `TaskForge DB`
+3. In the "Connection" tab:
+   - Host name/address: `postgres.data`
+   - Port: `5432`
+   - Maintenance database: `TaskForge`
+   - Username: `postgres`
+   - Password: `postgres`
+   - Check "Save password"
+4. Click "Save"
+
+Now you can browse the database, view tables, execute queries, and monitor database activity.
 
 #### Client Configuration
 
@@ -207,10 +216,17 @@ Go to link [for download Microsoft SQL Server](https://www.microsoft.com/en-us/s
 
 ## Build and run applications
 Before launching, be sure to set the variables in the appsettings.json configuration files. It is important to specify the correct database connection string
+
+**For PostgreSQL:**
 ```
  "ConnectionStrings": {
-    "TaskForgeConnection": "Server=tcp:<server>,<port>;Initial Catalog=<databasename>;Persist Security Info=False;User ID=<user>;Password=<password>;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    "DefaultConnection": "Host=localhost;Port=5432;Database=TaskForge;Username=postgres;Password=postgres"
   },
+```
+
+**For Docker environment** (connection string is automatically set via environment variables):
+```
+Host=postgres.data;Port=5432;Database=TaskForge;Username=postgres;Password=postgres
 ```
 Can use commands use terminal or use IDEs(Microsoft Visual Studio 2022 or VS Code):
 ```

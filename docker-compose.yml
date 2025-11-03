@@ -1,10 +1,10 @@
 version: '3.8'
 
 services:
-  sql.data:
-    image: ${SQL_IMAGE:-mcr.microsoft.com/mssql/server:2019-latest}
+  postgres.data:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: postgres.data
     platform: ${PLATFORM:-linux/amd64}
-    container_name: sqldatacontainer
 
   taskforge.api:
     image: ${DOCKER_REGISTRY-}taskforgeapi

@@ -28,20 +28,25 @@ fi
 # Detect platform
 if [[ "$ARCH" == "arm64" ]] || [[ "$ARCH" == "aarch64" ]]; then
     export PLATFORM="linux/arm64"
-    export SQL_IMAGE="mcr.microsoft.com/azure-sql-edge:latest"
+    export POSTGRES_IMAGE="postgres:16-alpine"
+    OVERRIDE_FILE="docker-compose.override.arm.yml"
     echo -e "${GREEN}✅ Detected ARM64 platform (Apple Silicon M1/M2/M3 or ARM Linux)${NC}"
 elif [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "i386" ]]; then
     export PLATFORM="linux/amd64"
-    export SQL_IMAGE="mcr.microsoft.com/mssql/server:2019-latest"
+    export POSTGRES_IMAGE="postgres:16-alpine"
+    OVERRIDE_FILE="docker-compose.override.yml"
     echo -e "${GREEN}✅ Detected AMD64/x86_64 platform (Intel/AMD)${NC}"
 else
     export PLATFORM="linux/amd64"
-    export SQL_IMAGE="mcr.microsoft.com/mssql/server:2019-latest"
+    export POSTGRES_IMAGE="postgres:16-alpine"
+    OVERRIDE_FILE="docker-compose.override.yml"
     echo -e "${YELLOW}⚠️ Unknown architecture ($ARCH), defaulting to AMD64${NC}"
 fi
 
 echo -e "${BLUE}Platform:${NC} $PLATFORM"
-echo -e "${BLUE}SQL Image:${NC} $SQL_IMAGE"
+echo -e "${BLUE}PostgreSQL Image:${NC} $POSTGRES_IMAGE"
+echo -e "${BLUE}pgAdmin Email:${NC} ${PGADMIN_EMAIL:-admin@pgadmin.org} (default)"
+echo -e "${BLUE}Override file:${NC} $OVERRIDE_FILE"
 echo -e "${BLUE}OS:${NC} $OS"
 echo ""
 
@@ -89,18 +94,18 @@ echo ""
 
 # Export variables for docker-compose (they will be picked up automatically)
 export PLATFORM
-export SQL_IMAGE
+export POSTGRES_IMAGE
 
 # Build images if rebuild flag is set
 # Note: Platform is controlled via PLATFORM environment variable and docker-compose.yml platform settings
 if [[ -n "$BUILD_FLAG" ]]; then
     echo -e "${BLUE}Building images for platform: $PLATFORM${NC}"
     if [[ -n "$NO_CACHE_FLAG" ]]; then
-        "${COMPOSE_CMD_ARGS[@]}" build --no-cache || {
+        "${COMPOSE_CMD_ARGS[@]}" -f docker-compose.yml -f "$OVERRIDE_FILE" build --no-cache || {
             echo -e "${YELLOW}⚠️ Build failed, continuing anyway...${NC}"
         }
     else
-        "${COMPOSE_CMD_ARGS[@]}" build || {
+        "${COMPOSE_CMD_ARGS[@]}" -f docker-compose.yml -f "$OVERRIDE_FILE" build || {
             echo -e "${YELLOW}⚠️ Build failed, continuing anyway...${NC}"
         }
     fi
@@ -108,7 +113,8 @@ if [[ -n "$BUILD_FLAG" ]]; then
 fi
 
 # Run docker-compose with all compose files
-# docker-compose automatically uses docker-compose.yml and docker-compose.override.yml
+# Explicitly specify both compose files to ensure correct configuration
 # Platform is already set via environment variable, so containers will use the correct platform
-"${COMPOSE_CMD_ARGS[@]}" up "${DOCKER_COMPOSE_ARGS[@]}"
+echo -e "${BLUE}Starting services with: docker-compose.yml and $OVERRIDE_FILE${NC}"
+"${COMPOSE_CMD_ARGS[@]}" -f docker-compose.yml -f "$OVERRIDE_FILE" up "${DOCKER_COMPOSE_ARGS[@]}"
 

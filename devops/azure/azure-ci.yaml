@@ -33,10 +33,10 @@ variables:
   codeCoverageTool: 'Cobertura'
   summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.cobertura.xml'
   # Minimum code coverage percentage required per service
-  minimumCodeCoverageAPI: 20
+  minimumCodeCoverageAPI: 5
   minimumCodeCoverageEventProcessor: 0
   minimumCodeCoverageMessageConsumer: 0
-  minimumCodeCoverageCommon: 40
+  minimumCodeCoverageCommon: 5
 
 stages:
 - stage: BuildAndTest

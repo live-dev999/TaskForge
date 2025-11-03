@@ -40,7 +40,8 @@ public class Details
             if (taskItem == null)
             {
                 _logger.LogWarning("Task item with Id: {TaskItemId} not found", request.Id);
-                return Result<TaskItem>.Failure("Task item not found");
+                // Return Success with null value - HandleResult will convert this to NotFound
+                return Result<TaskItem>.Success(null);
             }
             
             _logger.LogInformation("Query Details TaskItem completed successfully for Id: {TaskItemId}", request.Id);

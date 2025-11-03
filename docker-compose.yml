@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
-  sql.data:
-    image: ${SQL_IMAGE:-mcr.microsoft.com/mssql/server:2019-latest}
+  postgres.data:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: postgres.data
     platform: ${PLATFORM:-linux/amd64}
-    container_name: sqldatacontainer
 
   taskforge.api:
     image: ${DOCKER_REGISTRY-}taskforgeapi
@@ -12,9 +10,6 @@ services:
     build:
       context: .
       dockerfile: src/TaskForge.API/Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
 
   taskforge.eventprocessor:
     image: ${DOCKER_REGISTRY-}taskforgeeventprocessor
@@ -27,12 +22,15 @@ services:
         - linux/arm64
 
   taskforge.client:
+    container_name: taskforge.client
     image: ${DOCKER_REGISTRY-}taskforgeclient
     build:
       context: ./src/client-app
       dockerfile: Dockerfile
       args:
-        REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5009/api}
+    ports:
+      - "3000:80"
 
   otel-collector:
     image: otel/opentelemetry-collector:latest
@@ -63,6 +61,7 @@ services:
       - backend
 
   taskforge.messageconsumer:
+    container_name: taskforge.messageconsumer
     image: ${DOCKER_REGISTRY-}taskforgemessageconsumer
     platform: ${PLATFORM:-linux/amd64}
     build:
@@ -71,6 +70,8 @@ services:
       platforms:
         - linux/amd64
         - linux/arm64
+    ports:
+      - "5011:80"
 
   rabbitmq:
     image: rabbitmq:3-management

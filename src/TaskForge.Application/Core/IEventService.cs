@@ -1,17 +1,17 @@
 /*
  *   Copyright (c) 2025 Dzianis Prokharchyk
  *   All rights reserved.
-
+ *
  *   Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to deal
  *   in the Software without restriction, including without limitation the rights
  *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *   copies of the Software, and to permit persons to whom the Software is
  *   furnished to do so, subject to the following conditions:
- 
+ *
  *   The above copyright notice and this permission notice shall be included in all
  *   copies or substantial portions of the Software.
- 
+ *
  *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,13 +21,19 @@
  *   SOFTWARE.
  */
 
-namespace Tests.TaskForge.Application;
+namespace TaskForge.Application.Core;
 
-public class UnitTest1
+/// <summary>
+/// Interface for sending task change events to EventProcessor service.
+/// </summary>
+public interface IEventService
 {
-    [Fact]
-    public void Test1()
-    {
-
-    }
+    /// <summary>
+    /// Sends a task change event to the EventProcessor service asynchronously.
+    /// </summary>
+    /// <param name="eventDto">The task change event to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if the event was sent successfully, false otherwise.</returns>
+    Task<bool> SendEventAsync(TaskChangeEventDto eventDto, CancellationToken cancellationToken = default);
 }
+

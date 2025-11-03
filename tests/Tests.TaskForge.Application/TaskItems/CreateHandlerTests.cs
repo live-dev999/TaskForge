@@ -6,6 +6,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
@@ -47,6 +48,22 @@ public class CreateHandlerTests
         return new Mock<ILogger<Create.Handler>>().Object;
     }
 
+    private IEventService CreateEventService()
+    {
+        var mock = new Mock<IEventService>();
+        mock.Setup(x => x.SendEventAsync(It.IsAny<TaskChangeEventDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        return mock.Object;
+    }
+
+    private IMessageProducer CreateMessageProducer()
+    {
+        var mock = new Mock<IMessageProducer>();
+        mock.Setup(x => x.PublishEventAsync(It.IsAny<TaskChangeEventDto>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        return mock.Object;
+    }
+
     #endregion
 
     #region Success Tests
@@ -57,7 +74,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var command = new Create.Command
         {
             TaskItem = CreateValidTaskItem()
@@ -77,7 +96,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         var command = new Create.Command
         {
@@ -101,7 +122,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         taskItem.Id = Guid.Empty; // Should be auto-set
         taskItem.CreatedAt = default(DateTime); // Should be auto-set
@@ -131,7 +154,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
         var taskItem2 = CreateValidTaskItem();
@@ -160,7 +185,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
 
         // Act & Assert
         await Assert.ThrowsAsync<NullReferenceException>(() => handler.Handle(null, CancellationToken.None));
@@ -172,7 +199,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var command = new Create.Command
         {
             TaskItem = CreateValidTaskItem()
@@ -195,7 +224,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         taskItem.Id = Guid.Empty;
         var command = new Create.Command
@@ -218,7 +249,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         taskItem.CreatedAt = DateTime.MinValue;
         taskItem.UpdatedAt = DateTime.MinValue;
@@ -240,7 +273,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         taskItem.CreatedAt = DateTime.MaxValue;
         taskItem.UpdatedAt = DateTime.MaxValue;
@@ -262,7 +297,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         taskItem.Title = new string('A', 10000);
         var command = new Create.Command
@@ -283,7 +320,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var taskItem = CreateValidTaskItem();
         taskItem.Description = new string('B', 10000);
         var command = new Create.Command
@@ -304,7 +343,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
 
         var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
 
@@ -336,7 +377,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
 
         for (int i = 0; i < 5; i++)
         {
@@ -360,7 +403,9 @@ public class CreateHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var originalTaskItem = CreateValidTaskItem();
         var originalId = originalTaskItem.Id;
         var originalTitle = originalTaskItem.Title;
@@ -401,7 +446,9 @@ public class CreateHandlerTests
         // In-memory database always saves, so this test documents expected behavior
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new Create.Handler(context, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Create.Handler(context, logger, eventService, messageProducer);
         var command = new Create.Command
         {
             TaskItem = CreateValidTaskItem()

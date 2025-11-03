@@ -29,15 +29,28 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex, "An error occurred: {Message}", ex.Message);
+            
+            // Log inner exception if present
+            if (ex.InnerException != null)
+            {
+                _logger.LogError(ex.InnerException, "Inner exception: {Message}", ex.InnerException.Message);
+            }
+            
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            var details = ex.StackTrace?.ToString();
+            if (ex.InnerException != null)
+            {
+                details = $"{ex.Message}\nInner Exception: {ex.InnerException.Message}\n\n{details}";
+            }
 
             var response = _environment.IsDevelopment()
                 ? new AppException(
                     context.Response.StatusCode,
                     ex.Message,
-                    ex.StackTrace?.ToString()
+                    details
                 )
                 : new AppException(context.Response.StatusCode, "Internal Server Error");
 

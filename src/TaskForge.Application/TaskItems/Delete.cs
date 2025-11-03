@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
+using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
@@ -16,11 +17,15 @@ public class Delete
     {
         private readonly DataContext _context;
         private readonly ILogger<Handler> _logger;
+        private readonly IEventService _eventService;
+        private readonly IMessageProducer _messageProducer;
 
-        public Handler(DataContext context, ILogger<Handler> logger)
+        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
         {
             _context = context;
             _logger = logger;
+            _eventService = eventService;
+            _messageProducer = messageProducer;
         }
 
         public async Task<Result<Unit>> Handle(
@@ -38,6 +43,17 @@ public class Delete
                 return Result<Unit>.Failure("Task item not found");
             }
 
+            // Store task data before deletion for event
+            var deletedTaskData = new
+            {
+                taskItem.Id,
+                taskItem.Title,
+                taskItem.Description,
+                taskItem.Status,
+                taskItem.CreatedAt,
+                taskItem.UpdatedAt
+            };
+
             _context.Remove(taskItem);
 
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
@@ -48,6 +64,36 @@ public class Delete
             }
             
             _logger.LogInformation("Command Delete TaskItem completed successfully for Id: {TaskItemId}", request.Id);
+            
+            // Send events (synchronous HTTP and asynchronous RabbitMQ) - fire and forget - don't block on failure
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var eventDto = new TaskChangeEventDto
+                    {
+                        TaskId = deletedTaskData.Id,
+                        EventType = "Deleted",
+                        Title = deletedTaskData.Title,
+                        Description = deletedTaskData.Description,
+                        Status = deletedTaskData.Status.ToString(),
+                        EventTimestamp = DateTime.UtcNow,
+                        CreatedAt = deletedTaskData.CreatedAt,
+                        UpdatedAt = deletedTaskData.UpdatedAt
+                    };
+                    
+                    // Send to EventProcessor (synchronous HTTP)
+                    await _eventService.SendEventAsync(eventDto, cancellationToken);
+                    
+                    // Publish to RabbitMQ (asynchronous)
+                    await _messageProducer.PublishEventAsync(eventDto, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error in background task for sending events: TaskId={TaskId}", request.Id);
+                }
+            }, cancellationToken);
+            
             return Result<Unit>.Success(Unit.Value);
         }
     }

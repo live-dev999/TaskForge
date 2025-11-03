@@ -1,0 +1,15 @@
+graph TB
+    USER[Пользователь] --> API[Task Management Service]
+    ADMIN[Администратор] --> MONITOR[Monitoring Dashboard]
+    API --> DB[(PostgreSQL<br/>+ Read Replica)]
+    API --> CACHE[(Redis Cache<br/>+ Rate Limiting)]
+    API --> MQ[Message Bus<br/>Kafka + Dead Letter]
+    MQ --> EP[Event Processor<br/>+ Retry Mechanism]
+    MQ --> ANALYTICS[Analytics Service<br/>+ Metrics]
+    
+    style USER fill:#e1f5fe
+    style ADMIN fill:#fff3e0
+    style API fill:#f3e5f5
+    style DB fill:#e8f5e8
+    style CACHE fill:#fff8e1
+    style MONITOR fill:#fce4ec

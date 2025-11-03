@@ -104,41 +104,52 @@ public static class ApplicationServiceExtensions
         services.AddScoped<TaskForge.Application.Core.IEventService>(sp =>
             sp.GetRequiredService<TaskForge.Application.Core.EventService>());
         
-        // Configure MassTransit with RabbitMQ
-        services.AddMassTransit(x =>
+        // Configure RabbitMQ/MassTransit (optional - can be disabled for local development)
+        var rabbitMQEnabled = config.GetValue<bool>("RabbitMQ:Enabled", true);
+        
+        if (rabbitMQEnabled)
         {
-            // Configure message endpoint naming convention
-            // This ensures consistent endpoint names across services
-            x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("TaskForge", false));
-
-            // Configure RabbitMQ
-            x.UsingRabbitMq((context, cfg) =>
+            // Configure MassTransit with RabbitMQ
+            services.AddMassTransit(x =>
             {
-                var host = config["RabbitMQ:HostName"] ?? "localhost";
-                var port = config.GetValue<int>("RabbitMQ:Port", 5672);
-                var userName = config["RabbitMQ:UserName"] ?? "guest";
-                var password = config["RabbitMQ:Password"] ?? "guest";
+                // Configure message endpoint naming convention
+                // This ensures consistent endpoint names across services
+                x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("TaskForge", false));
 
-                cfg.Host(host, (ushort)port, "/", h =>
+                // Configure RabbitMQ
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    h.Username(userName);
-                    h.Password(password);
-                    // Configure connection timeout - MassTransit has built-in retry for connections
-                    h.RequestedConnectionTimeout(TimeSpan.FromSeconds(30));
-                });
+                    var host = config["RabbitMQ:HostName"] ?? "localhost";
+                    var port = config.GetValue<int>("RabbitMQ:Port", 5672);
+                    var userName = config["RabbitMQ:UserName"] ?? "guest";
+                    var password = config["RabbitMQ:Password"] ?? "guest";
 
-                // Configure publish endpoint for TaskChangeEventDto
-                cfg.Message<TaskForge.Application.Core.TaskChangeEventDto>(e =>
-                {
-                    e.SetEntityName("task-change-events");
-                });
+                    cfg.Host(host, (ushort)port, "/", h =>
+                    {
+                        h.Username(userName);
+                        h.Password(password);
+                        // Configure connection timeout - MassTransit has built-in retry for connections
+                        h.RequestedConnectionTimeout(TimeSpan.FromSeconds(30));
+                    });
 
-                cfg.ConfigureEndpoints(context);
+                    // Configure publish endpoint for TaskChangeEventDto
+                    cfg.Message<TaskForge.Application.Core.TaskChangeEventDto>(e =>
+                    {
+                        e.SetEntityName("task-change-events");
+                    });
+
+                    cfg.ConfigureEndpoints(context);
+                });
             });
-        });
 
-        // Register MessageProducer
-        services.AddScoped<TaskForge.Application.Core.IMessageProducer, TaskForge.Application.Core.MessageProducer>();
+            // Register real MessageProducer
+            services.AddScoped<TaskForge.Application.Core.IMessageProducer, TaskForge.Application.Core.MessageProducer>();
+        }
+        else
+        {
+            // Register null MessageProducer (no-op implementation)
+            services.AddScoped<TaskForge.Application.Core.IMessageProducer, TaskForge.Application.Core.NullMessageProducer>();
+        }
         
         // Add OpenTelemetry tracing
         AddOpenTelemetryTracing(services, config);

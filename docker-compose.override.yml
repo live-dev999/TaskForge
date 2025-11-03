@@ -44,6 +44,7 @@ services:
       - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-1.0.0}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
       # RabbitMQ configuration
+      - RabbitMQ__Enabled=true
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=${RABBITMQ_USER:-guest}
@@ -116,6 +117,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       # RabbitMQ configuration
+      - RabbitMQ__Enabled=true
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=${RABBITMQ_USER:-guest}

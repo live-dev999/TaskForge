@@ -12,9 +12,6 @@ services:
     build:
       context: .
       dockerfile: src/TaskForge.API/Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
 
   taskforge.eventprocessor:
     image: ${DOCKER_REGISTRY-}taskforgeeventprocessor

@@ -1,7 +1,7 @@
 /*
  *   Copyright (c) 2025 Dzianis Prokharchyk
  *   All rights reserved.
-
+ *
  *   Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to deal
  *   in the Software without restriction, including without limitation the rights
@@ -23,6 +23,10 @@
 
 namespace TaskForge.MessageConsumer;
 
+/// <summary>
+/// Worker service that hosts MassTransit bus for consuming messages.
+/// MassTransit automatically manages the bus lifecycle and message consumption.
+/// </summary>
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
@@ -34,13 +38,24 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // MassTransit bus is managed automatically as a hosted service
+        // We just need to keep the worker alive
+        _logger.LogInformation("[START] MessageConsumer Worker started. MassTransit bus will consume messages automatically.");
+        _logger.LogInformation("Listening for task change events from RabbitMQ queue: 'task-change-events'");
+        _logger.LogInformation("Worker is running and ready to process messages...");
+        
+        var heartbeatCounter = 0;
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            
+            heartbeatCounter++;
+            if (heartbeatCounter % 5 == 0) // Every 5 minutes
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogInformation("[HEARTBEAT] MessageConsumer Worker heartbeat: Still running and processing messages... (Running for {Minutes} minutes)", heartbeatCounter);
             }
-            await Task.Delay(1000, stoppingToken);
         }
+        
+        _logger.LogInformation("[STOP] MessageConsumer Worker is stopping. Shutting down gracefully...");
     }
 }

@@ -22,6 +22,8 @@
  */
 
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TaskForge.Domain;
 
 namespace TaskForge.Persistence;
@@ -30,9 +32,18 @@ public class Seed
 {
     #region Methods
 
-    public static async Task SeedData(DataContext context)
+    public static async Task SeedData(DataContext context, ILogger logger = null)
     {
-        if (context.TaskItems.Any()) return;
+        try
+        {
+            var hasData = await context.TaskItems.AnyAsync();
+            if (hasData)
+            {
+                logger?.LogInformation("Database already contains data. Skipping seed.");
+                return;
+            }
+
+            logger?.LogInformation("Starting database seed...");
 
         var taskItems = new List<TaskItem>
         {
@@ -118,8 +129,15 @@ public class Seed
             }
         };
 
-        await context.TaskItems.AddRangeAsync(taskItems);
-        await context.SaveChangesAsync();
+            await context.TaskItems.AddRangeAsync(taskItems);
+            var savedCount = await context.SaveChangesAsync();
+            logger?.LogInformation("Database seed completed successfully. Added {Count} task items.", savedCount);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "An error occurred during database seed: {ErrorMessage}", ex.Message);
+            throw;
+        }
     }
 
     #endregion

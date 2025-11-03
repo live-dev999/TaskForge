@@ -1,0 +1,28 @@
+graph TB
+    subgraph "Task Management System"
+        WEB_API[Web API<br/>ASP.NET Core 8]
+        APP_CORE[Application Core<br/>Business Logic]
+        DOMAIN[Domain Model<br/>Entities & Rules]
+        PERSISTENCE[Persistence<br/>EF Core]
+        EVENT_PROC[Event Processor<br/>Background Service]
+    end
+    
+    WEB_API --> APP_CORE
+    APP_CORE --> DOMAIN
+    APP_CORE --> PERSISTENCE
+    APP_CORE --> EVENT_PROC
+    
+    WEB_API --> SWAGGER[Swagger UI<br/>API Documentation]
+    PERSISTENCE --> DB[(Database<br/>PostgreSQL)]
+    EVENT_PROC --> MQ[(Message Queue<br/>Kafka/RabbitMQ)]
+    MQ --> CONSUMER[Message Consumer<br/>Logging Service]
+    
+    USER[Пользователь] --> WEB_API
+    CONSUMER --> LOGS[(Log Storage<br/>File/Console)]
+    
+    style WEB_API fill:#e3f2fd
+    style APP_CORE fill:#f3e5f5
+    style DOMAIN fill:#fff8e1
+    style PERSISTENCE fill:#e8f5e8
+    style EVENT_PROC fill:#ffebee
+    style CONSUMER fill:#fce4ec

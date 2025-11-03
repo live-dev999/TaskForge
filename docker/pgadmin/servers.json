@@ -1,0 +1,17 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "TaskForge DB",
+      "Group": "Servers",
+      "Host": "postgres.data",
+      "Port": 5432,
+      "MaintenanceDB": "TaskForge",
+      "Username": "postgres",
+      "Password": "postgres",
+      "SSLMode": "prefer",
+      "Comment": "TaskForge PostgreSQL Database",
+      "PassFile": ""
+    }
+  }
+}
+

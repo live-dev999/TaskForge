@@ -84,10 +84,12 @@ export default class TaskItemStore {
         taskItem.id = uuid();
 
         try {
-            await agent.TaskItems.create(taskItem)
+            const createdTaskItem = await agent.TaskItems.create(taskItem)
             runInAction(() => {
-                this.taskItemRegistry.set(taskItem.id, taskItem);//this.taskItems.push(taskItem);
-                this.selectedTaskItem = taskItem;
+                // Use the created task item from API (with correct CreatedAt/UpdatedAt from server)
+                const finalTaskItem = createdTaskItem || taskItem;
+                this.taskItemRegistry.set(finalTaskItem.id, finalTaskItem);
+                this.selectedTaskItem = finalTaskItem;
                 this.editMode = false;
                 this.loading = false;
             })

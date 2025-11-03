@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
+using TaskForge.Domain.Enum;
 using TaskForge.Persistence;
 
 namespace TaskForge.Application.TaskItems;
@@ -28,12 +29,16 @@ public class Edit
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger<Handler> _logger;
+        private readonly IEventService _eventService;
+        private readonly IMessageProducer _messageProducer;
 
-        public Handler(DataContext context, IMapper mapper, ILogger<Handler> logger)
+        public Handler(DataContext context, IMapper mapper, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
         {
             _mapper = mapper;
             _context = context;
             _logger = logger;
+            _eventService = eventService;
+            _messageProducer = messageProducer;
         }
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
@@ -71,7 +76,42 @@ public class Edit
             }
             
             _logger.LogInformation("Command Edit TaskItem completed successfully for Id: {TaskItemId}", request.TaskItem.Id);
+            
+            // Send events (synchronous HTTP and asynchronous RabbitMQ) - fire and forget - don't block on failure
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var eventDto = MapToEventDto(taskItem, "Updated");
+                    
+                    // Send to EventProcessor (synchronous HTTP)
+                    await _eventService.SendEventAsync(eventDto, cancellationToken);
+                    
+                    // Publish to RabbitMQ (asynchronous)
+                    await _messageProducer.PublishEventAsync(eventDto, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error in background task for sending events: TaskId={TaskId}", request.TaskItem.Id);
+                }
+            }, cancellationToken);
+            
             return Result<Unit>.Success(Unit.Value);
+        }
+
+        private static TaskChangeEventDto MapToEventDto(TaskItem taskItem, string eventType)
+        {
+            return new TaskChangeEventDto
+            {
+                TaskId = taskItem.Id,
+                EventType = eventType,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                Status = taskItem.Status.ToString(),
+                EventTimestamp = DateTime.UtcNow,
+                CreatedAt = taskItem.CreatedAt,
+                UpdatedAt = taskItem.UpdatedAt
+            };
         }
     }
 }

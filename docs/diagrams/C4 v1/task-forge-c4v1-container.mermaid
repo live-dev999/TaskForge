@@ -1,0 +1,65 @@
+graph TB
+    subgraph "Web API Container"
+        TASKS_CTRL[TasksController<br/>REST API]
+        EVENTS_CTRL[EventsController<br/>Sync Listener]
+        MIDDLEWARE[Middleware<br/>Exception/Logging]
+    end
+    
+    subgraph "Application Core Container"
+        COMMANDS[Command Handlers<br/>Create/Update/Delete]
+        QUERIES[Query Handlers<br/>Get/List]
+        VALIDATORS[Validators<br/>FluentValidation]
+        EVENT_PUB[Event Publisher<br/>Domain Events]
+    end
+    
+    subgraph "Domain Container"
+        TASK_ENTITY[Task Entity<br/>Business Rules]
+        DOMAIN_EVENTS[Domain Events<br/>Task Created/Updated]
+        REPO_INTERFACES[Repository Interfaces]
+    end
+    
+    subgraph "Persistence Container"
+        DB_CONTEXT[DbContext<br/>EF Core]
+        TASK_REPO[Task Repository<br/>Data Access]
+        MIGRATIONS[Migrations<br/>Database Schema]
+    end
+    
+    subgraph "Event Processor Container"
+        MQ_PRODUCER[Message Producer<br/>Kafka/RabbitMQ]
+        SYNC_LISTENER[Sync Event Listener<br/>HTTP]
+    end
+    
+    subgraph "Message Consumer Container"
+        MQ_CONSUMER[Message Consumer<br/>Background Service]
+        EVENT_LOGGER[Event Logger<br/>Logging Service]
+    end
+    
+    %% Connections
+    TASKS_CTRL --> COMMANDS
+    TASKS_CTRL --> QUERIES
+    EVENTS_CTRL --> SYNC_LISTENER
+    
+    COMMANDS --> TASK_ENTITY
+    QUERIES --> TASK_ENTITY
+    
+    COMMANDS --> EVENT_PUB
+    EVENT_PUB --> DOMAIN_EVENTS
+    
+    EVENT_PUB --> MQ_PRODUCER
+    EVENT_PUB --> SYNC_LISTENER
+    
+    MQ_PRODUCER --> MQ[(Message Queue)]
+    MQ --> MQ_CONSUMER
+    MQ_CONSUMER --> EVENT_LOGGER
+    
+    TASK_REPO --> DB_CONTEXT
+    DB_CONTEXT --> DB[(Database)]
+    
+    EVENT_LOGGER --> LOGS[(Logs<br/>File/Console)]
+    
+    style TASKS_CTRL fill:#e3f2fd
+    style COMMANDS fill:#f3e5f5
+    style TASK_ENTITY fill:#fff8e1
+    style TASK_REPO fill:#e8f5e8
+    style MQ_PRODUCER fill:#ffebee
+    style MQ_CONSUMER fill:#fce4ec

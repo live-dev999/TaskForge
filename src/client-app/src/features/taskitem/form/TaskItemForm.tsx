@@ -5,6 +5,7 @@ import { useStore } from "../../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { v4 as uuid } from 'uuid';
 
 export default observer(function TaskItemForm() {
     const { taskItemStore } = useStore();
@@ -86,6 +87,3 @@ const navigate = useNavigate();
     )
 })
 
-function uuid(): string {
-    throw new Error("Function not implemented.");
-}

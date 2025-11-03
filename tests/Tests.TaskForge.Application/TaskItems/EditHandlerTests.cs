@@ -58,6 +58,22 @@ public class EditHandlerTests
         return new Mock<ILogger<Edit.Handler>>().Object;
     }
 
+    private IEventService CreateEventService()
+    {
+        var mock = new Mock<IEventService>();
+        mock.Setup(x => x.SendEventAsync(It.IsAny<TaskChangeEventDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        return mock.Object;
+    }
+
+    private IMessageProducer CreateMessageProducer()
+    {
+        var mock = new Mock<IMessageProducer>();
+        mock.Setup(x => x.PublishEventAsync(It.IsAny<TaskChangeEventDto>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        return mock.Object;
+    }
+
     #endregion
 
     #region Success Tests
@@ -69,7 +85,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -99,7 +117,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         var originalTitle = existingTaskItem.Title;
@@ -137,7 +157,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         var originalCreatedAt = DateTime.UtcNow.AddDays(-10);
@@ -184,7 +206,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var nonExistentTaskItem = CreateValidTaskItem();
         nonExistentTaskItem.Id = Guid.NewGuid();
@@ -209,7 +233,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var nonExistentTaskItem = CreateValidTaskItem();
         nonExistentTaskItem.Id = Guid.NewGuid();
@@ -235,7 +261,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -268,7 +296,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var taskItem = CreateValidTaskItem();
         taskItem.Id = Guid.Empty;
@@ -293,7 +323,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -323,7 +355,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -358,7 +392,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -393,7 +429,9 @@ public class EditHandlerTests
         using var context = CreateInMemoryContext();
         var mapper = CreateMapper();
         var logger = CreateLogger();
-        var handler = new Edit.Handler(context, mapper, logger);
+        var eventService = CreateEventService();
+        var messageProducer = CreateMessageProducer();
+        var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);

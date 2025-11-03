@@ -1,0 +1,63 @@
+classDiagram
+    class TaskItem {
+        +Guid Id
+        +string Title
+        +string Description
+        +TaskStatus Status
+        +DateTime CreatedAt
+        +DateTime UpdatedAt
+        +Create(title, description)
+        +Update(title, description)
+        +ChangeStatus(status)
+    }
+    
+    class TasksController {
+        +IMediator _mediator
+        +CreateTask(CreateTaskRequest)
+        +UpdateTask(UpdateTaskRequest)
+        +DeleteTask(Guid id)
+        +GetTask(Guid id)
+    }
+    
+    class CreateTaskCommand {
+        +string Title
+        +string Description
+    }
+    
+    class CreateTaskCommandHandler {
+        +ITaskRepository _repository
+        +IEventPublisher _eventPublisher
+        +Handle(command)
+    }
+    
+    class TaskRepository {
+        +ApplicationDbContext _context
+        +GetByIdAsync(id)
+        +AddAsync(task)
+        +UpdateAsync(task)
+        +DeleteAsync(task)
+    }
+    
+    class EventPublisher {
+        +RabbitMQClient _client
+        +PublishAsync(event)
+    }
+    
+    class TaskCreatedEvent {
+        +Guid TaskId
+        +string Title
+        +DateTime CreatedAt
+    }
+    
+    class MessageConsumer {
+        +RabbitMQClient _client
+        +StartConsuming()
+        +ProcessMessage(message)
+    }
+    
+    TasksController --> CreateTaskCommand
+    CreateTaskCommand --> CreateTaskCommandHandler
+    CreateTaskCommandHandler --> TaskRepository
+    CreateTaskCommandHandler --> EventPublisher
+    EventPublisher --> TaskCreatedEvent
+    MessageConsumer ..> TaskCreatedEvent : consumes

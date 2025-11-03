@@ -25,11 +25,12 @@ using Microsoft.EntityFrameworkCore;
 using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using MediatR;
-using FluentValidation.AspNetCore;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using MassTransit;
 
 namespace TaskForge.API.Extensions;
 
@@ -45,7 +46,10 @@ public static class ApplicationServiceExtensions
         services.AddSwaggerGen();
         services.AddDbContext<Persistence.DataContext>(opt =>
         {
-            opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            var connectionString = config.GetConnectionString("DefaultConnection") 
+                ?? config["ConnectionString"] 
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            opt.UseNpgsql(connectionString);
         });
         services.AddCors(opt =>
         {
@@ -86,14 +90,69 @@ public static class ApplicationServiceExtensions
 
         services.AddMediatR(typeof(List.Handler));
         services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-        services.AddFluentValidationAutoValidation();
+        
+        // Configure FluentValidation
         services.AddValidatorsFromAssemblyContaining<Create>();
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
         
         // Add Health Checks
         services.AddHealthChecks()
             .AddDbContextCheck<Persistence.DataContext>(
                 name: "database",
                 tags: new[] { "ready" });
+        
+        // Add HttpClient for EventService
+        services.AddHttpClient<TaskForge.Application.Core.EventService>();
+        services.AddScoped<TaskForge.Application.Core.IEventService>(sp =>
+            sp.GetRequiredService<TaskForge.Application.Core.EventService>());
+        
+        // Configure RabbitMQ/MassTransit (optional - can be disabled for local development)
+        var rabbitMQEnabled = config.GetValue<bool>("RabbitMQ:Enabled", true);
+        
+        if (rabbitMQEnabled)
+        {
+            // Configure MassTransit with RabbitMQ
+            services.AddMassTransit(x =>
+            {
+                // Configure message endpoint naming convention
+                // This ensures consistent endpoint names across services
+                x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("TaskForge", false));
+
+                // Configure RabbitMQ
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    var host = config["RabbitMQ:HostName"] ?? "localhost";
+                    var port = config.GetValue<int>("RabbitMQ:Port", 5672);
+                    var userName = config["RabbitMQ:UserName"] ?? "guest";
+                    var password = config["RabbitMQ:Password"] ?? "guest";
+
+                    cfg.Host(host, (ushort)port, "/", h =>
+                    {
+                        h.Username(userName);
+                        h.Password(password);
+                        // Configure connection timeout - MassTransit has built-in retry for connections
+                        h.RequestedConnectionTimeout(TimeSpan.FromSeconds(30));
+                    });
+
+                    // Configure publish endpoint for TaskChangeEventDto
+                    cfg.Message<TaskForge.Application.Core.TaskChangeEventDto>(e =>
+                    {
+                        e.SetEntityName("task-change-events");
+                    });
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+            // Register real MessageProducer
+            services.AddScoped<TaskForge.Application.Core.IMessageProducer, TaskForge.Application.Core.MessageProducer>();
+        }
+        else
+        {
+            // Register null MessageProducer (no-op implementation)
+            services.AddScoped<TaskForge.Application.Core.IMessageProducer, TaskForge.Application.Core.NullMessageProducer>();
+        }
         
         // Add OpenTelemetry tracing
         AddOpenTelemetryTracing(services, config);

@@ -1,46 +1,41 @@
-# Test Task for .NET Developer: Task Management Service with Events
+# Test Task for .NET Developer: Task Management Service
 
 ## Objective:
-Develop an API service for user task management with support for both synchronous and asynchronous inter-service communication.
+Create an API service designed for simple user task management (Task Management Service).
 
-## Tasks:
+## Functional Requirements:
 
-### 1. **CRUD API Development for Task Management**
-   - Implement create, read, update, and delete operations for tasks
-   - Each task should contain: title, description, status (new/in progress/completed), creation and modification dates
-   - Ensure data validation and proper handling of task status transitions
+### 1. Create, delete, and retrieve user tasks
+   a. Each task must contain:
+      i. Task title (Title)
+      ii. Task description (Description)
+      iii. Task status (new, in progress, completed) (Status)
+      iv. Creation date and modification date (CreatedAt, UpdatedAt)
 
-### 2. **Synchronous Inter-Service Communication**
-   - Implement a separate HTTP endpoint for receiving task change events
-   - Send events to the logger service on every task modification in the main service
-   - Handle scenarios when the logger service is unavailable
+### 2. Synchronous inter-service communication
+   a. Implement a separate listener service that provides methods for retrieving task change event data and logs them.
 
-### 3. **Asynchronous Communication via Message Broker** (optional, but preferred)
-   - Configure event publishing to Kafka/RabbitMQ on task operations
-   - Implement a background consumer service for processing events from the queue
-   - Ensure reliable message delivery and duplicate message handling
+### 3. (Optional) Asynchronous inter-service communication via message queue (Kafka or RabbitMQ)
+   a. When creating, modifying, or deleting a task, send events (producer).
+   b. Create a separate queue listener service (consumer) that receives task change events and logs them.
 
-### 4. **Logging and Observability**
-   - Implement structured logging for all operations
-   - Add operation tracing (OpenTelemetry) for workflow monitoring
-
-### 5. **Reliability and Performance Assurance**
-   - Implement handling of long-running operations and timeouts
-   - Provide retry mechanisms for failures
-
-## Technical Requirements:
+## Technical Requirements and Stack:
 - **Programming Language:** .NET 8 / ASP.NET Core
-- **Database:** PostgreSQL with EF Core (original requirement allowed PostgreSQL or MS SQL Server)
-- **Message Broker:** RabbitMQ (original requirement allowed Kafka or RabbitMQ)
-- **API Documentation:** OpenAPI/Swagger format
-- Code must be **covered with unit tests**
-- **Architecture:** Clean architecture with SOLID principles compliance
+- **ORM:** Use an ORM system for database operations. Preferred - EF Core
+- **Database:** Preferably use PostgreSQL or Microsoft SQL Server (the project uses PostgreSQL with EF Core)
+- **Message Broker:** Kafka or RabbitMQ (the project uses RabbitMQ)
+- **Observability:** Logging (output to console or text file)
+- **Tracing:** OpenTelemetry (additional requirement)
 
-## Additional Tasks (optional):
-- **Containerization:** Dockerfile and docker-compose for the entire stack
-- **Authentication:** JWT authentication for API access
-- **Caching:** Redis for caching frequently requested tasks
-- **Health Checks:** Endpoints for service health monitoring
+## Code Implementation Requirements:
+- Clean and clear code structure, following SOLID principles
+- README file with project setup instructions
+
+## Additional Requirements (optional, will be considered a plus):
+- Dockerfile and ability to run the project via Docker compose
+- Unit test coverage
+- XML documentation for classes, methods, and properties
+- Adding tracing (OpenTelemetry)
 
 ## Deliverables:
 - Application source code on **GitHub** with comprehensive README

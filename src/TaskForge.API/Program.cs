@@ -75,3 +75,6 @@ catch (Exception ex)
     logger.LogError(ex, "An error occured during migration");
 }
 app.Run();
+
+// Make Program class accessible for integration tests
+public partial class Program { }

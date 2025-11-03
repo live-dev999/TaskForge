@@ -4,31 +4,37 @@ Task Management Service with Events
 <img width="250" src="design/logo.jpeg?raw=true">
 
 # About project
-The project is a test task. The full description of the title can be read here [EN](/docs/TASK-EN.MD) of [RU](/docs/TASK-RU.MD)
+The project is a test task. The full description of the title can be read here [EN](/docs/TASK-EN.MD) or [RU](/docs/TASK-RU.MD)
+
+📄 **[Сопроводительное письмо (Cover Letter)](/docs/COVER_LETTER.md)** - подробное описание реализованных улучшений и технических решений (Обязательно к прочтению)
 
 
 ## Build info
-Azure Build Status (master)/(dev)
-| dev   |      master      |
-|----------|:-------------:|
-|  [![Build Status](https://dev.azure.com/live-dev/TaskForge/_apis/build/status%2FTaskForge?branchName=dev)](https://dev.azure.com/live-dev/TaskForge/_build/latest?definitionId=2&branchName=dev) | [![Build Status](https://dev.azure.com/live-dev/TaskForge/_apis/build/status%2FTaskForge?branchName=master)](https://dev.azure.com/live-dev/TaskForge/_build/latest?definitionId=2&branchName=master)  |
+Azure Build Status (dev)/(master)
+
+| Branch | Status |
+|--------|:------:|
+| dev    | [![Build Status](https://dev.azure.com/live-dev/TaskForge/_apis/build/status/TaskForge?branchName=dev)](https://dev.azure.com/live-dev/TaskForge/_build/latest?definitionId=2&branchName=dev) |
+| master | [![Build Status](https://dev.azure.com/live-dev/TaskForge/_apis/build/status/TaskForge?branchName=master)](https://dev.azure.com/live-dev/TaskForge/_build/latest?definitionId=2&branchName=master) |
 
 
 
-GitHub Build Status (master)/(dev)
+GitHub Build Status (dev)/(master)
 
-| dev   |      master      |
-|----------|:-------------:|
-|  [![Build Status](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml/badge.svg?branch=dev)](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml?query=branch%3Adev) | [![Build Status](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml/badge.svg?branch=master)](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml?query=branch%3Amaster) |
+| Branch | Status |
+|--------|:------:|
+| dev    | [![Build Status](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml/badge.svg?branch=dev)](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml?query=branch%3Adev) |
+| master | [![Build Status](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml/badge.svg?branch=master)](https://github.com/live-dev999/TaskForge/actions/workflows/github-ci.yml?query=branch%3Amaster) |
 
 [View Latest Build Run](https://github.com/live-dev999/TaskForge/actions)
 
 
-Coverage(Coveralls) 
+Coverage (Coveralls) (dev)/(master)
 
-| dev   |      master      |
-|----------|:-------------:|
-|  [![Coverage Status](https://coveralls.io/repos/github/live-dev999/TaskForge/badge.svg?branch=master)](https://coveralls.io/github/live-dev999/TaskForge?branch=dev) | [![Coverage Status](https://coveralls.io/repos/github/live-dev999/TaskForge/badge.svg?branch=master)](https://coveralls.io/github/live-dev999/TaskForge?branch=master) |
+| Branch | Coverage |
+|--------|:-------:|
+| dev    | [![Coverage Status](https://coveralls.io/repos/github/live-dev999/TaskForge/badge.svg?branch=dev)](https://coveralls.io/github/live-dev999/TaskForge?branch=dev) |
+| master | [![Coverage Status](https://coveralls.io/repos/github/live-dev999/TaskForge/badge.svg?branch=master)](https://coveralls.io/github/live-dev999/TaskForge?branch=master) |
 
 
 ## **Preinstalled software**

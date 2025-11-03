@@ -1,0 +1,30 @@
+FROM postgres:16-alpine
+
+# Install bash and psql client
+RUN apk add --no-cache bash postgresql-client
+
+# Set working directory
+WORKDIR /scripts
+
+# Copy SQL scripts
+COPY 01-create-database.sql /scripts/
+COPY 02-create-table.sql /scripts/
+COPY 03-create-function.sql /scripts/
+COPY 04-insert-seed-data.sql /scripts/
+COPY 05-run-tests.sql /scripts/
+COPY 06-verify-results.sql /scripts/
+COPY run-all.sh /scripts/
+
+# Make script executable
+RUN chmod +x /scripts/run-all.sh
+
+# Set environment variables (will be overridden by docker-compose)
+ENV POSTGRES_DB=taskforgedb
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
+ENV POSTGRES_HOST=postgres-task2
+ENV POSTGRES_PORT=5432
+
+# Run the script
+CMD ["/scripts/run-all.sh"]
+

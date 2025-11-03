@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres-task2:
+    container_name: postgres-task2
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=taskforgedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_task2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  task2-runner:
+    container_name: task2-runner
+    build:
+      context: .
+      dockerfile: Dockerfile.runner
+    depends_on:
+      postgres-task2:
+        condition: service_healthy
+    environment:
+      - POSTGRES_DB=taskforgedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=postgres-task2
+      - POSTGRES_PORT=5432
+
+volumes:
+  postgres_task2_data:
+

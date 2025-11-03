@@ -172,11 +172,12 @@ public class TaskItemsControllerTests
     }
 
     [Fact]
-    public async Task GetTaskItem_WhenTaskItemNotFound_ReturnsBadRequest()
+    public async Task GetTaskItem_WhenTaskItemNotFound_ReturnsNotFound()
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var result = Result<TaskItem>.Failure("Task item not found");
+        // Details handler now returns Success(null) for not found items
+        var result = Result<TaskItem>.Success(null);
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Details.Query>(), It.IsAny<CancellationToken>()))
@@ -188,8 +189,7 @@ public class TaskItemsControllerTests
         var actionResult = await controller.GetTaskItem(Guid.NewGuid());
 
         // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult);
-        Assert.Equal("Task item not found", badRequestResult.Value);
+        var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<Unit>.Success(Unit.Value);
+        var result = Result<TaskItem>.Success(taskItem);
 
         mockMediator
             .Setup(m => m.Send(It.Is<Create.Command>(c => c.TaskItem != null && c.TaskItem.Id == taskItem.Id), It.IsAny<CancellationToken>()))
@@ -239,7 +239,7 @@ public class TaskItemsControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
-        Assert.Equal(Unit.Value, okResult.Value);
+        Assert.Equal(taskItem, okResult.Value);
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<Unit>.Success(Unit.Value);
+        var result = Result<TaskItem>.Success(taskItem);
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Create.Command>(), It.IsAny<CancellationToken>()))
@@ -272,7 +272,7 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<Unit>.Failure("Validation failed");
+        var result = Result<TaskItem>.Failure("Validation failed");
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Create.Command>(), It.IsAny<CancellationToken>()))
@@ -500,7 +500,7 @@ public class TaskItemsControllerTests
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var result = Result<Unit>.Failure("Task item is required");
+        var result = Result<TaskItem>.Failure("Task item is required");
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Create.Command>(), It.IsAny<CancellationToken>()))

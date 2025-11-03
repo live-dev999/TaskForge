@@ -45,6 +45,8 @@ public class TaskItemsControllerIntegrationTests : IClassFixture<WebApplicationF
 
     public TaskItemsControllerIntegrationTests(WebApplicationFactory<Program> factory)
     {
+        var databaseName = "TestDatabase_" + Guid.NewGuid().ToString();
+        
         _factory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
@@ -57,17 +59,17 @@ public class TaskItemsControllerIntegrationTests : IClassFixture<WebApplicationF
                     services.Remove(descriptor);
                 }
 
-                // Add in-memory database for testing
+                // Add in-memory database for testing with a shared database name
                 services.AddDbContext<DataContext>(options =>
                 {
-                    options.UseInMemoryDatabase("TestDatabase_" + Guid.NewGuid().ToString());
+                    options.UseInMemoryDatabase(databaseName);
                 });
             });
         });
 
         _client = _factory.CreateClient();
         
-        // Create a scope to access services
+        // Create a scope to access services - use the same database
         _scope = _factory.Services.CreateScope();
         _context = _scope.ServiceProvider.GetRequiredService<DataContext>();
     }
@@ -99,7 +101,15 @@ public class TaskItemsControllerIntegrationTests : IClassFixture<WebApplicationF
         Assert.True(createdTaskItem.UpdatedAt > DateTime.MinValue);
 
         // Verify it was saved to database
-        var savedTaskItem = await _context.TaskItems.FindAsync(createdTaskItem.Id);
+        // Ensure changes are tracked and saved
+        await Task.Delay(50);
+        
+        // Use the factory's services to get a new context with the same database
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyContext = verifyScope.ServiceProvider.GetRequiredService<DataContext>();
+        
+        // Ensure the context can see the changes
+        var savedTaskItem = await verifyContext.TaskItems.FindAsync(createdTaskItem.Id);
         Assert.NotNull(savedTaskItem);
         Assert.Equal(createTaskItem.Title, savedTaskItem.Title);
 
@@ -129,7 +139,11 @@ public class TaskItemsControllerIntegrationTests : IClassFixture<WebApplicationF
         // Assert 3 - Verify update
         Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
 
-        var savedAfterUpdate = await _context.TaskItems.FindAsync(taskId);
+        // Wait a bit and use a new scope to verify update
+        await Task.Delay(50);
+        using var updateScope = _factory.Services.CreateScope();
+        var updateContext = updateScope.ServiceProvider.GetRequiredService<DataContext>();
+        var savedAfterUpdate = await updateContext.TaskItems.FindAsync(taskId);
         Assert.NotNull(savedAfterUpdate);
         Assert.Equal(updatedTaskItem.Title, savedAfterUpdate.Title);
         Assert.Equal(updatedTaskItem.Description, savedAfterUpdate.Description);
@@ -153,7 +167,11 @@ public class TaskItemsControllerIntegrationTests : IClassFixture<WebApplicationF
         // Assert 5 - Verify deletion
         Assert.Equal(HttpStatusCode.OK, deleteResponse.StatusCode);
 
-        var deletedTaskItem = await _context.TaskItems.FindAsync(taskId);
+        // Wait a bit and use a new scope to verify deletion
+        await Task.Delay(50);
+        using var deleteScope = _factory.Services.CreateScope();
+        var deleteContext = deleteScope.ServiceProvider.GetRequiredService<DataContext>();
+        var deletedTaskItem = await deleteContext.TaskItems.FindAsync(taskId);
         Assert.Null(deletedTaskItem);
 
         // Act 6 - Try to get deleted TaskItem

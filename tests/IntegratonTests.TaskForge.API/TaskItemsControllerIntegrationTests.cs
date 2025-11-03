@@ -26,6 +26,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
 using TaskForge.Persistence;

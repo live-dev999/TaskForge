@@ -110,8 +110,11 @@ services:
 
   taskforge.messageconsumer:
     container_name: taskforge.messageconsumer
+    ports:
+      - "5011:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
       # RabbitMQ configuration
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
@@ -133,7 +136,7 @@ services:
   taskforge.client:
     container_name: taskforge.client
     ports:
-      - "${CLIENT_PORT:-3000}:80"
+      - "3000:80"
     environment:
       - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
     depends_on:
@@ -142,6 +145,12 @@ services:
     networks:
       - frontend
       - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   pgadmin:
     container_name: pgadmin

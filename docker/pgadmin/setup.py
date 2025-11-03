@@ -27,11 +27,8 @@ def wait_for_pgadmin_init(max_wait=120):
         if wait_count % 10 == 0:
             print(f"Waiting for pgAdmin initialization... ({wait_count}/{max_wait}s)")
     
-    if not STORAGE_DIR.exists():
-        print(f"Creating storage directory: {STORAGE_DIR}")
-        STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-        os.chown(STORAGE_DIR, 5050, 5050)  # pgadmin user/group
-    
+    # Don't create directory manually - pgAdmin will create it with correct permissions
+    # Just wait for it to exist
     return STORAGE_DIR.exists()
 
 def copy_servers_config():
@@ -53,9 +50,20 @@ def copy_servers_config():
         with open(SERVERS_JSON, 'w') as f:
             json.dump(config, f, indent=2)
         
-        # Set permissions
-        os.chmod(SERVERS_JSON, 0o600)
-        os.chown(SERVERS_JSON, 5050, 5050)  # pgadmin user/group
+        # Set permissions (readable/writable by owner)
+        # Note: chown might fail if not running as root, but chmod should work
+        try:
+            os.chmod(SERVERS_JSON, 0o600)
+        except Exception as e:
+            print(f"⚠️  Warning: Could not set permissions on {SERVERS_JSON}: {e}")
+        
+        # Try to set owner, but don't fail if it doesn't work
+        # pgAdmin will fix permissions when it accesses the file
+        try:
+            os.chown(SERVERS_JSON, 5050, 5050)  # pgadmin user/group
+        except (PermissionError, OSError):
+            # Not running as root - pgAdmin will fix ownership when accessing
+            pass
         
         print(f"✅ pgAdmin server configuration initialized")
         print(f"   File: {SERVERS_JSON}")

@@ -192,6 +192,8 @@ GRANT ALL PRIVILEGES ON DATABASE TaskForge TO postgres;
 - **[Development Sequence](/docs/DEVELOPMENT_SEQUENCE.md)** - последовательность разработки проекта
 - **[Architecture Tests Summary](/docs/ARCHITECTURE_TESTS_SUMMARY.md)** - сводка архитектурных тестов
 - **[Docker Platforms Explanation](/docs/DOCKER_PLATFORMS_EXPLANATION.md)** - объяснение Docker платформ
+- **[Задание 2: SQL Функция (EN)](/src/database/postgres/README.md)** - руководство по SQL функции для анализа платежей (английский)
+- **[Задание 2: SQL Функция (RU)](/src/database/postgres/README-RU.md)** - руководство по SQL функции для анализа платежей (русский)
 
 ### Просмотр диаграмм Mermaid
 

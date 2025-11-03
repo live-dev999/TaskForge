@@ -232,6 +232,8 @@ All project documentation is located in the [`docs/`](/docs/) folder:
 - **[Development Sequence](/docs/DEVELOPMENT_SEQUENCE.md)** - Project development sequence
 - **[Architecture Tests Summary](/docs/ARCHITECTURE_TESTS_SUMMARY.md)** - Architecture tests summary
 - **[Docker Platforms Explanation](/docs/DOCKER_PLATFORMS_EXPLANATION.md)** - Docker platforms explanation
+- **[Task 2: SQL Function (EN)](/src/database/postgres/README.md)** - SQL Function for Payment Analysis guide (English)
+- **[Task 2: SQL Function (RU)](/src/database/postgres/README-RU.md)** - SQL Function for Payment Analysis guide (Russian)
 
 ### Viewing Mermaid Diagrams
 

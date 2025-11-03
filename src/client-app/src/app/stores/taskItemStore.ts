@@ -44,9 +44,8 @@ export default class TaskItemStore {
         }
     }
 
-    loadTaskItem = async (id: string) => {
+    loadTaskItem = async (id: string): Promise<TaskItem | undefined> => {
         let taskItem = this.getTaskItem(id)
-        if (taskItem) this.selectedTaskItem = taskItem;
         if (taskItem) {
             this.selectedTaskItem = taskItem;
             return taskItem;
@@ -62,8 +61,11 @@ export default class TaskItemStore {
                 this.setLoadingInitial(false)
                 return taskItem;
             } catch (error) {
-                console.log(error);
+                console.error('Error loading task item:', error);
                 this.setLoadingInitial(false);
+                // If error is 404, navigation is handled by interceptor
+                // Return undefined so form can handle it gracefully
+                return undefined;
             }
         }
     }

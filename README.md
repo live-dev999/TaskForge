@@ -164,6 +164,23 @@ In Docker, the client automatically proxies API requests through nginx to the ba
 
 For more details, see `src/client-app/README-DOCKER.md`.
 
+## 📚 Документация
+
+Вся документация проекта находится в папке [`docs/`](/docs/):
+
+- **[Сопроводительное письмо (Cover Letter)](/docs/COVER_LETTER.md)** - подробное описание реализованных улучшений и технических решений
+- **[Описание задания (Task Description)](/docs/TASK-EN.MD)** - оригинальное задание на английском языке
+- **[Описание задания (Task Description RU)](/docs/TASK-RU.MD)** - оригинальное задание на русском языке
+- **[Docker Compose Guide](/docs/DOCKER-COMPOSE-GUIDE.md)** - руководство по использованию Docker Compose
+- **[Development Sequence](/docs/DEVELOPMENT_SEQUENCE.md)** - последовательность разработки проекта
+- **[Architecture Tests Summary](/docs/ARCHITECTURE_TESTS_SUMMARY.md)** - сводка архитектурных тестов
+- **[Troubleshooting Docker](/docs/TROUBLESHOOTING_DOCKER.md)** - решение проблем с Docker
+- **[Database Comparison](/docs/DATABASE_COMPARISON.md)** - сравнение баз данных
+- **[Docker Platforms Explanation](/docs/DOCKER_PLATFORMS_EXPLANATION.md)** - объяснение Docker платформ
+- **[Index Analysis](/docs/INDEX_ANALYSIS.md)** - анализ индексов базы данных
+- **[Interview Answers](/docs/INTERVIEW_ANSWERS.md)** - ответы на вопросы интервью
+- **[Test Coverage Summary](/docs/TEST_COVERAGE_SUMMARY.md)** - сводка покрытия тестами
+
 
 ### **Deploy local database in your machine (alternative method)**
 Go to link [for download Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Install Microsoft SQL Server using the installer or any other method available.

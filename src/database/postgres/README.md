@@ -57,8 +57,14 @@ docker run --rm \
 
 ### Option 3: Manual execution
 
-If you have PostgreSQL installed locally:
+**Note:** This option requires PostgreSQL client (`psql`) to be installed locally.
 
+Install PostgreSQL client:
+- **Mac:** `brew install postgresql@16`
+- **Ubuntu/Debian:** `sudo apt-get install postgresql-client`
+- **Windows:** Download from [PostgreSQL Downloads](https://www.postgresql.org/download/)
+
+Then run:
 ```bash
 cd src/database/postgres
 export PGPASSWORD=postgres

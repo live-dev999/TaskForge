@@ -7,6 +7,24 @@
 
 set -e
 
+# Check if psql is available
+if ! command -v psql &> /dev/null; then
+    echo "ERROR: psql command not found!"
+    echo ""
+    echo "This script requires PostgreSQL client (psql) to be installed."
+    echo ""
+    echo "Option 1: Install PostgreSQL client locally"
+    echo "  Mac: brew install postgresql@16"
+    echo "  Ubuntu/Debian: sudo apt-get install postgresql-client"
+    echo "  Windows: Download from https://www.postgresql.org/download/"
+    echo ""
+    echo "Option 2: Use Docker (Recommended)"
+    echo "  cd src/database/postgres"
+    echo "  docker-compose up --build"
+    echo ""
+    exit 1
+fi
+
 DB_NAME="${POSTGRES_DB:-taskforgedb}"
 DB_USER="${POSTGRES_USER:-postgres}"
 DB_PASSWORD="${POSTGRES_PASSWORD:-postgres}"

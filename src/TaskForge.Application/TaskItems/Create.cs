@@ -10,7 +10,7 @@ namespace TaskForge.Application.TaskItems;
 
 public class Create
 {
-    public class Command : IRequest<Result<Unit>>
+    public class Command : IRequest<Result<TaskItem>>
     {
         public TaskItem TaskItem { get; set; }
     }
@@ -23,7 +23,7 @@ public class Create
                 .SetValidator(new TaskItemValidator());
         }
     }
-    public class Handler : IRequestHandler<Command, Result<Unit>>
+    public class Handler : IRequestHandler<Command, Result<TaskItem>>
     {
         private readonly DataContext _context;
         private readonly ILogger<Handler> _logger;
@@ -38,7 +38,7 @@ public class Create
             _messageProducer = messageProducer;
         }
 
-        public async Task<Result<Unit>> Handle(
+        public async Task<Result<TaskItem>> Handle(
             Command request,
             CancellationToken cancellationToken
         )
@@ -62,7 +62,7 @@ public class Create
             if (!result)
             {
                 _logger.LogError("Failed to create task item with Id: {TaskItemId}", request.TaskItem.Id);
-                return Result<Unit>.Failure("Failed to create task item");
+                return Result<TaskItem>.Failure("Failed to create task item");
             }
             
             _logger.LogInformation("Command Create TaskItem completed successfully for Id: {TaskItemId}", request.TaskItem.Id);
@@ -86,7 +86,7 @@ public class Create
                 }
             }, cancellationToken);
             
-            return Result<Unit>.Success(Unit.Value);
+            return Result<TaskItem>.Success(request.TaskItem);
         }
 
         private static TaskChangeEventDto MapToEventDto(TaskItem taskItem, string eventType)

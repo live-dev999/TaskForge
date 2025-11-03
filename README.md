@@ -3,10 +3,12 @@ Task Management Service with Events
 <!-- ![logo](/design/logo.jpg?raw=true) { height=200px } -->
 <img width="250" src="design/logo.jpeg?raw=true">
 
-# About project
-The project is a test task. The full description of the title can be read here [EN](/docs/TASK-EN.MD) or [RU](/docs/TASK-RU.MD)
+**Language / Язык:** [English](README.md) | [Русский](README-RU.md)
 
-📄 **[Сопроводительное письмо (Cover Letter)](/docs/COVER_LETTER.md)** - подробное описание реализованных улучшений и технических решений (Обязательно к прочтению)
+# About project
+The project is a test task. The full description of the task can be read here [EN](/docs/TASK-EN.MD) or [RU](/docs/TASK-RU.MD)
+
+📄 **[Cover Letter](/docs/COVER_LETTER.md)** - Detailed description of implemented improvements and technical decisions (Highly recommended reading)
 
 
 ## Build info
@@ -177,35 +179,31 @@ CREATE USER postgres WITH PASSWORD 'postgres';
 GRANT ALL PRIVILEGES ON DATABASE TaskForge TO postgres;
 ```
 
-## 📚 Документация
+## 📚 Documentation
 
-Вся документация проекта находится в папке [`docs/`](/docs/):
+All project documentation is located in the [`docs/`](/docs/) folder:
 
-- **[Сопроводительное письмо (Cover Letter)](/docs/COVER_LETTER.md)** - подробное описание реализованных улучшений и технических решений
-- **[Описание задания (Task Description)](/docs/TASK-EN.MD)** - оригинальное задание на английском языке
-- **[Описание задания (Task Description RU)](/docs/TASK-RU.MD)** - оригинальное задание на русском языке
-- **[Docker Guide (EN)](/docs/DOCKER-GUIDE-EN.MD)** - полное руководство по Docker и устранению неполадок на английском
-- **[Docker Guide (RU)](/docs/DOCKER-GUIDE-RU.MD)** - полное руководство по Docker и устранению неполадок на русском
-- **[Docker Compose Guide](/docs/DOCKER-COMPOSE-GUIDE.md)** - руководство по использованию Docker Compose
-- **[Development Sequence](/docs/DEVELOPMENT_SEQUENCE.md)** - последовательность разработки проекта
-- **[Architecture Tests Summary](/docs/ARCHITECTURE_TESTS_SUMMARY.md)** - сводка архитектурных тестов
-- **[Database Comparison](/docs/DATABASE_COMPARISON.md)** - сравнение баз данных
-- **[Docker Platforms Explanation](/docs/DOCKER_PLATFORMS_EXPLANATION.md)** - объяснение Docker платформ
-- **[Index Analysis](/docs/INDEX_ANALYSIS.md)** - анализ индексов базы данных
-- **[Interview Answers](/docs/INTERVIEW_ANSWERS.md)** - ответы на вопросы интервью
-- **[Test Coverage Summary](/docs/TEST_COVERAGE_SUMMARY.md)** - сводка покрытия тестами
+- **[Cover Letter](/docs/COVER_LETTER.md)** - Detailed description of implemented improvements and technical decisions
+- **[Task Description (EN)](/docs/TASK-EN.MD)** - Original task description in English
+- **[Task Description (RU)](/docs/TASK-RU.MD)** - Original task description in Russian
+- **[Docker Guide (EN)](/docs/DOCKER-GUIDE-EN.MD)** - Complete Docker guide and troubleshooting in English
+- **[Docker Guide (RU)](/docs/DOCKER-GUIDE-RU.MD)** - Complete Docker guide and troubleshooting in Russian
+- **[Docker Compose Guide](/docs/DOCKER-COMPOSE-GUIDE.md)** - Docker Compose usage guide
+- **[Development Sequence](/docs/DEVELOPMENT_SEQUENCE.md)** - Project development sequence
+- **[Architecture Tests Summary](/docs/ARCHITECTURE_TESTS_SUMMARY.md)** - Architecture tests summary
+- **[Docker Platforms Explanation](/docs/DOCKER_PLATFORMS_EXPLANATION.md)** - Docker platforms explanation
 
-### Просмотр диаграмм Mermaid
+### Viewing Mermaid Diagrams
 
-В проекте используются диаграммы C4 Model в формате `.mermaid`, расположенные в папке [`docs/diagrams/`](/docs/diagrams/).
+The project uses C4 Model diagrams in `.mermaid` format, located in the [`docs/diagrams/`](/docs/diagrams/) folder.
 
-Для просмотра диаграмм `.mermaid` в Visual Studio Code рекомендуется использовать одно из следующих расширений:
+To view `.mermaid` diagrams in Visual Studio Code, it is recommended to use one of the following extensions:
 
-- **[Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid)** - позволяет просматривать диаграммы Mermaid прямо в предпросмотре Markdown файлов
-- **[Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=vstirbu.vscode-mermaid-preview)** - предварительный просмотр файлов `.mermaid` с поддержкой экспорта в SVG/PNG
-- **[Mermaid Editor](https://marketplace.visualstudio.com/items?itemName=TomoyukiAota.vscode-mermaid-editor)** - редактор диаграмм Mermaid с поддержкой live preview
+- **[Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid)** - Allows viewing Mermaid diagrams directly in Markdown preview
+- **[Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=vstirbu.vscode-mermaid-preview)** - Preview `.mermaid` files with SVG/PNG export support
+- **[Mermaid Editor](https://marketplace.visualstudio.com/items?itemName=TomoyukiAota.vscode-mermaid-editor)** - Mermaid diagram editor with live preview support
 
-После установки расширения откройте файл `.mermaid` и используйте предпросмотр (`Ctrl+Shift+V` / `Cmd+Shift+V`) для просмотра диаграммы.
+After installing the extension, open a `.mermaid` file and use preview (`Ctrl+Shift+V` / `Cmd+Shift+V`) to view the diagram.
 
 ## Commit Formats
 #### Types
@@ -273,5 +271,4 @@ Can use commands use terminal or use IDEs(Microsoft Visual Studio 2022 or VS Cod
 dotnet build [options]
 dotnet run [options]
 ```
-
 

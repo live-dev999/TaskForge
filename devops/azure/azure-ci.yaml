@@ -587,31 +587,32 @@ stages:
         artifactName: 'drop'
         publishLocation: 'Container'
 
-- stage: Docker
-  displayName: 'Build Docker Images'
-  condition: false  # Disabled: Docker build and publish stages disabled for all CI
-  jobs:
-  - job: BuildDockerImages
-    displayName: 'Build Docker Images'
-    steps:
-    - task: Docker@2
-      displayName: 'Build API Docker Image'
-      inputs:
-        command: 'build'
-        repository: 'taskforge-api'
-        dockerfile: 'src/TaskForge.API/Dockerfile'
-        buildContext: '$(System.DefaultWorkingDirectory)'
-        tags: |
-          $(Build.BuildId)
-          latest
-
-    - task: Docker@2
-      displayName: 'Build EventProcessor Docker Image'
-      inputs:
-        command: 'build'
-        repository: 'taskforge-eventprocessor'
-        dockerfile: 'src/TaskForge.EventProcessor/Dockerfile'
-        buildContext: '$(System.DefaultWorkingDirectory)'
-        tags: |
-          $(Build.BuildId)
-          latest
+# Docker build stage is disabled - all Docker-related steps are commented out
+# - stage: Docker
+#   displayName: 'Build Docker Images'
+#   condition: false  # Disabled: Docker build and publish stages disabled for all CI
+#   jobs:
+#   - job: BuildDockerImages
+#     displayName: 'Build Docker Images'
+#     steps:
+#     - task: Docker@2
+#       displayName: 'Build API Docker Image'
+#       inputs:
+#         command: 'build'
+#         repository: 'taskforge-api'
+#         dockerfile: 'src/TaskForge.API/Dockerfile'
+#         buildContext: '$(System.DefaultWorkingDirectory)'
+#         tags: |
+#           $(Build.BuildId)
+#           latest
+#
+#     - task: Docker@2
+#       displayName: 'Build EventProcessor Docker Image'
+#       inputs:
+#         command: 'build'
+#         repository: 'taskforge-eventprocessor'
+#         dockerfile: 'src/TaskForge.EventProcessor/Dockerfile'
+#         buildContext: '$(System.DefaultWorkingDirectory)'
+#         tags: |
+#           $(Build.BuildId)
+#           latest

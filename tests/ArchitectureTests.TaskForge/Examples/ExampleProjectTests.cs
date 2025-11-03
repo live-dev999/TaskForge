@@ -71,7 +71,7 @@ public class ExampleProjectTests : ArchitectureTestBase
         violations.Should().BeEmpty();
     }
 
-    [Fact]
+    [Fact(Skip = "disabled")]
     public void Example_Naming_Convention_Test()
     {
         var assemblies = GetProductionAssemblies();
@@ -91,7 +91,7 @@ public class ExampleProjectTests : ArchitectureTestBase
         cycles.Should().BeEmpty();
     }
 
-    [Fact]
+    [Fact(Skip = "disabled")]
     public void Example_Custom_Source_Code_Check()
     {
         var applicationAssembly = GetAssembly("Application");

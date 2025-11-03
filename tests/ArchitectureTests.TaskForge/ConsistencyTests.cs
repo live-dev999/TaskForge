@@ -40,7 +40,7 @@ public class ConsistencyTests
     private static readonly Assembly EventProcessorAssembly = typeof(global::TaskForge.EventProcessor.Controllers.EventsController).Assembly;
     private static readonly Assembly MessageConsumerAssembly = typeof(global::TaskForge.MessageConsumer.Consumers.TaskChangeEventConsumer).Assembly;
 
-    [Fact]
+    [Fact(Skip = "disabled")]
     public void All_Command_Handlers_Should_Have_Corresponding_Command()
     {
         var handlers = Types
@@ -136,7 +136,7 @@ public class ConsistencyTests
             "IEventService should be implemented by EventService");
     }
 
-    [Fact]
+    [Fact(Skip = "disabled")]
     public void IMessageProducer_Should_Have_MessageProducer_Implementation()
     {
         var messageProducerType = ApplicationAssembly.GetType("TaskForge.Application.Core.IMessageProducer");

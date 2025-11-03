@@ -1,11 +1,12 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Button, Form, Segment } from "semantic-ui-react";
 import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
-import { useStore } from "../../../app/stores/store";
+
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { v4 as uuid } from 'uuid';
+import { useStore } from "../../../app/stores/store";
 
 export default observer(function TaskItemForm() {
     const { taskItemStore } = useStore();

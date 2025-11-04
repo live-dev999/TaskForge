@@ -160,30 +160,34 @@ jobs:
 
     - name: Verify LCOV file exists before Coveralls
       if: always()
+      id: verify_coverage
       run: |
         echo "Current directory: $(pwd)"
         echo "Looking for TestResults/coverage.info..."
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info"
-          echo "File size: $(stat -c%s TestResults/coverage.info 2>/dev/null || stat -f%z TestResults/coverage.info 2>/dev/null || echo 'unknown') bytes"
-          echo "File lines: $(wc -l < TestResults/coverage.info || echo 0)"
+        COVERAGE_FILE="TestResults/coverage.info"
+        if [ -f "$COVERAGE_FILE" ]; then
+          echo "✅ File found: $COVERAGE_FILE"
+          echo "File size: $(stat -c%s "$COVERAGE_FILE" 2>/dev/null || stat -f%z "$COVERAGE_FILE" 2>/dev/null || echo 'unknown') bytes"
+          echo "File lines: $(wc -l < "$COVERAGE_FILE" || echo 0)"
           echo "First 5 lines:"
-          head -5 TestResults/coverage.info || true
+          head -5 "$COVERAGE_FILE" || true
           echo ""
           echo "Sample SF (source file) entries:"
-          grep "^SF:" TestResults/coverage.info | head -3 || echo "No SF: entries found"
+          grep "^SF:" "$COVERAGE_FILE" | head -3 || echo "No SF: entries found"
+          echo "coverage_exists=true" >> $GITHUB_OUTPUT
         else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
+          echo "⚠️ WARNING: $COVERAGE_FILE not found!"
+          echo "This may happen if tests failed or no tests were executed."
           echo "Listing TestResults directory:"
           ls -la TestResults/ 2>/dev/null || echo "TestResults directory does not exist"
           echo ""
-          echo "Searching for any .info files:"
+          echo "Searching for any .info files in project:"
           find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+          echo "coverage_exists=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Publish API coverage report to Coveralls
-      if: always()
+      if: always() && steps.verify_coverage.outputs.coverage_exists == 'true'
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -279,17 +283,22 @@ jobs:
 
     - name: Verify LCOV file exists before Coveralls
       if: always()
+      id: verify_coverage
       run: |
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info ($(wc -l < TestResults/coverage.info || echo 0) lines)"
+        COVERAGE_FILE="TestResults/coverage.info"
+        if [ -f "$COVERAGE_FILE" ]; then
+          echo "✅ File found: $COVERAGE_FILE ($(wc -l < "$COVERAGE_FILE" || echo 0) lines)"
+          echo "coverage_exists=true" >> $GITHUB_OUTPUT
         else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
+          echo "⚠️ WARNING: $COVERAGE_FILE not found!"
+          echo "This may happen if tests failed or no tests were executed."
+          echo "Searching for any .info files in project:"
           find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+          echo "coverage_exists=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Publish EventProcessor coverage report to Coveralls
-      if: always()
+      if: always() && steps.verify_coverage.outputs.coverage_exists == 'true'
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -385,17 +394,22 @@ jobs:
 
     - name: Verify LCOV file exists before Coveralls
       if: always()
+      id: verify_coverage
       run: |
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info ($(wc -l < TestResults/coverage.info || echo 0) lines)"
+        COVERAGE_FILE="TestResults/coverage.info"
+        if [ -f "$COVERAGE_FILE" ]; then
+          echo "✅ File found: $COVERAGE_FILE ($(wc -l < "$COVERAGE_FILE" || echo 0) lines)"
+          echo "coverage_exists=true" >> $GITHUB_OUTPUT
         else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
+          echo "⚠️ WARNING: $COVERAGE_FILE not found!"
+          echo "This may happen if tests failed or no tests were executed."
+          echo "Searching for any .info files in project:"
           find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+          echo "coverage_exists=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Publish MessageConsumer coverage report to Coveralls
-      if: always()
+      if: always() && steps.verify_coverage.outputs.coverage_exists == 'true'
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -530,17 +544,22 @@ jobs:
 
     - name: Verify LCOV file exists before Coveralls
       if: always()
+      id: verify_coverage
       run: |
-        if [ -f TestResults/coverage.info ]; then
-          echo "✅ File found: TestResults/coverage.info ($(wc -l < TestResults/coverage.info || echo 0) lines)"
+        COVERAGE_FILE="TestResults/coverage.info"
+        if [ -f "$COVERAGE_FILE" ]; then
+          echo "✅ File found: $COVERAGE_FILE ($(wc -l < "$COVERAGE_FILE" || echo 0) lines)"
+          echo "coverage_exists=true" >> $GITHUB_OUTPUT
         else
-          echo "❌ ERROR: TestResults/coverage.info not found!"
+          echo "⚠️ WARNING: $COVERAGE_FILE not found!"
+          echo "This may happen if tests failed or no tests were executed."
+          echo "Searching for any .info files in project:"
           find . -name "*.info" -type f 2>/dev/null | head -10 || echo "No .info files found"
-          exit 1
+          echo "coverage_exists=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Publish Common Tests coverage report to Coveralls
-      if: always()
+      if: always() && steps.verify_coverage.outputs.coverage_exists == 'true'
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}

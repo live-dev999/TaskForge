@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaskForge.Application.Core;
 using TaskForge.Domain;
@@ -35,7 +36,12 @@ public class Details
             
             _logger.LogInformation("Executing query: Details TaskItem with Id: {TaskItemId}", request.Id);
             
-            var taskItem = await _context.TaskItems.FindAsync(new object[] { request.Id }, cancellationToken).ConfigureAwait(false);
+            // Use AsNoTracking for read-only query to improve performance
+            // Note: FindAsync doesn't support AsNoTracking, so we use FirstOrDefaultAsync instead
+            var taskItem = await _context.TaskItems
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken)
+                .ConfigureAwait(false);
             
             if (taskItem == null)
             {

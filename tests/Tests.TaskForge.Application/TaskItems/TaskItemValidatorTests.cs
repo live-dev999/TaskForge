@@ -359,7 +359,7 @@ public class TaskItemValidatorTests
     public void Validate_WhenMultipleFieldsAreInvalid_ShouldHaveMultipleValidationErrors()
     {
         // Arrange
-        var taskItem = new TaskItem
+        var taskItem = new TaskItemDto
         {
             Title = null,
             Description = null, // Description is optional, no error expected

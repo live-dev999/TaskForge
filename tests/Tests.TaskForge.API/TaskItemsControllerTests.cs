@@ -164,7 +164,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.GetTaskItem(taskItem.Id);
+        var actionResult = await controller.GetTaskItem(taskItem.Id, CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
@@ -186,7 +186,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.GetTaskItem(Guid.NewGuid());
+        var actionResult = await controller.GetTaskItem(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
@@ -207,7 +207,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.GetTaskItem(taskId);
+        await controller.GetTaskItem(taskId, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(
@@ -235,7 +235,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.CreateTaskItem(taskItem);
+        var actionResult = await controller.CreateTaskItem(taskItem, CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
@@ -257,7 +257,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.CreateTaskItem(taskItem);
+        await controller.CreateTaskItem(taskItem, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(
@@ -281,7 +281,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.CreateTaskItem(taskItem);
+        var actionResult = await controller.CreateTaskItem(taskItem, CancellationToken.None);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult);
@@ -308,7 +308,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.EditTaskItem(taskId, taskItem);
+        var actionResult = await controller.EditTaskItem(taskId, taskItem, CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
@@ -341,7 +341,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.EditTaskItem(taskId, taskItem);
+        await controller.EditTaskItem(taskId, taskItem, CancellationToken.None);
 
         // Assert
         Assert.NotNull(capturedCommand);
@@ -365,7 +365,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.EditTaskItem(taskItem.Id, taskItem);
+        var actionResult = await controller.EditTaskItem(taskItem.Id, taskItem, CancellationToken.None);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult);
@@ -391,7 +391,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.DeleteAsync(taskId);
+        var actionResult = await controller.DeleteAsync(taskId, CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
@@ -413,7 +413,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.DeleteAsync(taskId);
+        await controller.DeleteAsync(taskId, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(
@@ -437,7 +437,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        var actionResult = await controller.DeleteAsync(taskId);
+        var actionResult = await controller.DeleteAsync(taskId, CancellationToken.None);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult);
@@ -459,7 +459,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.DeleteAsync(taskId);
+        await controller.DeleteAsync(taskId, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(
@@ -486,7 +486,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.GetTaskItem(Guid.Empty);
+        await controller.GetTaskItem(Guid.Empty, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(
@@ -509,7 +509,7 @@ public class TaskItemsControllerTests
         var controller = CreateController(mockMediator.Object);
 
         // Act
-        await controller.CreateTaskItem(null);
+        await controller.CreateTaskItem(null, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(
@@ -530,7 +530,7 @@ public class TaskItemsControllerTests
         // Act & Assert
         // In actual code, TaskItem.Id = id would throw NullReferenceException when TaskItem is null
         await Assert.ThrowsAsync<NullReferenceException>(() => 
-            controller.EditTaskItem(taskId, null));
+            controller.EditTaskItem(taskId, null, CancellationToken.None));
         
         // Verify mediator was not called due to exception
         mockMediator.Verify(m => m.Send(It.IsAny<Edit.Command>(), It.IsAny<CancellationToken>()), Times.Never);

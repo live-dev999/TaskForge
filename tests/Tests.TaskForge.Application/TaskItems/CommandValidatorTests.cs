@@ -76,7 +76,8 @@ public class CommandValidatorTests
         // Arrange
         var validator = new Create.CommandValidator();
         var taskItem = CreateValidTaskItem();
-        taskItem.Description = null;
+        // Description is now optional, so test maximum length validation instead
+        taskItem.Description = new string('a', 2001); // Exceeds max length of 2000
         var command = new Create.Command
         {
             TaskItem = taskItem
@@ -87,6 +88,44 @@ public class CommandValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.TaskItem.Description);
+    }
+
+    [Fact]
+    public void CreateCommandValidator_WhenTaskItemHasNullDescription_ShouldNotHaveValidationError()
+    {
+        // Arrange
+        var validator = new Create.CommandValidator();
+        var taskItem = CreateValidTaskItem();
+        taskItem.Description = null; // Description is optional
+        var command = new Create.Command
+        {
+            TaskItem = taskItem
+        };
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.TaskItem.Description);
+    }
+
+    [Fact]
+    public void CreateCommandValidator_WhenTaskItemHasEmptyDescription_ShouldNotHaveValidationError()
+    {
+        // Arrange
+        var validator = new Create.CommandValidator();
+        var taskItem = CreateValidTaskItem();
+        taskItem.Description = string.Empty; // Description is optional
+        var command = new Create.Command
+        {
+            TaskItem = taskItem
+        };
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.TaskItem.Description);
     }
 
     #endregion

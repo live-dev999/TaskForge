@@ -36,27 +36,27 @@ public class TaskItemsController : BaseApiController
     }
 
     [HttpGet("{id}")] //api/taskitems/{id}
-    public async Task<IActionResult> GetTaskItem(Guid id)
+    public async Task<IActionResult> GetTaskItem(Guid id, CancellationToken cancellationToken)
     {
-        return HandleResult(await Mediator.Send(new Details.Query() { Id = id }));
+        return HandleResult(await Mediator.Send(new Details.Query() { Id = id }, cancellationToken));
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTaskItem([FromBody] TaskItem TaskItem)
+    public async Task<IActionResult> CreateTaskItem([FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
     {
-        return HandleResult(await Mediator.Send(new Create.Command { TaskItem = TaskItem }));
+        return HandleResult(await Mediator.Send(new Create.Command { TaskItem = TaskItem }, cancellationToken));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItem TaskItem)
+    public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
     {
         TaskItem.Id = id;
-        return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }));
+        return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }, cancellationToken));
     }
 
     [HttpDelete("{id}")] //api/taskitems/{id}
-    public async Task<IActionResult> DeleteAsync(Guid id)
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
+        return HandleResult(await Mediator.Send(new Delete.Command { Id = id }, cancellationToken));
     }
 }

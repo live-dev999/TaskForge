@@ -36,7 +36,11 @@ public class List
             
             _logger.LogInformation("Executing query: List TaskItems");
             
-            var items = await _context.TaskItems.ToListAsync(cancellationToken);
+            // Use AsNoTracking for read-only query to improve performance
+            var items = await _context.TaskItems
+                .AsNoTracking()
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
             var result = Result<List<TaskItem>>.Success(items);
             
             _logger.LogInformation("Query List TaskItems completed successfully. Items count: {Count}", items.Count);

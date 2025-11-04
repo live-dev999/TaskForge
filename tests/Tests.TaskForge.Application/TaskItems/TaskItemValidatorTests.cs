@@ -81,11 +81,11 @@ public class TaskItemValidatorTests
     }
 
     [Fact]
-    public void Validate_WhenTitleIsLong_ShouldHaveValidationError()
+    public void Validate_WhenTitleExceedsMaxLength_ShouldHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Title = new string('A', 1000);
+        taskItem.Title = new string('A', 501); // Exceeds max length of 500
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -94,44 +94,72 @@ public class TaskItemValidatorTests
         result.ShouldHaveValidationErrorFor(x => x.Title);
     }
 
+    [Fact]
+    public void Validate_WhenTitleIsAtMaxLength_ShouldNotHaveValidationError()
+    {
+        // Arrange
+        var taskItem = CreateValidTaskItem();
+        taskItem.Title = new string('A', 500); // Exactly max length
+
+        // Act
+        var result = _validator.TestValidate(taskItem);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Title);
+    }
+
     #endregion
 
     #region Description Validation Tests
 
     [Fact]
-    public void Validate_WhenDescriptionIsEmpty_ShouldHaveValidationError()
+    public void Validate_WhenDescriptionIsEmpty_ShouldNotHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Description = string.Empty;
+        taskItem.Description = string.Empty; // Description is optional
 
         // Act
         var result = _validator.TestValidate(taskItem);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Description);
+        result.ShouldNotHaveValidationErrorFor(x => x.Description);
     }
 
     [Fact]
-    public void Validate_WhenDescriptionIsNull_ShouldHaveValidationError()
+    public void Validate_WhenDescriptionIsNull_ShouldNotHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Description = null;
+        taskItem.Description = null; // Description is optional
 
         // Act
         var result = _validator.TestValidate(taskItem);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Description);
+        result.ShouldNotHaveValidationErrorFor(x => x.Description);
     }
 
     [Fact]
-    public void Validate_WhenDescriptionIsWhitespace_ShouldHaveValidationError()
+    public void Validate_WhenDescriptionIsWhitespace_ShouldNotHaveValidationError()
     {
         // Arrange
         var taskItem = CreateValidTaskItem();
-        taskItem.Description = "   ";
+        taskItem.Description = "   "; // Description is optional, whitespace is allowed
+
+        // Act
+        var result = _validator.TestValidate(taskItem);
+
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.Description);
+    }
+
+    [Fact]
+    public void Validate_WhenDescriptionExceedsMaxLength_ShouldHaveValidationError()
+    {
+        // Arrange
+        var taskItem = CreateValidTaskItem();
+        taskItem.Description = new string('a', 2001); // Exceeds max length of 2000
 
         // Act
         var result = _validator.TestValidate(taskItem);
@@ -334,19 +362,21 @@ public class TaskItemValidatorTests
         var taskItem = new TaskItem
         {
             Title = null,
-            Description = null,
+            Description = null, // Description is optional, no error expected
             Status = (TaskItemStatus)999, // Invalid enum value
             CreatedAt = default(DateTime),
             UpdatedAt = default(DateTime)
         };
 
         // Act
-        var result = _validator.Validate(taskItem);
+        var result = _validator.TestValidate(taskItem);
 
         // Assert
         Assert.False(result.IsValid);
-        // Title, Description, Status should have errors (CreatedAt and UpdatedAt are not validated)
-        Assert.True(result.Errors.Count >= 3);
+        // Title and Status should have errors (Description is optional, CreatedAt and UpdatedAt are not validated)
+        Assert.True(result.Errors.Count >= 2);
+        result.ShouldHaveValidationErrorFor(x => x.Title);
+        result.ShouldHaveValidationErrorFor(x => x.Status);
     }
 
     #endregion

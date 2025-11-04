@@ -71,7 +71,7 @@ public class MessageProducer : IMessageProducer
 
             // MassTransit will automatically serialize TaskChangeEventDto and publish it
             // The message will be routed to "task-change-events" exchange/queue based on configuration
-            await _publishEndpoint.Publish(eventDto, cancellationToken);
+            await _publishEndpoint.Publish(eventDto, cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation(
                 "Successfully published task change event to RabbitMQ: TaskId={TaskId}, EventType={EventType}",

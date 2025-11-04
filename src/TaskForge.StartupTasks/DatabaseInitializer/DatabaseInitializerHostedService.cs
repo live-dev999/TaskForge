@@ -116,10 +116,6 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
         {
             _logger.LogInformation("Starting database seed...");
             
-            // Get logger from service provider - use ILogger<Program> if available, otherwise use generic logger
-            var logger = serviceProvider.GetService<ILogger<Program>>() 
-                ?? serviceProvider.GetRequiredService<ILogger<DatabaseInitializerHostedService<TDbContext>>>();
-            
             // Try to find Seed.SeedData method via reflection if it exists
             // This allows for flexible seeding implementation
             var seedType = typeof(TDbContext).Assembly.GetType("TaskForge.Persistence.Seed");
@@ -134,7 +130,8 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
                     if (parameters.Length >= 1 && parameters[0].ParameterType == typeof(TDbContext))
                     {
                         // Call Seed.SeedData(context, logger)
-                        var seedTask = seedMethod.Invoke(null, new object[] { dbContext, logger }) as Task;
+                        // Seed.SeedData accepts ILogger (base interface), so we can pass _logger
+                        var seedTask = seedMethod.Invoke(null, new object[] { dbContext, _logger }) as Task;
                         if (seedTask != null)
                         {
                             await seedTask.ConfigureAwait(false);

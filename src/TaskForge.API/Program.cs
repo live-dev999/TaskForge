@@ -24,6 +24,7 @@
 using TaskForge.API.Extensions;
 using TaskForge.API.Middleware;
 using TaskForge.Persistence;
+using TaskForge.StartupTasks.DatabaseInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 

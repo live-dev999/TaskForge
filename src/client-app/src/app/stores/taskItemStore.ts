@@ -1,7 +1,9 @@
 import { makeAutoObservable, runInAction } from "mobx"
 import agent from "../api/agent";
 import { TaskItem } from "../models/taskItem"
+
 import { v4 as uuid } from 'uuid';
+import { Pagination } from "../models/pagination";
 
 export default class TaskItemStore {
     taskItemRegistry = new Map<string, TaskItem>();
@@ -9,6 +11,7 @@ export default class TaskItemStore {
     editMode = false;
     loading = false;
     loadingInitial = true;
+    pagination: Pagination | null = null;
 
     constructor() {
         makeAutoObservable(this)
@@ -29,19 +32,33 @@ export default class TaskItemStore {
     }
 
 
-    loadTaskItems = async () => {
+    loadTaskItems = async (pageNumber: number = 1, pageSize: number = 10) => {
         this.setLoadingInitial(true);
         try {
-            const taskItems = await agent.TaskItems.list();
+            const params = new URLSearchParams();
+            params.append('pageNumber', pageNumber.toString());
+            params.append('pageSize', pageSize.toString());
+            
+            const result = await agent.TaskItems.list(params);
 
-            taskItems.forEach(taskItem => {
-                this.setTaskItem(taskItem);
+            runInAction(() => {
+                this.taskItemRegistry.clear();
+                result.items.forEach(taskItem => {
+                    this.setTaskItem(taskItem);
+                });
+                this.pagination = result.pagination;
+                this.setLoadingInitial(false);
             });
-            this.setLoadingInitial(false);
         } catch (error) {
             console.log(error);
-            this.setLoadingInitial(false);
+            runInAction(() => {
+                this.setLoadingInitial(false);
+            });
         }
+    }
+
+    setPagination = (pagination: Pagination | null) => {
+        this.pagination = pagination;
     }
 
     loadTaskItem = async (id: string): Promise<TaskItem | undefined> => {

@@ -31,9 +31,9 @@ public class EditHandlerTests
         return new DataContext(options);
     }
 
-    private TaskItem CreateValidTaskItem()
+    private TaskItemDto CreateValidTaskItem()
     {
-        return new TaskItem
+        return new TaskItemDto
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
@@ -89,7 +89,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
@@ -121,7 +129,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         var originalTitle = existingTaskItem.Title;
         var originalDescription = existingTaskItem.Description;
         await context.TaskItems.AddAsync(existingTaskItem);
@@ -161,11 +177,17 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
-        var originalCreatedAt = DateTime.UtcNow.AddDays(-10);
-        existingTaskItem.CreatedAt = originalCreatedAt;
-        var originalUpdatedAt = DateTime.UtcNow.AddMinutes(-5);
-        existingTaskItem.UpdatedAt = originalUpdatedAt;
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow.AddDays(-10),
+            UpdatedAt = DateTime.UtcNow.AddMinutes(-5)
+        };
+        var originalCreatedAt = existingTaskItem.CreatedAt;
+        var originalUpdatedAt = existingTaskItem.UpdatedAt;
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
@@ -265,7 +287,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
@@ -327,7 +357,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
@@ -359,7 +397,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
@@ -396,7 +442,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
@@ -433,7 +487,15 @@ public class EditHandlerTests
         var messageProducer = CreateMessageProducer();
         var handler = new Edit.Handler(context, mapper, logger, eventService, messageProducer);
         
-        var existingTaskItem = CreateValidTaskItem();
+        var existingTaskItem = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Title",
+            Description = "Test Description",
+            Status = TaskItemStatus.New,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 

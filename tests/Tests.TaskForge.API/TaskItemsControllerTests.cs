@@ -45,9 +45,9 @@ public class TaskItemsControllerTests
         return controller;
     }
 
-    private TaskItem CreateValidTaskItem()
+    private TaskItemDto CreateValidTaskItem()
     {
-        return new TaskItem
+        return new TaskItemDto
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
@@ -67,21 +67,24 @@ public class TaskItemsControllerTests
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var taskItems = new List<TaskItem> { CreateValidTaskItem() };
-        var result = Result<List<TaskItem>>.Success(taskItems);
+        var taskItems = new List<TaskItemDto> { CreateValidTaskItem() };
+        var pagedList = new PagedList<TaskItemDto>(taskItems, taskItems.Count, 1, 10);
+        var result = Result<PagedList<TaskItemDto>>.Success(pagedList);
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<List.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(result);
 
         var controller = CreateController(mockMediator.Object);
+        var pagingParams = new PagingParams { PageNumber = 1, PageSize = 10 };
 
         // Act
-        var actionResult = await controller.GetTaskItems(CancellationToken.None);
+        var actionResult = await controller.GetTaskItems(pagingParams, CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
-        Assert.Equal(taskItems, okResult.Value);
+        var returnedPagedList = Assert.IsType<PagedList<TaskItemDto>>(okResult.Value);
+        Assert.Equal(taskItems.Count, returnedPagedList.Count);
     }
 
     [Fact]
@@ -89,17 +92,19 @@ public class TaskItemsControllerTests
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var taskItems = new List<TaskItem> { CreateValidTaskItem() };
-        var result = Result<List<TaskItem>>.Success(taskItems);
+        var taskItems = new List<TaskItemDto> { CreateValidTaskItem() };
+        var pagedList = new PagedList<TaskItemDto>(taskItems, taskItems.Count, 1, 10);
+        var result = Result<PagedList<TaskItemDto>>.Success(pagedList);
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<List.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(result);
 
         var controller = CreateController(mockMediator.Object);
+        var pagingParams = new PagingParams { PageNumber = 1, PageSize = 10 };
 
         // Act
-        await controller.GetTaskItems(CancellationToken.None);
+        await controller.GetTaskItems(pagingParams, CancellationToken.None);
 
         // Assert
         mockMediator.Verify(m => m.Send(It.IsAny<List.Query>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -110,16 +115,17 @@ public class TaskItemsControllerTests
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var result = Result<List<TaskItem>>.Failure("Error occurred");
+        var result = Result<PagedList<TaskItemDto>>.Failure("Error occurred");
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<List.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(result);
 
         var controller = CreateController(mockMediator.Object);
+        var pagingParams = new PagingParams { PageNumber = 1, PageSize = 10 };
 
         // Act
-        var actionResult = await controller.GetTaskItems(CancellationToken.None);
+        var actionResult = await controller.GetTaskItems(pagingParams, CancellationToken.None);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult);
@@ -139,15 +145,16 @@ public class TaskItemsControllerTests
             .ThrowsAsync(new OperationCanceledException());
 
         var controller = CreateController(mockMediator.Object);
+        var pagingParams = new PagingParams { PageNumber = 1, PageSize = 10 };
 
         // Act & Assert
         await Assert.ThrowsAsync<OperationCanceledException>(() => 
-            controller.GetTaskItems(cancellationTokenSource.Token));
+            controller.GetTaskItems(pagingParams, cancellationTokenSource.Token));
     }
 
     #endregion
 
-    #region GetTaskItem Tests
+    #region GetTaskItemDto Tests
 
     [Fact]
     public async Task GetTaskItem_WhenTaskItemExists_ReturnsOkResult()
@@ -155,7 +162,17 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<TaskItem>.Success(taskItem);
+        // Details.Query returns TaskItem (domain entity), not TaskItemDto
+        var taskItemDomain = new TaskItem
+        {
+            Id = taskItem.Id,
+            Title = taskItem.Title,
+            Description = taskItem.Description,
+            Status = taskItem.Status,
+            CreatedAt = taskItem.CreatedAt,
+            UpdatedAt = taskItem.UpdatedAt
+        };
+        var result = Result<TaskItem>.Success(taskItemDomain);
 
         mockMediator
             .Setup(m => m.Send(It.Is<Details.Query>(q => q.Id == taskItem.Id), It.IsAny<CancellationToken>()))
@@ -168,7 +185,9 @@ public class TaskItemsControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
-        Assert.Equal(taskItem, okResult.Value);
+        var returnedTaskItem = Assert.IsType<TaskItem>(okResult.Value);
+        Assert.Equal(taskItem.Id, returnedTaskItem.Id);
+        Assert.Equal(taskItem.Title, returnedTaskItem.Title);
     }
 
     [Fact]
@@ -226,7 +245,7 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<TaskItem>.Success(taskItem);
+        var result = Result<TaskItemDto>.Success(taskItem);
 
         mockMediator
             .Setup(m => m.Send(It.Is<Create.Command>(c => c.TaskItem != null && c.TaskItem.Id == taskItem.Id), It.IsAny<CancellationToken>()))
@@ -239,7 +258,9 @@ public class TaskItemsControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
-        Assert.Equal(taskItem, okResult.Value);
+        var returnedTaskItem = Assert.IsType<TaskItemDto>(okResult.Value);
+        Assert.Equal(taskItem.Id, returnedTaskItem.Id);
+        Assert.Equal(taskItem.Title, returnedTaskItem.Title);
     }
 
     [Fact]
@@ -248,7 +269,7 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<TaskItem>.Success(taskItem);
+        var result = Result<TaskItemDto>.Success(taskItem);
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Create.Command>(), It.IsAny<CancellationToken>()))
@@ -272,7 +293,7 @@ public class TaskItemsControllerTests
         // Arrange
         var mockMediator = new Mock<IMediator>();
         var taskItem = CreateValidTaskItem();
-        var result = Result<TaskItem>.Failure("Validation failed");
+        var result = Result<TaskItemDto>.Failure("Validation failed");
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Create.Command>(), It.IsAny<CancellationToken>()))
@@ -500,7 +521,7 @@ public class TaskItemsControllerTests
     {
         // Arrange
         var mockMediator = new Mock<IMediator>();
-        var result = Result<TaskItem>.Failure("Task item is required");
+        var result = Result<TaskItemDto>.Failure("Task item is required");
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<Create.Command>(), It.IsAny<CancellationToken>()))

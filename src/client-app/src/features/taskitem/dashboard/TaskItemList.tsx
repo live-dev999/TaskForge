@@ -1,30 +1,24 @@
 import { observer } from "mobx-react-lite";
-import { Fragment, SyntheticEvent, useState } from "react";
-import { Button, Header, Item, ItemMeta, Label, Segment } from "semantic-ui-react";
+import { Fragment } from "react";
+import { Header } from "semantic-ui-react";
 import { useStore } from "../../../app/stores/store";
-import { Link } from "react-router-dom";
 import TaskItemListItem from "./TaskItemListItem";
 
 export default observer(function TaskItemList() {
     const { taskItemStore } = useStore();
-    const { groupedTaskItems } = taskItemStore;
-
+    const { taskItemsByDate } = taskItemStore;
 
     return (
         <>
-            {groupedTaskItems.map(([group, taskItems]) => (
-                <Fragment key={group}>
-                    <Header sub color="teal">
-                        {group}
-                    </Header>
-
-
-                    {taskItems.map(taskItem => (
-                        <TaskItemListItem key={taskItem.id} taskItem={taskItem} />
-                    ))}
-                </Fragment>
-            ))}
+            {taskItemsByDate.length > 0 ? (
+                taskItemsByDate.map(taskItem => (
+                    <TaskItemListItem key={taskItem.id} taskItem={taskItem} />
+                ))
+            ) : (
+                <Header as="h3" textAlign="center" color="grey">
+                    No task items found
+                </Header>
+            )}
         </>
-
     )
 })

@@ -13,7 +13,7 @@ public class Edit
 {
     public class Command : IRequest<Result<Unit>>
     {
-        public TaskItem TaskItem { get; set; }
+        public TaskItemDto TaskItem { get; set; }
     }
     public class CommandValidator : AbstractValidator<Command>
     {

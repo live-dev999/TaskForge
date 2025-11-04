@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -10,9 +11,9 @@ namespace TaskForge.Application.TaskItems;
 
 public class Create
 {
-    public class Command : IRequest<Result<TaskItem>>
+    public class Command : IRequest<Result<TaskItemDto>>
     {
-        public TaskItem TaskItem { get; set; }
+        public TaskItemDto TaskItem { get; set; }
     }
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -23,22 +24,24 @@ public class Create
                 .SetValidator(new TaskItemValidator());
         }
     }
-    public class Handler : IRequestHandler<Command, Result<TaskItem>>
+    public class Handler : IRequestHandler<Command, Result<TaskItemDto>>
     {
         private readonly DataContext _context;
         private readonly ILogger<Handler> _logger;
         private readonly IEventService _eventService;
         private readonly IMessageProducer _messageProducer;
+        private readonly IMapper _mapper;
 
-        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer)
+        public Handler(DataContext context, ILogger<Handler> logger, IEventService eventService, IMessageProducer messageProducer, IMapper mapper)
         {
             _context = context;
             _logger = logger;
             _eventService = eventService;
             _messageProducer = messageProducer;
+            _mapper = mapper;
         }
 
-        public async Task<Result<TaskItem>> Handle(
+        public async Task<Result<TaskItemDto>> Handle(
             Command request,
             CancellationToken cancellationToken
         )
@@ -56,16 +59,21 @@ public class Create
             request.TaskItem.CreatedAt = now;
             request.TaskItem.UpdatedAt = now;
             
-            _context.Add(request.TaskItem);
+            // Map TaskItemDto to TaskItem entity for database persistence
+            var taskItemEntity = _mapper.Map<TaskItem>(request.TaskItem);
+            _context.Add(taskItemEntity);
 
             var result = await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false) > 0;
             if (!result)
             {
                 _logger.LogError("Failed to create task item with Id: {TaskItemId}", request.TaskItem.Id);
-                return Result<TaskItem>.Failure("Failed to create task item");
+                return Result<TaskItemDto>.Failure("Failed to create task item");
             }
             
             _logger.LogInformation("Command Create TaskItem completed successfully for Id: {TaskItemId}", request.TaskItem.Id);
+            
+            // Map back to DTO for response
+            var taskItemDto = _mapper.Map<TaskItemDto>(taskItemEntity);
             
             // Send events (synchronous HTTP and asynchronous RabbitMQ) - fire and forget - don't block on failure
             // Use separate CancellationTokenSource with timeout to ensure background task completes even if HTTP request is cancelled
@@ -74,7 +82,7 @@ public class Create
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); // 30 second timeout for background task
                 try
                 {
-                    var eventDto = MapToEventDto(request.TaskItem, "Created");
+                    var eventDto = MapToEventDto(taskItemDto, "Created");
                     
                     // Send to EventProcessor (synchronous HTTP)
                     await _eventService.SendEventAsync(eventDto, cts.Token).ConfigureAwait(false);
@@ -84,18 +92,18 @@ public class Create
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogWarning("Background task for sending events was cancelled: TaskId={TaskId}", request.TaskItem.Id);
+                    _logger.LogWarning("Background task for sending events was cancelled: TaskId={TaskId}", taskItemDto.Id);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error in background task for sending events: TaskId={TaskId}", request.TaskItem.Id);
+                    _logger.LogError(ex, "Error in background task for sending events: TaskId={TaskId}", taskItemDto.Id);
                 }
             });
             
-            return Result<TaskItem>.Success(request.TaskItem);
+            return Result<TaskItemDto>.Success(taskItemDto);
         }
 
-        private static TaskChangeEventDto MapToEventDto(TaskItem taskItem, string eventType)
+        private static TaskChangeEventDto MapToEventDto(TaskItemDto taskItem, string eventType)
         {
             return new TaskChangeEventDto
             {

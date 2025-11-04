@@ -15,13 +15,19 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace TaskForge.StartupTasks.DatabaseInitializer
-{
-    public class DatabaseInitializerSettings
-    {
-        public bool Initialize { get; set; }
-        public bool Seed { get; set; } = true;
-        public bool ForceSeed { get; set; } = false; // Force seed even if data exists
-        public bool DropOnMigrationConflict { get; set; } = false;
+export interface Pagination {
+    currentPage: number
+    itemsPerPage: number
+    totalItems: number
+    totalPages: number
+}
+
+export class PaginatedResult<T>{
+    items: T;
+    pagination: Pagination
+    
+    constructor(items: T, pagination: Pagination) {
+        this.items = items;
+        this.pagination = pagination;
     }
 }

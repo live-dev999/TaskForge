@@ -15,13 +15,19 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace TaskForge.StartupTasks.DatabaseInitializer
+namespace TaskForge.Application.Core
 {
-    public class DatabaseInitializerSettings
+    public class PagingParams
     {
-        public bool Initialize { get; set; }
-        public bool Seed { get; set; } = true;
-        public bool ForceSeed { get; set; } = false; // Force seed even if data exists
-        public bool DropOnMigrationConflict { get; set; } = false;
+        private const int MaxPageSize = 50;
+
+        public int PageNumber { get; set; } = 1;
+
+        private int _pageSize = 10;
+        public int PageSize
+        {
+            get => _pageSize;
+            set => _pageSize = value > MaxPageSize ? MaxPageSize : value;
+        }
     }
 }

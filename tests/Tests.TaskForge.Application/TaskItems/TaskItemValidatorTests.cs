@@ -359,7 +359,7 @@ public class TaskItemValidatorTests
     public void Validate_WhenMultipleFieldsAreInvalid_ShouldHaveMultipleValidationErrors()
     {
         // Arrange
-        var taskItem = new TaskItem
+        var taskItem = new TaskItemDto
         {
             Title = null,
             Description = null, // Description is optional, no error expected
@@ -383,9 +383,9 @@ public class TaskItemValidatorTests
 
     #region Helper Methods
 
-    private TaskItem CreateValidTaskItem()
+    private TaskItemDto CreateValidTaskItem()
     {
-        return new TaskItem
+        return new TaskItemDto
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",

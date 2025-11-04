@@ -3,7 +3,7 @@ using TaskForge.Domain;
 
 namespace TaskForge.Application.TaskItems;
 
-public class TaskItemValidator : AbstractValidator<TaskItem>
+public class TaskItemValidator : AbstractValidator<TaskItemDto>
 {
     public TaskItemValidator()
     {

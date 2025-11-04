@@ -3,9 +3,11 @@
  *   All rights reserved.
  */
 
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 using TaskForge.Domain.Enum;
@@ -42,6 +44,15 @@ public class ListHandlerTests
         };
     }
 
+    private IMapper CreateMapper()
+    {
+        var configuration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfiles>();
+        });
+        return configuration.CreateMapper();
+    }
+
     private ILogger<List.Handler> CreateLogger()
     {
         return new Mock<ILogger<List.Handler>>().Object;
@@ -57,9 +68,13 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -76,13 +91,17 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -100,7 +119,8 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
@@ -117,7 +137,10 @@ public class ListHandlerTests
         await context.TaskItems.AddRangeAsync(taskItem1, taskItem2, taskItem3);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -134,7 +157,8 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
@@ -146,7 +170,10 @@ public class ListHandlerTests
         await context.TaskItems.AddRangeAsync(taskItem1, taskItem2);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -167,13 +194,17 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var existingTaskItem = CreateValidTaskItem();
         await context.TaskItems.AddAsync(existingTaskItem);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
         var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
 
@@ -192,7 +223,8 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() => 
@@ -205,7 +237,8 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var taskItems = new List<TaskItem>();
         for (int i = 0; i < 100; i++)
@@ -219,14 +252,20 @@ public class ListHandlerTests
         await context.TaskItems.AddRangeAsync(taskItems);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        // Note: MaxPageSize is 50, so PageSize = 100 will be limited to 50
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 50 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(100, result.Value.Count);
+        Assert.Equal(50, result.Value.Count);
+        Assert.Equal(100, result.Value.TotalCount); // Total count should be 100
+        Assert.Equal(2, result.Value.TotalPages); // Should be 2 pages (50 items per page)
     }
 
     [Fact]
@@ -235,7 +274,8 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var statuses = new[] { TaskItemStatus.New, TaskItemStatus.InProgress, TaskItemStatus.Completed, TaskItemStatus.Pending };
         var taskItems = new List<TaskItem>();
@@ -251,7 +291,10 @@ public class ListHandlerTests
         await context.TaskItems.AddRangeAsync(taskItems);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -274,7 +317,8 @@ public class ListHandlerTests
         // Arrange
         using var context = CreateInMemoryContext();
         var logger = CreateLogger();
-        var handler = new List.Handler(context, logger);
+        var mapper = CreateMapper();
+        var handler = new List.Handler(context, logger, mapper);
         
         var taskItem1 = CreateValidTaskItem();
         taskItem1.Id = Guid.NewGuid();
@@ -287,7 +331,10 @@ public class ListHandlerTests
         await context.TaskItems.AddRangeAsync(taskItem1, taskItem2);
         await context.SaveChangesAsync();
 
-        var query = new List.Query();
+        var query = new List.Query
+        {
+            Params = new PagingParams { PageNumber = 1, PageSize = 10 }
+        };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);

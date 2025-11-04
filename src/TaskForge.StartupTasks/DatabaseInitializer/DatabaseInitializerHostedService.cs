@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace TaskForge.StartupTasks.DatabaseInitializer;
 
@@ -45,6 +46,12 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("DatabaseInitializerHostedService starting...");
+        _logger.LogInformation("DatabaseInitializer settings: Initialize={Initialize}, Seed={Seed}, DropOnMigrationConflict={DropOnMigrationConflict}",
+            _settings?.Initialize ?? true,
+            _settings?.Seed ?? true,
+            _settings?.DropOnMigrationConflict ?? false);
+        
         // Guard against null settings (shouldn't happen after fix, but defensive programming)
         if (_settings == null)
         {
@@ -56,7 +63,7 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
 
         if (!_settings.Initialize)
         {
-            _logger.LogDebug("Database initialization is disabled. Skipping migration and seed.");
+            _logger.LogInformation("Database initialization is disabled. Skipping migration and seed.");
             return;
         }
 
@@ -135,35 +142,66 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
             
             // Try to find Seed.SeedData method via reflection if it exists
             // This allows for flexible seeding implementation
-            var seedType = typeof(TDbContext).Assembly.GetType("TaskForge.Persistence.Seed");
-            if (seedType != null)
+            var assembly = typeof(TDbContext).Assembly;
+            _logger.LogDebug("Looking for Seed class in assembly: {AssemblyName}", assembly.FullName);
+            
+            var seedType = assembly.GetType("TaskForge.Persistence.Seed");
+            if (seedType == null)
             {
-                var seedMethod = seedType.GetMethod("SeedData", 
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                
-                if (seedMethod != null)
-                {
-                    var parameters = seedMethod.GetParameters();
-                    if (parameters.Length >= 1 && parameters[0].ParameterType == typeof(TDbContext))
-                    {
-                        // Call Seed.SeedData(context, logger)
-                        // Seed.SeedData accepts ILogger (base interface), so we can pass _logger
-                        var seedTask = seedMethod.Invoke(null, new object[] { dbContext, _logger }) as Task;
-                        if (seedTask != null)
-                        {
-                            await seedTask.ConfigureAwait(false);
-                            _logger.LogInformation("Database seed completed successfully.");
-                            return;
-                        }
-                    }
-                }
+                _logger.LogWarning("Seed class not found. Searched in assembly: {AssemblyName}. Available types: {Types}", 
+                    assembly.FullName, 
+                    string.Join(", ", assembly.GetTypes().Select(t => t.FullName).Take(10)));
+                return;
             }
             
-            _logger.LogWarning("Seed method not found. Skipping database seed.");
+            _logger.LogDebug("Found Seed class: {SeedType}", seedType.FullName);
+            
+            var seedMethod = seedType.GetMethod("SeedData", 
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            
+            if (seedMethod == null)
+            {
+                _logger.LogWarning("SeedData method not found in Seed class. Available methods: {Methods}",
+                    string.Join(", ", seedType.GetMethods().Select(m => m.Name)));
+                return;
+            }
+            
+            _logger.LogDebug("Found SeedData method: {MethodName}", seedMethod.Name);
+            
+            var parameters = seedMethod.GetParameters();
+            _logger.LogDebug("SeedData method parameters: {Parameters}", 
+                string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}")));
+            
+            if (parameters.Length >= 1 && parameters[0].ParameterType == typeof(TDbContext))
+            {
+                // Call Seed.SeedData(context, logger)
+                // Seed.SeedData accepts ILogger (base interface), so we can pass _logger
+                _logger.LogInformation("Calling Seed.SeedData with context and logger...");
+                var seedTask = seedMethod.Invoke(null, new object[] { dbContext, _logger }) as Task;
+                if (seedTask != null)
+                {
+                    await seedTask.ConfigureAwait(false);
+                    _logger.LogInformation("Database seed completed successfully.");
+                    return;
+                }
+                else
+                {
+                    _logger.LogWarning("Seed.SeedData returned null Task.");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("SeedData method signature doesn't match expected signature. Expected first parameter: {ExpectedType}, got: {ActualType}",
+                    typeof(TDbContext).Name,
+                    parameters.Length > 0 ? parameters[0].ParameterType.Name : "none");
+            }
+            
+            _logger.LogWarning("Seed method not found or couldn't be invoked. Skipping database seed.");
         }
         catch (Exception seedEx)
         {
-            _logger.LogError(seedEx, "An error occurred during database seeding: {ErrorMessage}", seedEx.Message);
+            _logger.LogError(seedEx, "An error occurred during database seeding: {ErrorMessage}. Stack trace: {StackTrace}", 
+                seedEx.Message, seedEx.StackTrace);
             // Don't throw - allow application to continue even if seed fails
         }
     }

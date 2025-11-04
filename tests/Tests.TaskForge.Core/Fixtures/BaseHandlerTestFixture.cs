@@ -4,7 +4,6 @@
  */
 
 using Microsoft.Extensions.Logging;
-using TaskForge.Application.Core;
 using TaskForge.Domain;
 using TaskForge.Persistence;
 using Tests.TaskForge.Core.Helpers;

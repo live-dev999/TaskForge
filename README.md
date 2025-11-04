@@ -50,7 +50,7 @@ Coverage (Coveralls) (dev)/(master)
 - [Visual Studio 2022 for Mac](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio-mac/?sku=communitymac&rel=17) or [Microsoft VS Code](https://visualstudio.microsoft.com/downloads/)
 - [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - Database:
-  - [PostgreSQL 15+](https://www.postgresql.org/download/) or Docker image
+    - [PostgreSQL 15+](https://www.postgresql.org/download/) or Docker image
   - PostgreSQL supports both Intel and Apple Silicon CPUs
 
 ### Linux

@@ -36,14 +36,20 @@ public class Seed
     {
         try
         {
+            logger?.LogInformation("Seed.SeedData called. Checking if database already contains data...");
+            
             var hasData = await context.TaskItems.AnyAsync().ConfigureAwait(false);
+            var itemCount = await context.TaskItems.CountAsync().ConfigureAwait(false);
+            
+            logger?.LogInformation("Database check: hasData={HasData}, itemCount={ItemCount}", hasData, itemCount);
+            
             if (hasData)
             {
-                logger?.LogInformation("Database already contains data. Skipping seed.");
+                logger?.LogInformation("Database already contains {Count} task items. Skipping seed.", itemCount);
                 return;
             }
 
-            logger?.LogInformation("Starting database seed...");
+            logger?.LogInformation("Database is empty. Starting database seed...");
 
         var taskItems = new List<TaskItem>
         {

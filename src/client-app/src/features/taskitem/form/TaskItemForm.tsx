@@ -4,10 +4,10 @@ import { TaskItem, TaskStatus } from "../../../app/models/taskItem";
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
-import { v4 as uuid } from 'uuid';
 import { useStore } from "../../../app/stores/store";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import * as Yup from "yup";
+import { toast } from "react-toastify";
 
 interface TaskItemFormValues {
     id: string;
@@ -95,24 +95,44 @@ export default observer(function TaskItemForm() {
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 enableReinitialize
-                onSubmit={(values: TaskItemFormValues, { setSubmitting }: FormikHelpers<TaskItemFormValues>) => {
-                    const taskItemToSubmit: TaskItem = {
-                        ...values,
-                        id: values.id || uuid()
-                    };
-
-                    if (!taskItemToSubmit.id || taskItemToSubmit.id === '') {
-                        createTaskItem(taskItemToSubmit).then(() => {
-                            navigate(`/taskItems/${taskItemToSubmit.id}`);
-                        }).finally(() => {
-                            setSubmitting(false);
-                        });
-                    } else {
-                        updateTaskItem(taskItemToSubmit).then(() => {
-                            navigate(`/taskItems/${taskItemToSubmit.id}`);
-                        }).finally(() => {
-                            setSubmitting(false);
-                        });
+                onSubmit={async (values: TaskItemFormValues, { setSubmitting }: FormikHelpers<TaskItemFormValues>) => {
+                    try {
+                        if (id) {
+                            // Editing existing task
+                            const taskItemToSubmit: TaskItem = {
+                                id: id,
+                                title: values.title,
+                                description: values.description || '',
+                                status: values.status,
+                                createdAt: values.createdAt,
+                                updatedAt: values.updatedAt
+                            };
+                            await updateTaskItem(taskItemToSubmit);
+                            navigate(`/taskItems/${id}`);
+                        } else {
+                            // Creating new task - send Guid.Empty as string, server will generate new Guid
+                            // Server will set CreatedAt and UpdatedAt automatically, but we can send current dates
+                            const taskItemToSubmit: TaskItem = {
+                                id: '00000000-0000-0000-0000-000000000000', // Guid.Empty for new task
+                                title: values.title,
+                                description: values.description || '',
+                                status: values.status,
+                                createdAt: values.createdAt, // Server will overwrite this
+                                updatedAt: values.updatedAt  // Server will overwrite this
+                            };
+                            const createdTaskItem = await createTaskItem(taskItemToSubmit);
+                            if (createdTaskItem && createdTaskItem.id) {
+                                navigate(`/taskItems/${createdTaskItem.id}`);
+                            } else {
+                                console.error('Failed to create task item: no ID returned');
+                                toast.error('Failed to create task item');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error submitting form:', error);
+                        // Error is already handled by agent interceptor
+                    } finally {
+                        setSubmitting(false);
                     }
                 }}
             >

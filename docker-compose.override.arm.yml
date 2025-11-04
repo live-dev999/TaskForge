@@ -51,6 +51,10 @@ services:
       # EventProcessor configuration (for synchronous event processing)
       - EventProcessor__BaseUrl=${EVENT_PROCESSOR_BASE_URL:-http://taskforge.eventprocessor:80}
       - EVENT_PROCESSOR_BASE_URL=${EVENT_PROCESSOR_BASE_URL:-http://taskforge.eventprocessor:80}
+      # DatabaseInitializer configuration
+      - DatabaseInitializer__Initialize=${DATABASE_INITIALIZER_INITIALIZE:-true}
+      - DatabaseInitializer__Seed=${DATABASE_INITIALIZER_SEED:-true}
+      - DatabaseInitializer__DropOnMigrationConflict=${DATABASE_INITIALIZER_DROP_ON_MIGRATION_CONFLICT:-false}
     ports:
       - "5009:80"
     depends_on:

@@ -11,6 +11,8 @@ export default function NavBar() {
                     <img src="./assets/logo.jpeg" alt="logo" style={{marginRight: '10px'}}/>
                     Task Forge
                </Menu.Item>
+               <Menu.Item as={NavLink} to='/errors' name="Errors">
+                </Menu.Item>
                 <Menu.Item as={NavLink} to='/taskItems' name="TaskItems">
                 </Menu.Item>
                 <Menu.Item name="TaskItems">

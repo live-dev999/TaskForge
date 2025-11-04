@@ -1,5 +1,8 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { TaskItem } from '../models/taskItem';
+import { toast } from 'react-toastify';
+import { router } from '../router/Routes';
+import { store } from '../stores/store';
 
 const sleep = (delay: number) => {
     return new Promise((resolve) => {
@@ -23,14 +26,58 @@ const getApiBaseURL = () => {
 
 axios.defaults.baseURL = getApiBaseURL();
 
-axios.interceptors.response.use(async respose => {
-    try {
-        await sleep(1000);
-        return respose;
-    } catch (error) {
-        console.log(error);
-        return await Promise.reject(error);
+// Log base URL for debugging
+console.log('API Base URL:', axios.defaults.baseURL);
+
+axios.interceptors.response.use(async response => {
+    //await sleep(1000);
+    return response;
+}, (error: AxiosError) => {
+    if (error.response) {
+        const { data, status, config } = error.response as AxiosResponse;
+        switch (status) {
+            case 400:
+                if (config.method === 'get' && data && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'errors') && Object.prototype.hasOwnProperty.call(data.errors, 'id')) {
+                    router.navigate('/not-found');
+                }
+                //toast.error('bad request')
+                if (data && typeof data === 'object' && 'errors' in data && data.errors) {
+                    const modalStateErrors = [];
+                    for (const key in data.errors) {
+                        if (data.errors[key])
+                            modalStateErrors.push(data.errors[key])
+                    }
+                    throw modalStateErrors.flat();
+                } else {
+                    toast.error(typeof data === 'string' ? data : 'Bad request');
+                }
+                break;
+            case 401:
+                toast.error('unauthorised')
+                break;
+            case 403:
+                toast.error('forbidden')
+                break;
+            case 404:
+                //toast.error('not found')
+                router.navigate('/not-found');
+                break;
+            case 500:
+                store.commonStore.setServerError(data);
+                router.navigate('/server-error');
+                //toast.error('server error ')
+                break;
+        }
+    } else if (error.request) {
+        // Request was made but no response received
+        toast.error('Server is not responding. Please check if the API is running.');
+        console.error('Request error:', error.message);
+    } else {
+        // Something else happened
+        toast.error('An unexpected error occurred');
+        console.error('Error:', error.message);
     }
+    return Promise.reject(error);
 })
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;

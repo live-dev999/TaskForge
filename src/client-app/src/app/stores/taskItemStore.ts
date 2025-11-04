@@ -44,9 +44,8 @@ export default class TaskItemStore {
         }
     }
 
-    loadTaskItem = async (id: string) => {
+    loadTaskItem = async (id: string): Promise<TaskItem | undefined> => {
         let taskItem = this.getTaskItem(id)
-        if (taskItem) this.selectedTaskItem = taskItem;
         if (taskItem) {
             this.selectedTaskItem = taskItem;
             return taskItem;
@@ -62,8 +61,11 @@ export default class TaskItemStore {
                 this.setLoadingInitial(false)
                 return taskItem;
             } catch (error) {
-                console.log(error);
+                console.error('Error loading task item:', error);
                 this.setLoadingInitial(false);
+                // If error is 404, navigation is handled by interceptor
+                // Return undefined so form can handle it gracefully
+                return undefined;
             }
         }
     }
@@ -79,25 +81,34 @@ export default class TaskItemStore {
         this.loadingInitial = state;
     }
 
-    createTaskItem = async (taskItem: TaskItem) => {
+    createTaskItem = async (taskItem: TaskItem): Promise<TaskItem | undefined> => {
         this.loading = true;
-        taskItem.id = uuid();
+        // Don't modify taskItem.id here - form sends Guid.Empty (00000000-0000-0000-0000-000000000000)
+        // Server will check if Id == Guid.Empty and generate new Guid if needed
 
         try {
-            const createdTaskItem = await agent.TaskItems.create(taskItem)
-            runInAction(() => {
-                // Use the created task item from API (with correct CreatedAt/UpdatedAt from server)
-                const finalTaskItem = createdTaskItem || taskItem;
-                this.taskItemRegistry.set(finalTaskItem.id, finalTaskItem);
-                this.selectedTaskItem = finalTaskItem;
-                this.editMode = false;
-                this.loading = false;
-            })
+            const createdTaskItem = await agent.TaskItems.create(taskItem);
+            if (createdTaskItem) {
+                runInAction(() => {
+                    // Use the created task item from API (with correct ID, CreatedAt/UpdatedAt from server)
+                    this.setTaskItem(createdTaskItem);
+                    this.selectedTaskItem = createdTaskItem;
+                    this.editMode = false;
+                    this.loading = false;
+                });
+                return createdTaskItem;
+            } else {
+                runInAction(() => {
+                    this.loading = false;
+                });
+                return undefined;
+            }
         } catch (error) {
-            console.log(error);
+            console.error('Error creating task item:', error);
             runInAction(() => {
                 this.loading = false;
-            })
+            });
+            throw error; // Re-throw to allow form to handle error
         }
     }
 

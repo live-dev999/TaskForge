@@ -9,13 +9,13 @@ public class TaskItemValidator : AbstractValidator<TaskItem>
     {
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Title is required")
-            .MaximumLength(200).WithMessage("Title must not exceed 200 characters");
+            .MaximumLength(500).WithMessage("Title must not exceed 500 characters");
         
         RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Description is required")
             .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters");
         
         RuleFor(x => x.Status).IsInEnum().WithMessage("Invalid task status");
         // Note: CreatedAt and UpdatedAt are set automatically, no validation needed
+        // Note: Description is optional (can be null/empty) as per database configuration
     }
 }

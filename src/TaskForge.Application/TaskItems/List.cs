@@ -36,7 +36,7 @@ public class List
             
             _logger.LogInformation("Executing query: List TaskItems");
             
-            var items = await _context.TaskItems.ToListAsync(cancellationToken);
+            var items = await _context.TaskItems.ToListAsync(cancellationToken).ConfigureAwait(false);
             var result = Result<List<TaskItem>>.Success(items);
             
             _logger.LogInformation("Query List TaskItems completed successfully. Items count: {Count}", items.Count);

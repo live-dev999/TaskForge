@@ -35,7 +35,7 @@ public class Details
             
             _logger.LogInformation("Executing query: Details TaskItem with Id: {TaskItemId}", request.Id);
             
-            var taskItem = await _context.TaskItems.FindAsync(new object[] { request.Id }, cancellationToken);
+            var taskItem = await _context.TaskItems.FindAsync(new object[] { request.Id }, cancellationToken).ConfigureAwait(false);
             
             if (taskItem == null)
             {

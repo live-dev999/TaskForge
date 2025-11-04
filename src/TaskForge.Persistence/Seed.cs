@@ -36,7 +36,7 @@ public class Seed
     {
         try
         {
-            var hasData = await context.TaskItems.AnyAsync();
+            var hasData = await context.TaskItems.AnyAsync().ConfigureAwait(false);
             if (hasData)
             {
                 logger?.LogInformation("Database already contains data. Skipping seed.");
@@ -129,8 +129,8 @@ public class Seed
             }
         };
 
-            await context.TaskItems.AddRangeAsync(taskItems);
-            var savedCount = await context.SaveChangesAsync();
+            await context.TaskItems.AddRangeAsync(taskItems).ConfigureAwait(false);
+            var savedCount = await context.SaveChangesAsync().ConfigureAwait(false);
             logger?.LogInformation("Database seed completed successfully. Added {Count} task items.", savedCount);
         }
         catch (Exception ex)

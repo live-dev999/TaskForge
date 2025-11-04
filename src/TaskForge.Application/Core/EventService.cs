@@ -86,7 +86,7 @@ public class EventService : IEventService
             var response = await _httpClient.PostAsJsonAsync(
                 "/api/events",
                 eventDto,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
@@ -98,7 +98,7 @@ public class EventService : IEventService
             }
             else
             {
-                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 _logger.LogWarning(
                     "EventProcessor returned non-success status: {StatusCode} for TaskId={TaskId}, EventType={EventType}. Response: {Response}",
                     response.StatusCode,

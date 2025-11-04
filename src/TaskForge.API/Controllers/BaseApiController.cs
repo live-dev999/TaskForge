@@ -86,7 +86,9 @@ public class BaseApiController : ControllerBase
                 return NotFound();
 
             // Handle PagedList - add pagination headers
-            if (result.Value is PagedList<object> pagedList)
+            // PagedList<T> inherits from List<T> and has pagination properties
+            var pagedList = result.Value;
+            if (pagedList != null)
             {
                 Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
             }

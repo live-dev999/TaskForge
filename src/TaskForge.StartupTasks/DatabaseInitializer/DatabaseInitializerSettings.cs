@@ -21,6 +21,7 @@ namespace TaskForge.StartupTasks.DatabaseInitializer
     {
         public bool Initialize { get; set; }
         public bool Seed { get; set; } = true;
+        public bool ForceSeed { get; set; } = false; // Force seed even if data exists
         public bool DropOnMigrationConflict { get; set; } = false;
     }
 }

@@ -1,8 +1,9 @@
 import { makeAutoObservable, runInAction } from "mobx"
 import agent from "../api/agent";
 import { TaskItem } from "../models/taskItem"
-import { Pagination, PagedResult } from "../models/pagination"
+
 import { v4 as uuid } from 'uuid';
+import { Pagination } from "../models/pagination";
 
 export default class TaskItemStore {
     taskItemRegistry = new Map<string, TaskItem>();

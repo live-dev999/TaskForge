@@ -23,11 +23,11 @@ export interface Pagination {
 }
 
 export class PaginatedResult<T>{
-    data: T;
+    items: T;
     pagination: Pagination
     
-    constructor(data: T, pagination: Pagination) {
-        this.data = data;
+    constructor(items: T, pagination: Pagination) {
+        this.items = items;
         this.pagination = pagination;
     }
 }

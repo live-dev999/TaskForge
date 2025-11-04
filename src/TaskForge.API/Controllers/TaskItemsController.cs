@@ -30,7 +30,7 @@ namespace TaskForge.API.Controllers;
 
 public class TaskItemsController : BaseApiController
 {
-    [HttpGet("taskitems")]
+    [HttpGet]
     public async Task<IActionResult> GetTaskItems([FromQuery] PagingParams pagingParams, CancellationToken ct)
     {
         return HandlePagedResult(await Mediator.Send(new List.Query() { Params = pagingParams }, ct));

@@ -45,11 +45,26 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        // Guard against null settings (shouldn't happen after fix, but defensive programming)
+        if (_settings == null)
+        {
+            _logger.LogWarning("DatabaseInitializerSettings is null. Using default settings (Initialize=true, Seed=true).");
+            // Use default behavior if settings are null
+            await RunInitializationAsync(cancellationToken);
+            return;
+        }
+
         if (!_settings.Initialize)
         {
             _logger.LogDebug("Database initialization is disabled. Skipping migration and seed.");
             return;
         }
+
+        await RunInitializationAsync(cancellationToken);
+    }
+
+    private async Task RunInitializationAsync(CancellationToken cancellationToken)
+    {
 
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
@@ -59,8 +74,9 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
             // Run database migration
             await RunMigrationAsync(dbContext, cancellationToken).ConfigureAwait(false);
 
-            // Seed database if enabled
-            if (_settings.Seed)
+            // Seed database if enabled (default to true if settings is null)
+            var shouldSeed = _settings?.Seed ?? true;
+            if (shouldSeed)
             {
                 await SeedDatabaseAsync(dbContext, scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
             }
@@ -83,7 +99,8 @@ public class DatabaseInitializerHostedService<TDbContext> : IHostedService
         catch (Exception ex) when (IsTableAlreadyExistsError(ex))
         {
             // Table already exists - this happens when old table exists but migration history is missing
-            if (_settings.DropOnMigrationConflict || _environment.IsDevelopment())
+            var shouldDrop = _settings?.DropOnMigrationConflict ?? false;
+            if (shouldDrop || _environment.IsDevelopment())
             {
                 _logger.LogWarning("Table 'TaskItems' already exists. Dropping it to apply new migration...");
                 

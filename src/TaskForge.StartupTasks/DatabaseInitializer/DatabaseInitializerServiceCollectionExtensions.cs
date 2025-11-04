@@ -31,11 +31,20 @@ public static class DatabaseInitializerServiceCollectionExtensions
         where TDbContext : DbContext
     {
         services.AddSingleton(serviceProvider =>
-            serviceProvider
-                .GetRequiredService<IConfiguration>()
+        {
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            var settings = configuration
                 .GetSection(databaseInitializerSettingsPath)
-                .Get<DatabaseInitializerSettings>()
-        );
+                .Get<DatabaseInitializerSettings>();
+            
+            // Return default settings if configuration section is missing or null
+            return settings ?? new DatabaseInitializerSettings
+            {
+                Initialize = true,
+                Seed = true,
+                DropOnMigrationConflict = false
+            };
+        });
 
         return services.AddHostedService<DatabaseInitializerHostedService<TDbContext>>();
     }

@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { TaskItem } from '../models/taskItem';
+import { Pagination, PagedResult } from '../models/pagination';
 import { toast } from 'react-toastify';
 import { router } from '../router/Routes';
 import { store } from '../stores/store';
@@ -90,7 +91,36 @@ const requests = {
 }
 
 const TaskItems = {
-    list: () => requests.get<TaskItem[]>('/taskItems'),
+    list: async (params?: URLSearchParams): Promise<PagedResult<TaskItem>> => {
+        const query = params ? `?${params.toString()}` : '';
+        const response = await axios.get<TaskItem[]>(`/taskItems${query}`);
+        const paginationHeader = response.headers['pagination'];
+        let pagination: Pagination = {
+            currentPage: 1,
+            totalPages: 1,
+            pageSize: 10,
+            totalCount: 0
+        };
+        
+        if (paginationHeader) {
+            try {
+                const parsed = JSON.parse(paginationHeader);
+                pagination = {
+                    currentPage: parsed.currentPage || 1,
+                    totalPages: parsed.totalPages || 1,
+                    pageSize: parsed.itemsPerPage || 10,
+                    totalCount: parsed.totalItems || 0
+                };
+            } catch (e) {
+                console.error('Failed to parse pagination header:', e);
+            }
+        }
+        
+        return {
+            items: response.data,
+            pagination
+        };
+    },
     details: (id: string) => requests.get<TaskItem>(`/taskItems/${id}`),
     create: (taskItem: TaskItem) => requests.post<TaskItem>('/taskItems', taskItem),
     update: (taskItem: TaskItem) => requests.put<void>(`/taskItems/${taskItem.id}`, taskItem),

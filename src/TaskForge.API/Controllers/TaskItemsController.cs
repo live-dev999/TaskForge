@@ -22,6 +22,7 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using TaskForge.Application.Core;
 using TaskForge.Application.TaskItems;
 using TaskForge.Domain;
 
@@ -29,10 +30,10 @@ namespace TaskForge.API.Controllers;
 
 public class TaskItemsController : BaseApiController
 {
-    [HttpGet] //api/taskitems
-    public async Task<IActionResult> GetTaskItems(CancellationToken ct)
+    [HttpGet("taskitems")]
+    public async Task<IActionResult> GetTaskItems([FromQuery] PagingParams pagingParams, CancellationToken ct)
     {
-        return HandleResult(await Mediator.Send(new List.Query(), ct));
+        return HandlePagedResult(await Mediator.Send(new List.Query() { Params = pagingParams }, ct));
     }
 
     [HttpGet("{id}")] //api/taskitems/{id}
@@ -42,13 +43,13 @@ public class TaskItemsController : BaseApiController
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTaskItem([FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateTaskItem([FromBody] TaskItemDto TaskItem, CancellationToken cancellationToken)
     {
         return HandleResult(await Mediator.Send(new Create.Command { TaskItem = TaskItem }, cancellationToken));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
+    public async Task<IActionResult> EditTaskItem(Guid id, [FromBody] TaskItemDto TaskItem, CancellationToken cancellationToken)
     {
         TaskItem.Id = id;
         return HandleResult(await Mediator.Send(new Edit.Command { TaskItem = TaskItem }, cancellationToken));

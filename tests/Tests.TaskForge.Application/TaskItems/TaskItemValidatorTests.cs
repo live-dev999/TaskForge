@@ -383,9 +383,9 @@ public class TaskItemValidatorTests
 
     #region Helper Methods
 
-    private TaskItem CreateValidTaskItem()
+    private TaskItemDto CreateValidTaskItem()
     {
-        return new TaskItem
+        return new TaskItemDto
         {
             Id = Guid.NewGuid(),
             Title = "Test Title",
